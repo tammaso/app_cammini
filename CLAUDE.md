@@ -163,7 +163,10 @@ Lingua di lavoro: italiano, anche per testi dell'interfaccia, commenti nel codic
   carta di oggi c'è solo il cammino.
   Legenda: al primo posto, in entrambe le epoche, «Cammino di Abramo» con il simbolo della carta
   (tratteggio rosso su bordo bianco). Nell'epoca storica poi le voci della cartina del volume, senza
-  interruttori: «Regno di Mari conquistato da Hammurabi nel 1700 a.C. circa», «Capitali». In "Oggi"
+  interruttori: «Regno di Mari conquistato da Hammurabi nel 1700 a.C. circa», «Capitali» (la Mezzaluna fertile non è in legenda: deciso il 2026-11-08; uno stile «velo»
+  con voce di legenda avrebbe in legenda un simbolo a velo, tinta leggera e bordo del suo colore). Sulla carta il nome «Mezzaluna fertile» (regione antica,
+  aggiunto nel backoffice come nome «disegnato», quindi resta rigenerando) sta dentro l'arco nel deserto
+  siriano (40° E, 32,9° N), dove il bordo interno è quasi orizzontale e non ci sono altri nomi. In "Oggi"
   poi l'interruttore "Cartina muta", che toglie tutti i nomi dalla carta, anche quelli delle tappe
   (restano i numeri), e vale solo in "Oggi". Niente altre voci.
   Niente di moderno nell'epoca storica, niente di antico in "Oggi". Per un itinerario con un'altra
@@ -289,7 +292,11 @@ da file://): usare sempre il server.
   Nomi della cartina (gruppo "cartina:<epoca>") nel sistema `disponiMondo`, solo in "1700 a.C.", tranne la
   geografia fisica; quelli inclinati restano al loro posto e si scontrano con gli altri come rettangoli
   ruotati. Nella panoramica alcuni nomi fitti (Canaan, Gerusalemme, Assur, Mar Morto) compaiono
-  solo avvicinandosi; Zoan non compare perché c'è il pin «Egitto». La linea a
+  solo avvicinandosi; Zoan non compare perché c'è il pin «Egitto». Gerusalemme sta 17 km a sud di Betel: nella
+  panoramica (zoom 5 circa) sono 8 pixel e il suo pallino finisce sotto il segnaposto della tappa;
+  compare da zoom 6,5 circa. Segnaposto più piccoli da lontano non basterebbero (da 26 a 18 pixel:
+  compare da 6,3), quindi non si sono cambiati (2026-11-08). Un pin il cui nome è nascosto (tappe
+  secondarie da lontano, cartina muta) occupa ora solo il cerchio. La linea a
   puntini vicino a Ur è letta come costa del Golfo Persico allora: da confermare. Il cammino segue
   ora il percorso del volume (Carran → Palmira → Damasco → Canaan; in Egitto la tappa è Zoan).
 

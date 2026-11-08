@@ -214,6 +214,7 @@ h1 { font-family: var(--display); font-weight: 700; font-size: 34px; line-height
 .leg li[hidden] { display: none; }
 /* i simboli della legenda della cartina del volume */
 .leg .sw.area { width: 20px; height: 15px; border: 1px solid #8a8c8e; }
+.leg .sw.area.velo { border-width: 2px; }
 .leg .sw.linea { display: block; width: 28px; height: 10px; }
 .leg .sw.cammino { display: block; width: 28px; height: 10px; }
 .leg .sw.punto { width: 9px; height: 9px; border-radius: 50%; border: 1.2px solid #231f20; box-shadow: 0 0 0 1px rgba(255,255,255,.5); }
@@ -690,6 +691,12 @@ const SIMBOLI = {
 const colore = c => /^#[0-9a-f]{3,8}$/i.test(c ?? "") ? c : "#888888";
 function simboloDiStile(s) {
   if (s.tipo === "linea") return `<svg class="sw linea" viewBox="0 0 28 10" aria-hidden="true"><path d="M3 5H25" stroke="${colore(s.colore)}" stroke-width="3" stroke-linecap="round"${s.tratteggio ? ` stroke-dasharray="${s.tratteggio.map(v => Math.max(v, .1) * 3).join(" ")}"` : ""}/></svg>`;
+  // un velo (come l'arco della Mezzaluna) si vede com'è sulla carta: tinta leggera e bordo del suo colore
+  const opacita = Math.max(...[s.opacita ?? 1].flat());
+  if (s.tipo === "area" && opacita < .5) {
+    const [r, g, b] = colore(s.riempimento).slice(1).match(/../g).map(h => parseInt(h, 16));
+    return `<span class="sw area velo" style="background: rgba(${r}, ${g}, ${b}, ${Math.max(opacita, .2)}); border-color: ${colore(s.contorno ?? s.riempimento)}"></span>`;
+  }
   return `<span class="sw ${s.tipo === "punto" ? "punto" : "area"}" style="background: ${colore(s.tipo === "punto" ? s.colore : s.riempimento)}"></span>`;
 }
 function legenda(ep) {
@@ -870,7 +877,12 @@ function disponiMondo() {
   const raggio = Math.hypot(pn.x - pc.x, pn.y - pc.y) * 180 / Math.PI;
   // prima si leggono le posizioni degli ostacoli, poi si scrive: una sola rilettura della pagina
   const presi = [];
-  if (!mapEl.classList.contains("hide-pins")) pins.forEach(p => presi.push(rettangolo(p, base)));
+  // un pin occupa il cerchio e il suo nome; se il nome è nascosto (tappe secondarie da lontano, cartina
+  // muta) occupa solo il cerchio
+  if (!mapEl.classList.contains("hide-pins")) pins.forEach(p => {
+    const nomeVisibile = getComputedStyle(p.querySelector(".pl")).visibility === "visible";
+    presi.push(rettangolo(nomeVisibile ? p : p.querySelector(".pn"), base));
+  });
   altreEtichette.forEach(el => { if (getComputedStyle(el).visibility === "visible") presi.push(rettangolo(el, base)); });
   // la mappa continua sotto il pannello del racconto, la legenda e i pulsanti: lì un nome non si vedrebbe
   document.querySelectorAll(".panel, #polbox, #accessibilita, .maplibregl-ctrl-bottom-right").forEach(el => presi.push(rettangolo(el, base, 0)));
