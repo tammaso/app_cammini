@@ -1,0 +1,199 @@
+﻿Stato;Capitale mostrata;Nome in Natural Earth;Latitudine;Longitudine;Esito;Nota
+Afghanistan;Kabul;Kabul;34.519;69.181;ok;
+Albania;Tirana;Tirana;41.328;19.819;ok;
+Algeria;Algeri;Algeri;36.765;3.049;ok;
+Andorra;Andorra la Vella;Andorra la Vella;42.5;1.516;ok;
+Angola;Luanda;Luanda;-8.836;13.232;ok;
+Antigua e Barbuda;Saint John's;Saint John's;17.118;-61.85;ok;
+Arabia Saudita;Riad;Riad;24.643;46.771;ok;
+Argentina;Buenos Aires;Buenos Aires;-34.601;-58.399;ok;
+Armenia;Erevan;Erevan;40.183;44.512;ok;
+Australia;Canberra;Canberra;-35.283;149.129;ok;
+Austria;Vienna;Vienna;48.202;16.365;ok;
+Azerbaigian;Baku;Baku;40.397;49.86;ok;
+Bahamas;Nassau;Nassau;25.083;-77.35;ok;
+Bahrein;Manama;Manama;26.236;50.583;ok;
+Bangladesh;Dacca;Dacca;23.725;90.407;ok;
+Barbados;Bridgetown;Bridgetown;13.102;-59.617;ok;
+Belgio;Bruxelles;Bruxelles;50.835;4.331;ok;
+Belize;Belmopan;Belmopan;17.252;-88.767;ok;
+Benin;Porto-Novo;Porto-Novo;6.483;2.617;scelta tra più capitali;"Capitale ufficiale; il governo ha sede a Cotonou."
+Bhutan;Thimphu;Thimphu;27.473;89.639;ok;
+Bielorussia;Minsk;Minsk;53.902;27.565;ok;
+Birmania;Naypyidaw;Naypyidaw;19.769;96.117;scelta tra più capitali;"Capitale dal 2005; Yangon è la città più grande."
+Bolivia;Sucre;Sucre;-19.041;-65.26;scelta tra più capitali;"Capitale costituzionale; il governo ha sede a La Paz."
+Bosnia ed Erzegovina;Sarajevo;Sarajevo;43.85;18.383;ok;
+Botswana;Gaborone;Gaborone;-24.646;25.912;ok;
+Brasile;Brasilia;Brasilia;-15.781;-47.918;ok;
+Brunei;Bandar Seri Begawan;Bandar Seri Begawan;4.883;114.933;ok;
+Bulgaria;Sofia;Sofia;42.685;23.315;ok;
+Burkina Faso;Ouagadougou;Ouagadougou;12.372;-1.527;ok;
+Burundi;Bujumbura;Bujumbura;-3.376;29.36;ok;
+Cambogia;Phnom Penh;Phnom Penh;11.552;104.915;ok;
+Camerun;Yaoundé;Yaoundé;3.869;11.515;ok;
+Canada;Ottawa;Ottawa;45.419;-75.702;ok;
+Capo Verde;Praia;Praia;14.917;-23.517;ok;
+Ciad;N’Djamena;N’Djamena;12.115;15.047;ok;
+Cile;Santiago del Cile;Santiago del Cile;-33.448;-70.669;ok;
+Cina;Pechino;Pechino;39.931;116.386;ok;
+Cipro;Nicosia;Nicosia;35.167;33.367;ok;
+Città del Vaticano;Città del Vaticano;Città del Vaticano;41.903;12.453;ok;
+Colombia;Bogotá;Bogotà;4.598;-74.085;nome corretto;Grafia con l'accento acuto, come in spagnolo.
+Comore;Moroni;Moroni;-11.704;43.24;ok;
+Congo;Brazzaville;Brazzaville;-4.257;15.283;ok;
+Corea del Nord;Pyongyang;Pyongyang;39.021;125.753;ok;
+Corea del Sud;Seul;Seul;37.568;126.998;ok;
+Costa Rica;San José;San José;9.937;-84.086;ok;
+Costa d'Avorio;Yamoussoukro;Yamoussoukro;6.818;-5.276;scelta tra più capitali;"Capitale ufficiale; Abidjan è la città più grande e sede di molti uffici."
+Croazia;Zagabria;Zagabria;45.8;16.0;ok;
+Cuba;L'Avana;L'Avana;23.134;-82.366;ok;
+Danimarca;Copenaghen;Copenaghen;55.681;12.562;ok;
+Dominica;Roseau;Roseau;15.301;-61.387;ok;
+Ecuador;Quito;Quito;-0.213;-78.502;ok;
+Egitto;Il Cairo;Il Cairo;30.052;31.248;ok;
+El Salvador;San Salvador;San Salvador;13.712;-89.205;ok;
+Emirati Arabi Uniti;Abu Dhabi;Abu Dhabi;24.467;54.367;ok;
+Eritrea;Asmara;Asmara;15.333;38.933;ok;
+Estonia;Tallinn;Tallinn;59.434;24.728;ok;
+Etiopia;Addis Abeba;Addis Abeba;9.035;38.698;ok;
+Figi;Suva;Suva;-18.133;178.442;ok;
+Filippine;Manila;Manila;14.606;120.98;ok;
+Finlandia;Helsinki;Helsinki;60.178;24.932;ok;
+Francia;Parigi;Parigi;48.869;2.331;ok;
+Gabon;Libreville;Libreville;0.385;9.458;ok;
+Gambia;Banjul;Banjul;13.454;-16.592;ok;
+Georgia;Tbilisi;Tbilisi;41.727;44.789;ok;
+Germania;Berlino;Berlino;52.524;13.4;ok;
+Ghana;Accra;Accra;5.552;-0.219;ok;
+Giamaica;Kingston;Kingston;17.977;-76.767;ok;
+Giappone;Tokyo;Tokyo;35.687;139.749;ok;
+Gibuti;Gibuti;Gibuti;11.595;43.148;ok;
+Giordania;Amman;Amman;31.952;35.931;ok;
+Grecia;Atene;Atene;37.985;23.731;ok;
+Grenada;Saint George's;Saint George's;12.053;-61.742;ok;
+Guatemala;Città del Guatemala;Città del Guatemala;14.623;-90.529;ok;
+Guinea;Conakry;Conakry;9.533;-13.682;ok;
+Guinea Equatoriale;Malabo;Malabo;3.75;8.783;ok;
+Guinea-Bissau;Bissau;Bissau;11.865;-15.598;ok;
+Guyana;Georgetown;Georgetown;6.802;-58.167;ok;
+Haiti;Port-au-Prince;Port-au-Prince;18.543;-72.338;ok;
+Honduras;Tegucigalpa;Tegucigalpa;14.104;-87.219;ok;
+India;Nuova Delhi;Nuova Delhi;28.6;77.2;ok;
+Indonesia;Giacarta;Giacarta;-6.172;106.827;ok;
+Iran;Teheran;Teheran;35.674;51.422;ok;
+Iraq;Baghdad;Baghdad;33.341;44.392;ok;
+Irlanda;Dublino;Dublino;53.335;-6.251;ok;
+Islanda;Reykjavík;Reykjavík;64.15;-21.95;ok;
+Isole Marshall;Majuro;Majuro;7.103;171.38;ok;
+Isole Salomone;Honiara;Honiara;-9.438;159.95;ok;
+Israele;;Gerusalemme, Tel Aviv;;;esclusa;Natural Earth indica Gerusalemme, ma l'Italia non la riconosce come capitale di Israele (l'ambasciata è a Tel Aviv). Nessun simbolo finché la redazione non decide.
+Italia;Roma;Roma;41.898;12.481;ok;
+Kazakistan;Astana;Nur-Sultan;51.181;71.428;nome corretto;Rinominata Astana nel 2022.
+Kenya;Nairobi;Nairobi;-1.281;36.815;ok;
+Kirghizistan;Biškek;Biškek;42.875;74.583;ok;
+Kiribati;Tarawa Sud;Tarawa Sud;1.338;173.018;ok;
+Kosovo;Pristina;Pristina;42.667;21.166;da verificare;Stato riconosciuto dall'Italia, non da tutti i Paesi.
+Kuwait;Al Kuwait;Al Kuwait;29.372;47.976;da verificare;Natural Earth scrive «Al Kuwait»: verificare la forma italiana (Kuwait City, Kuwait).
+Laos;Vientiane;Vientiane;17.967;102.6;ok;
+Lesotho;Maseru;Maseru;-29.317;27.483;ok;
+Lettonia;Riga;Riga;56.95;24.1;ok;
+Libano;Beirut;Beirut;33.874;35.508;ok;
+Liberia;Monrovia;Monrovia;6.315;-10.8;ok;
+Libia;Tripoli;Tripoli;32.892;13.18;ok;
+Liechtenstein;Vaduz;Vaduz;47.134;9.517;ok;
+Lituania;Vilnius;Vilnius;54.683;25.317;ok;
+Lussemburgo;Lussemburgo;Lussemburgo;49.612;6.13;ok;
+Macedonia del Nord;Skopje;Skopje;42.0;21.433;ok;
+Madagascar;Antananarivo;Antananarivo;-18.915;47.515;ok;
+Malawi;Lilongwe;Lilongwe;-13.983;33.783;ok;
+Malaysia;Kuala Lumpur;Kuala Lumpur;3.169;101.698;scelta tra più capitali;"Capitale; il governo ha sede a Putrajaya."
+Maldive;Malé;Male;4.167;73.5;nome corretto;Grafia corrente.
+Mali;Bamako;Bamako;12.652;-8.002;ok;
+Malta;La Valletta;La Valletta;35.9;14.515;ok;
+Marocco;Rabat;Rabat;34.025;-6.836;ok;
+Mauritania;Nouakchott;Nouakchott;18.086;-15.975;ok;
+Mauritius;Port Louis;Port Louis;-20.167;57.5;ok;
+Messico;Città del Messico;Città del Messico;19.444;-99.133;ok;
+Micronesia;Palikir;Palikir;6.917;158.15;ok;
+Moldavia;Chișinău;Chișinău;47.005;28.858;ok;
+Monaco;Monaco;Principato di Monaco;43.74;7.407;nome corretto;La città ha lo stesso nome dello Stato.
+Mongolia;Ulan Bator;Ulan Bator;47.919;106.915;ok;
+Montenegro;Podgorica;Podgorica;42.466;19.266;ok;
+Mozambico;Maputo;Maputo;-25.953;32.587;ok;
+Namibia;Windhoek;Windhoek;-22.57;17.084;ok;
+Nauru;;;;;esclusa;Nauru non ha una capitale ufficiale: il governo ha sede a Yaren.
+Nepal;Katmandu;Katmandu;27.719;85.315;ok;
+Nicaragua;Managua;Managua;12.155;-86.27;ok;
+Niger;Niamey;Niamey;13.519;2.115;ok;
+Nigeria;Abuja;Abuja;9.085;7.531;ok;
+Norvegia;Oslo;Oslo;59.919;10.748;ok;
+Nuova Zelanda;Wellington;Wellington;-41.3;174.783;ok;
+Oman;Mascate;Mascate;23.613;58.593;ok;
+Paesi Bassi;Amsterdam;Amsterdam;52.352;4.915;scelta tra più capitali;"Capitale costituzionale; governo e parlamento hanno sede all'Aia."
+Pakistan;Islamabad;Islamabad;33.702;73.165;ok;
+Palau;Melekeok;Melekeok;7.487;134.627;ok;
+Palestina;;;;;esclusa;Natural Earth non indica una capitale (segna Ramallah come sede amministrativa). Da decidere con la redazione.
+Panama;Panama;Panama;8.97;-79.535;ok;
+Papua Nuova Guinea;Port Moresby;Port Moresby;-9.465;147.193;ok;
+Paraguay;Asunción;Asunción;-25.294;-57.643;ok;
+Perù;Lima;Lima;-12.046;-77.052;ok;
+Polonia;Varsavia;Varsavia;52.252;20.998;ok;
+Portogallo;Lisbona;Lisbona;38.725;-9.147;ok;
+Qatar;Doha;Doha;25.287;51.533;ok;
+Regno Unito;Londra;Londra;51.502;-0.119;ok;
+Rep. Centrafricana;Bangui;Bangui;4.367;18.558;ok;
+Rep. Dem. del Congo;Kinshasa;Kinshasa;-4.328;15.313;ok;
+Repubblica Ceca;Praga;Praga;50.085;14.464;ok;
+Repubblica Dominicana;Santo Domingo;Santo Domingo;18.472;-69.902;ok;
+Romania;Bucarest;Bucarest;44.435;26.098;ok;
+Ruanda;Kigali;Kigali;-1.952;30.059;ok;
+Russia;Mosca;Mosca;55.754;37.614;ok;
+Sahara Occidentale;;Bir Lehlu;;;esclusa;Territorio conteso: Natural Earth indica come capitale secondaria Bir Lehlu, sede della Repubblica Saharawi, che l'Italia non riconosce.
+Saint Kitts e Nevis;Basseterre;Basseterre;17.302;-62.717;ok;
+Saint Lucia;Castries;Castries;14.002;-61.0;ok;
+Saint Vincent e Grenadine;Kingstown;Kingstown;13.148;-61.212;ok;
+Samoa;Apia;Apia;-13.842;-171.739;ok;
+San Marino;San Marino;Città di San Marino;43.936;12.442;nome corretto;Forma usata negli atlanti.
+Senegal;Dakar;Dakar;14.718;-17.475;ok;
+Serbia;Belgrado;Belgrado;44.821;20.466;ok;
+Seychelles;Victoria;Victoria;-4.617;55.45;ok;
+Sierra Leone;Freetown;Freetown;8.472;-13.236;ok;
+Singapore;Singapore;Singapore;1.295;103.854;ok;
+Siria;Damasco;Damasco;33.502;36.298;ok;
+Slovacchia;Bratislava;Bratislava;48.15;17.117;ok;
+Slovenia;Lubiana;Lubiana;46.055;14.515;ok;
+Somalia;Mogadiscio;Mogadiscio;2.069;45.365;ok;
+Spagna;Madrid;Madrid;40.402;-3.685;ok;
+Sri Lanka;Colombo;Colombo;6.932;79.858;ok;
+Stati Uniti;Washington;Washington;38.901;-77.011;ok;
+Sudafrica;Pretoria;Pretoria;-25.705;28.227;scelta tra più capitali;"Capitale amministrativa; Città del Capo (legislativa) e Bloemfontein (giudiziaria) non hanno il simbolo. Natural Earth segna come capitale anche Johannesburg, che non lo è."
+Sudan;Khartum;Khartum;15.59;32.532;ok;
+Sudan del Sud;Giuba;Giuba;4.83;31.58;ok;
+Suriname;Paramaribo;Paramaribo;5.835;-55.167;ok;
+Svezia;Stoccolma;Stoccolma;59.353;18.095;ok;
+Svizzera;Berna;Berna;46.917;7.467;ok;
+São Tomé e Príncipe;São Tomé;São Tomé;0.333;6.733;ok;
+Tagikistan;Dušanbe;Dušanbe;38.56;68.774;ok;
+Taiwan;Taipei;Taipei;25.036;121.568;da verificare;Taiwan compare come Stato nel punto di vista italiano di Natural Earth, ma l'Italia non ha relazioni diplomatiche ufficiali con Taipei.
+Tanzania;Dodoma;Dodoma;-6.183;35.75;scelta tra più capitali;"Capitale ufficiale (Natural Earth la segna come secondaria); Dar es Salaam è la città più grande."
+Thailandia;Bangkok;Bangkok;13.752;100.515;ok;
+Timor Est;Dili;Dili;-8.559;125.579;ok;
+Togo;Lomé;Lomé;6.134;1.221;ok;
+Tonga;Nukuʻalofa;Nukuʻalofa;-21.139;-175.221;ok;
+Trinidad e Tobago;Port of Spain;Port of Spain;10.652;-61.517;ok;
+Tunisia;Tunisi;Tunisi;36.803;10.18;ok;
+Turchia;Ankara;Ankara;39.929;32.862;ok;
+Turkmenistan;Aşgabat;Aşgabat;37.95;58.383;ok;
+Tuvalu;Funafuti;Funafuti;-8.517;179.217;ok;
+Ucraina;Kiev;Kiev;50.435;30.515;da verificare;"Natural Earth scrive «Kiev»; nell'uso recente si trova anche «Kyiv»."
+Uganda;Kampala;Kampala;0.319;32.581;ok;
+Ungheria;Budapest;Budapest;47.502;19.081;ok;
+Uruguay;Montevideo;Montevideo;-34.856;-56.173;ok;
+Uzbekistan;Tashkent;Tashkent;41.314;69.293;ok;
+Vanuatu;Port Vila;Port Vila;-17.733;168.317;ok;
+Venezuela;Caracas;Caracas;10.503;-66.919;ok;
+Vietnam;Hanoi;Hanoi;21.035;105.848;ok;
+Yemen;Sana'a;Sana'a;15.357;44.205;ok;
+Zambia;Lusaka;Lusaka;-15.415;28.281;ok;
+Zimbabwe;Harare;Harare;-17.816;31.043;ok;
+eSwatini;Mbabane;Mbabane;-26.317;31.133;ok;

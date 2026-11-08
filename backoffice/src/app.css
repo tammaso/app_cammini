@@ -1,0 +1,120 @@
+/* Stessa palette e tipografia della demo dell'atlante. */
+:root {
+  color-scheme: light;
+  --font-display: "Plus Jakarta Sans", system-ui, -apple-system, "Segoe UI", sans-serif;
+  --font-body: "Inter", system-ui, -apple-system, "Segoe UI", sans-serif;
+
+  --ink: #24211c;
+  --ink-soft: #635c53;
+  --ink-faint: #9c9285;
+  --paper: #f8f6f1;
+  --surface: #ffffff;
+  --surface-alt: #f1ede3;
+  --line: #e6e0d2;
+
+  --accent: #1b6e77;
+  --accent-ink: #12525a;
+  --accent-tint: #e7f0ef;
+  --brand: #8a5a3a;
+  --brand-tint: #f1e6d8;
+  --danger: #9c3b28;
+  --danger-tint: #f7e6e1;
+
+  --radius-sm: 8px;
+  --radius-md: 12px;
+  --shadow-sm: 0 2px 8px rgb(36 33 28 / .08);
+}
+
+* { box-sizing: border-box; }
+
+body {
+  margin: 0;
+  background: var(--paper);
+  color: var(--ink);
+  font: 400 15px/1.5 var(--font-body);
+}
+
+h1, h2, h3 { font-family: var(--font-display); line-height: 1.2; margin: 0 0 .5rem; }
+h1 { font-size: 1.6rem; }
+a { color: var(--accent-ink); }
+
+.intestazione-pagina {
+  display: flex;
+  align-items: flex-end;
+  justify-content: space-between;
+  gap: 1rem;
+  margin-bottom: 1.25rem;
+}
+.intestazione-pagina p { margin: 0; color: var(--ink-soft); }
+
+.riquadro {
+  background: var(--surface);
+  border: 1px solid var(--line);
+  border-radius: var(--radius-md);
+  box-shadow: var(--shadow-sm);
+}
+
+table.elenco { width: 100%; border-collapse: collapse; }
+.elenco th, .elenco td { padding: .65rem .9rem; text-align: left; border-bottom: 1px solid var(--line); }
+.elenco th { font-size: .8rem; text-transform: uppercase; letter-spacing: .04em; color: var(--ink-soft); font-weight: 600; }
+.elenco tr:last-child td { border-bottom: 0; }
+.elenco td.numero, .elenco th.numero { text-align: right; font-variant-numeric: tabular-nums; }
+.elenco .vuoto { color: var(--ink-faint); text-align: center; padding: 2rem; }
+
+.pulsante {
+  display: inline-flex;
+  align-items: center;
+  gap: .4rem;
+  padding: .55rem 1rem;
+  border-radius: var(--radius-sm);
+  border: 1px solid var(--accent);
+  background: var(--accent);
+  color: #fff;
+  font: 600 .9rem var(--font-body);
+  text-decoration: none;
+  white-space: nowrap;
+  cursor: pointer;
+}
+.pulsante:hover { background: var(--accent-ink); }
+.pulsante.secondario { background: var(--surface); color: var(--accent-ink); }
+.pulsante.secondario:hover { background: var(--accent-tint); }
+.pulsante.pericolo { background: var(--surface); color: var(--danger); border-color: var(--danger); }
+.pulsante.pericolo:hover { background: var(--danger-tint); }
+
+.modulo { padding: 1.25rem; display: grid; gap: 1rem; max-width: 46rem; }
+.campo { display: grid; gap: .3rem; }
+.campo label { font-weight: 600; }
+.campo .aiuto { font-size: .85rem; color: var(--ink-soft); }
+.campo input, .campo textarea {
+  font: inherit;
+  padding: .55rem .7rem;
+  border: 1px solid var(--line);
+  border-radius: var(--radius-sm);
+  background: var(--surface);
+}
+.campo input:focus, .campo textarea:focus { outline: 2px solid var(--accent); outline-offset: 1px; }
+.campo textarea { min-height: 9rem; resize: vertical; }
+.campo input[aria-invalid="true"], .campo textarea[aria-invalid="true"] { border-color: var(--danger); }
+.campo .errore { color: var(--danger); font-size: .85rem; }
+.campo.stretto input { max-width: 8rem; }
+
+.azioni { display: flex; gap: .6rem; align-items: center; flex-wrap: wrap; }
+.azioni .spinta { margin-left: auto; }
+
+.avviso {
+  padding: .75rem 1rem;
+  border-radius: var(--radius-sm);
+  background: var(--danger-tint);
+  color: var(--danger);
+  margin-bottom: 1rem;
+}
+
+.etichetta {
+  display: inline-block;
+  padding: .1rem .5rem;
+  border-radius: 999px;
+  font-size: .8rem;
+  background: var(--surface-alt);
+  color: var(--ink-soft);
+}
+.etichetta.ok { background: var(--accent-tint); color: var(--accent-ink); }

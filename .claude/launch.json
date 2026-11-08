@@ -1,0 +1,19 @@
+{
+  "version": "0.0.1",
+  "configurations": [
+    {
+      "name": "prototipo",
+      "runtimeExecutable": "py",
+      "runtimeArgs": ["-u", "strumenti/server.py", "8010"],
+      "port": 8010,
+      "autoPort": false
+    },
+    {
+      "name": "backoffice",
+      "runtimeExecutable": "npm",
+      "runtimeArgs": ["run", "backoffice"],
+      "port": 5175,
+      "autoPort": false
+    }
+  ]
+}

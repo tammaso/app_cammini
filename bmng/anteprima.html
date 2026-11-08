@@ -1,0 +1,65 @@
+<!doctype html>
+<html lang="it">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Anteprima tile Blue Marble</title>
+<link rel="stylesheet" href="https://unpkg.com/maplibre-gl@5.6.1/dist/maplibre-gl.css">
+<style>
+  html, body, #map { height: 100%; margin: 0; }
+  body { background: #070b12; font-family: system-ui, sans-serif; }
+  .info {
+    position: absolute; top: 12px; left: 12px; z-index: 2; max-width: 320px;
+    background: rgba(10, 16, 26, .82); color: #eef2f6; padding: 10px 14px; border-radius: 8px; font-size: 14px; line-height: 1.4;
+  }
+  .info b { display: block; margin-bottom: 4px; }
+  #stato { font-variant-numeric: tabular-nums; color: #a9c2d8; }
+</style>
+</head>
+<body>
+<div class="info">
+  <b>Anteprima tile NASA Blue Marble</b>
+  Trascina e usa la rotella per controllare colori, nitidezza e giunture tra i riquadri.
+  <div id="stato"></div>
+</div>
+<div id="map"></div>
+
+<script src="https://unpkg.com/maplibre-gl@5.6.1/dist/maplibre-gl.js"></script>
+<script src="https://unpkg.com/pmtiles@3.2.1/dist/pmtiles.js"></script>
+<script>
+// Cambia qui la sorgente se serve:
+//   "pmtiles"  legge il file bmng.pmtiles nella stessa cartella di questa pagina
+//   "cartella" legge le tile da ./tile/{z}/{x}/{y}.webp
+const SORGENTE = new URLSearchParams(location.search).get("sorgente") || "pmtiles";
+const FILE_PMTILES = new URLSearchParams(location.search).get("file") || "bmng.pmtiles";
+
+const protocollo = new pmtiles.Protocol();
+maplibregl.addProtocol("pmtiles", protocollo.tile);
+
+const raster = SORGENTE === "pmtiles"
+  ? { type: "raster", url: "pmtiles://" + new URL(FILE_PMTILES, location.href).href, tileSize: 512 }
+  : { type: "raster", tiles: [new URL("tile/{z}/{x}/{y}.webp", location.href).href.replace(/%7B/g, "{").replace(/%7D/g, "}")], tileSize: 512, maxzoom: 7 };
+raster.attribution = "NASA Earth Observatory, Blue Marble Next Generation";
+
+const map = new maplibregl.Map({
+  container: "map",
+  style: {
+    version: 8,
+    projection: { type: "globe" },
+    sky: { "atmosphere-blend": ["interpolate", ["linear"], ["zoom"], 0, 1, 5, 1, 7, 0] },
+    sources: { bmng: raster },
+    layers: [
+      { id: "fondo", type: "background", paint: { "background-color": "#08122a" } },
+      { id: "bmng", type: "raster", source: "bmng" }
+    ]
+  },
+  center: [38, 32], zoom: 1.6, maxZoom: 9
+});
+map.addControl(new maplibregl.NavigationControl(), "bottom-right");
+const stato = document.getElementById("stato");
+const aggiorna = () => { const c = map.getCenter(); stato.textContent = `zoom ${map.getZoom().toFixed(1)} · ${c.lat.toFixed(2)}°, ${c.lng.toFixed(2)}°`; };
+map.on("move", aggiorna); map.on("load", aggiorna);
+map.on("error", e => { stato.textContent = "Errore: " + (e.error && e.error.message || e); });
+</script>
+</body>
+</html>

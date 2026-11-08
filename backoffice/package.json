@@ -1,0 +1,38 @@
+{
+	"name": "backoffice",
+	"private": true,
+	"version": "0.0.1",
+	"type": "module",
+	"scripts": {
+		"dev": "vite dev",
+		"build": "vite build",
+		"preview": "vite preview",
+		"prepare": "svelte-kit sync || echo ''",
+		"check": "svelte-kit sync && svelte-check --tsconfig ./tsconfig.json",
+		"migra": "node db/migra.ts",
+		"carica-prototipo": "node db/carica-prototipo.ts",
+		"pubblica": "node db/pubblica.ts",
+		"prepara-demo": "node db/prepara-demo.ts",
+		"test": "node --test \"db/**/*.test.ts\" \"src/**/*.test.ts\""
+	},
+	"devDependencies": {
+		"@sveltejs/adapter-node": "^6.0.0",
+		"@sveltejs/kit": "^3.0.0",
+		"@sveltejs/vite-plugin-svelte": "^7.2.0",
+		"@types/node": "^24",
+		"svelte": "^5.57.1",
+		"svelte-check": "^4.6.0",
+		"typescript": "^6.0.3",
+		"vite": "^8.3.0"
+	},
+	"imports": {
+		"#lib": "./src/lib/index.js",
+		"#lib/*": "./src/lib/*"
+	},
+	"dependencies": {
+		"jsts": "^2.12.1",
+		"maplibre-gl": "^5.6.1",
+		"pmtiles": "^3.2.1",
+		"sharp": "^0.35.5"
+	}
+}

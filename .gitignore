@@ -1,0 +1,32 @@
+# File troppo grandi per GitHub (limite 100 MB per file): restano solo in locale
+*.tif
+*.tiff
+*.pmtiles
+quadranti mondo NASA Blue Marble Next Generation/
+bmng-tile/
+tile/
+
+# Cache dei dati scaricati dagli script
+strumenti/natural_earth/
+
+# Python
+__pycache__/
+*.pyc
+.venv/
+
+# Node
+node_modules/
+dist/
+
+# Sistema
+.DS_Store
+Thumbs.db
+desktop.ini
+
+# Backoffice: database, archivio immagini, copie di lavoro
+backoffice/dati/
+# Cartine preparate da strumenti/importa_cartina_ai.py per il backoffice
+strumenti/importazioni/
+
+# Demo del portale da caricare su un server (npm run prepara-demo)
+/pubblicazione/

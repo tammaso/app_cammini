@@ -1,0 +1,20 @@
+{
+  "name": "app-cammini",
+  "private": true,
+  "type": "module",
+  "engines": {
+    "node": ">=24"
+  },
+  "workspaces": [
+    "backoffice"
+  ],
+  "scripts": {
+    "backoffice": "npm run dev -w backoffice",
+    "check": "npm run check -w backoffice",
+    "migra": "npm run migra -w backoffice",
+    "carica-prototipo": "npm run carica-prototipo -w backoffice --",
+    "pubblica": "npm run pubblica -w backoffice",
+    "prepara-demo": "npm run prepara-demo -w backoffice",
+    "test": "npm test -w backoffice"
+  }
+}

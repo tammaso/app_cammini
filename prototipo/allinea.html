@@ -1,0 +1,687 @@
+<!doctype html>
+<html lang="it">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Allinea la cartina</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Josefin+Sans:wght@600;700&family=Mulish:ital,wght@0,400..800;1,400..800&display=swap">
+<link rel="stylesheet" href="https://unpkg.com/maplibre-gl@5.6.1/dist/maplibre-gl.css">
+<style>
+/* Prova del backoffice: georeferenziazione assistita di una cartina consegnata in SVG.
+   Pannello a sinistra (comandi e spilli), carta a destra con il disegno deformato sopra il satellite. */
+:root {
+  --bg: #10213a; --ink: #f4f7fb; --muted: #a7b7cf; --line: #24406a; --accent: #ff6b57; --giallo: #ffd166;
+  --proposto: #ffd166; --confermato: #5cc98a; --manuale: #6cc4ff; --errore: #ff6b57;
+  --body: "Mulish", "Segoe UI", Arial, sans-serif; --display: "Josefin Sans", "Mulish", Arial, sans-serif;
+  color-scheme: dark;
+}
+* { box-sizing: border-box; }
+html, body { height: 100%; margin: 0; }
+body { background: var(--bg); color: var(--ink); font: 15px/1.45 var(--body); }
+.app { height: 100%; display: grid; grid-template-columns: minmax(330px, 400px) 1fr; }
+.panel { overflow-y: auto; padding: 20px 20px 24px; border-right: 1px solid var(--line); display: flex; flex-direction: column; gap: 18px; }
+#map { position: relative; min-width: 0; }
+.eyebrow { margin: 0 0 4px; font-size: 12px; letter-spacing: .12em; text-transform: uppercase; color: var(--muted); }
+.eyebrow b { display: inline-block; padding: 3px 8px; border-radius: 4px; background: #4f9a6e; color: #fff; }
+h1 { margin: 0; font: 700 28px/1.1 var(--display); }
+.file { margin: 4px 0 0; color: var(--muted); font-size: 13px; }
+.aiuto { margin: 0; color: var(--muted); font-size: 14px; }
+h2 { margin: 0 0 8px; font-size: 12px; letter-spacing: .12em; text-transform: uppercase; color: var(--giallo); }
+section { border-top: 1px solid var(--line); padding-top: 14px; }
+.riga { display: flex; align-items: center; gap: 10px; margin: 6px 0; font-size: 14px; }
+.riga input[type=range] { flex: 1; accent-color: var(--accent); }
+.riga input[type=checkbox] { width: 17px; height: 17px; accent-color: var(--accent); margin: 0; }
+label.riga { cursor: pointer; }
+.btn { font: 700 13px/1 var(--body); padding: 9px 13px; border-radius: 999px; border: 1px solid var(--line); background: transparent; color: var(--ink); cursor: pointer; }
+.btn:hover { border-color: var(--muted); }
+.btn.primary { background: var(--accent); border-color: var(--accent); color: #1a0a06; }
+.btn[aria-pressed="true"] { background: var(--manuale); border-color: var(--manuale); color: #04233a; }
+.btn:focus-visible, .punto button:focus-visible, .punto select:focus-visible, .punto input:focus-visible { outline: 3px solid var(--accent); outline-offset: 2px; }
+.comandi { display: flex; flex-wrap: wrap; gap: 8px; }
+.stato { margin: 0; font-size: 14px; }
+.avviso { margin: 8px 0 0; padding: 10px 12px; border-radius: 8px; background: rgba(255, 107, 87, .15); border: 1px solid var(--errore); font-size: 14px; }
+.esito { margin: 10px 0 0; padding: 10px 12px; border-radius: 8px; font-size: 14px; background: rgba(92, 201, 138, .12); border: 1px solid var(--confermato); }
+.esito.errore { background: rgba(255, 107, 87, .15); border-color: var(--errore); }
+.esito p { margin: 0; }
+.esito pre { margin: 8px 0 0; font: 12px/1.45 Consolas, monospace; color: var(--muted); white-space: pre-wrap; }
+.esito a { color: var(--giallo); font-weight: 700; }
+.btn:disabled { opacity: .6; cursor: progress; }
+.legenda-spilli { display: flex; flex-wrap: wrap; gap: 6px 14px; margin: 0 0 8px; font-size: 12px; color: var(--muted); }
+.legenda-spilli span::before { content: ""; display: inline-block; width: 10px; height: 10px; border-radius: 50%; margin-right: 5px; vertical-align: -1px; background: var(--c); }
+.punti { list-style: none; margin: 0; padding: 0; display: grid; gap: 4px; }
+.punto { display: grid; grid-template-columns: 24px 1fr auto; gap: 4px 8px; align-items: center; padding: 7px 8px; border-radius: 8px; background: rgba(255,255,255,.04); }
+.punto.attivo { background: rgba(108, 196, 255, .14); }
+.punto .n { width: 22px; height: 22px; border-radius: 50%; display: grid; place-items: center; font: 800 11px/1 var(--body); color: #10213a; background: var(--c); }
+.punto .nome { border: 0; padding: 0; background: none; color: var(--ink); font: 700 14px/1.2 var(--body); text-align: left; cursor: pointer; }
+.punto input.nome { border-bottom: 1px dashed var(--muted); cursor: text; width: 100%; }
+.punto .scarto { font-size: 12px; color: var(--muted); font-variant-numeric: tabular-nums; text-align: right; }
+.punto .scarto.alto { color: var(--giallo); }
+.punto .sotto { grid-column: 2 / 4; display: flex; align-items: center; gap: 8px; flex-wrap: wrap; font-size: 12px; color: var(--muted); }
+.punto select { font: 600 12px var(--body); background: #0b1830; color: var(--ink); border: 1px solid var(--line); border-radius: 6px; padding: 3px 4px; }
+.punto .azione { border: 0; background: none; color: var(--muted); font: 700 12px var(--body); cursor: pointer; padding: 3px 4px; border-radius: 6px; }
+.punto .azione:hover { color: var(--ink); background: rgba(255,255,255,.08); }
+.nota { margin: 0; font-size: 12px; color: var(--muted); }
+/* spilli sulla carta: un cerchio numerato con il colore dello stato */
+.spillo { width: 24px; height: 24px; border-radius: 50%; display: grid; place-items: center; cursor: grab; font: 800 11px/1 var(--body); color: #10213a;
+  background: var(--c); border: 2px solid #fff; box-shadow: 0 1px 5px rgba(0,0,0,.6); }
+.spillo.ipotetica { border-style: dashed; }
+.spillo.attivo { outline: 3px solid #fff; outline-offset: 2px; }
+.spillo:active { cursor: grabbing; }
+/* nomi della cartina, nella posizione del disegno */
+.nome-disegno { font: 600 11px/1 var(--body); white-space: pre; pointer-events: none; text-shadow: 0 0 2px #fff, 0 0 2px #fff, 0 0 3px #fff; }
+.senza-nomi .nome-disegno { display: none; }
+.aggiungi .maplibregl-canvas { cursor: crosshair; }
+.caricamento { position: absolute; inset: 0; display: grid; place-items: center; color: var(--muted); }
+@media (max-width: 760px) { .app { grid-template-columns: 1fr; grid-template-rows: 55% 1fr; } #map { order: -1; } .panel { border-right: 0; border-top: 1px solid var(--line); } }
+</style>
+</head>
+<body>
+<div class="app">
+  <aside class="panel" aria-label="Allineamento della cartina">
+    <header>
+      <p class="eyebrow"><b>Prova del backoffice</b></p>
+      <p class="avviso">Superata: l'allineamento ora si fa nel backoffice (<code>npm run backoffice</code>, poi la cartina → Allinea),
+        con gli spilli nel database. Questa pagina resta come prova e non aggiorna più il portale.</p>
+      <h1>Allinea la cartina</h1>
+      <p class="file" id="file">Mezzaluna fertile, 1700 a.C. · cartine/mezzaluna_1700ac.svg</p>
+    </header>
+    <p class="aiuto">Gli spilli agganciano un punto del disegno a un punto del globo. Trascinali finché coste e fiumi
+      del disegno combaciano con il satellite; il disegno si deforma mentre li sposti.</p>
+
+    <section>
+      <h2>Disegno</h2>
+      <label class="riga">Opacità <input type="range" id="opacita" min="0" max="1" step="0.05" value="0.55"></label>
+      <label class="riga"><input type="checkbox" id="v-aree" checked> Aree colorate</label>
+      <label class="riga"><input type="checkbox" id="v-linee" checked> Linee (coste, fiumi, percorso)</label>
+      <label class="riga"><input type="checkbox" id="v-nomi" checked> Nomi della cartina</label>
+      <label class="riga"><input type="checkbox" id="v-griglia"> Griglia della deformazione</label>
+      <label class="riga"><input type="checkbox" id="v-fiumi"> Fiumi veri (Natural Earth)</label>
+    </section>
+
+    <section>
+      <h2>Spilli</h2>
+      <p class="stato" id="stato"></p>
+      <div id="pieghe" class="avviso" hidden></div>
+      <div class="comandi" style="margin-top: 10px">
+        <button class="btn" type="button" id="aggiungi" aria-pressed="false">Aggiungi spillo</button>
+        <button class="btn" type="button" id="conferma-tutti">Conferma tutti</button>
+        <button class="btn" type="button" id="ricomincia">Ricomincia</button>
+      </div>
+      <p class="nota" id="nota-aggiungi" hidden style="margin-top: 8px">Clicca sul disegno nel punto da agganciare (per esempio la punta
+        del Sinai o la confluenza di due fiumi), poi trascina lo spillo dove si trova davvero.</p>
+    </section>
+
+    <section>
+      <div class="legenda-spilli">
+        <span style="--c: var(--proposto)">proposto</span><span style="--c: var(--confermato)">confermato</span>
+        <span style="--c: var(--manuale)">aggiunto a mano</span>
+      </div>
+      <ol class="punti" id="punti"></ol>
+      <p class="nota" style="margin-top: 10px">Lo scarto è quanto il disegno si discosta dal vero in quel punto: dove andrebbe il luogo
+        se lo spillo non ci fosse. Bordo tratteggiato: luogo ipotetico, che tira il disegno solo un poco.</p>
+    </section>
+
+    <section>
+      <h2>Portale</h2>
+      <p class="stato" id="stato-portale"></p>
+      <div class="comandi" style="margin-top: 10px">
+        <button class="btn primary" type="button" id="porta">Aggiorna la cartina del portale</button>
+        <button class="btn" type="button" id="annulla" hidden>Torna agli spilli del portale</button>
+        <button class="btn" type="button" id="scarica">Scarica i punti (JSON)</button>
+      </div>
+      <div id="esito" class="esito" role="status" hidden></div>
+      <p class="nota" style="margin-top: 8px">Gli spilli si salvano accanto alla cartina (cartine/mezzaluna_1700ac.punti.json) e la cartina
+        del 1700 a.C. del portale si rigenera con questi. Finché non li porti nel portale restano solo in questo browser.
+        Nel backoffice finiranno nella tabella dei punti di controllo.</p>
+    </section>
+  </aside>
+  <div id="map" role="region" aria-label="Carta con il disegno da allineare"><div class="caricamento" id="caricamento">Lettura della cartina…</div></div>
+</div>
+
+<script src="https://unpkg.com/maplibre-gl@5.6.1/dist/maplibre-gl.js"></script>
+<script src="https://unpkg.com/pmtiles@3.2.1/dist/pmtiles.js"></script>
+<script src="dati/luoghi.js"></script>
+<script>
+const ID_CARTINA = "mezzaluna_1700ac";
+const SVG_CARTINA = `cartine/${ID_CARTINA}.svg`;
+const FILE_PUNTI = `cartine/${ID_CARTINA}.punti.json`; // gli spilli che il portale usa ora
+const CHIAVE = `allinea:${ID_CARTINA}`; // la bozza in questo browser
+const $ = id => document.getElementById(id);
+
+/* ---------- Lettura dell'SVG ---------- */
+// L'SVG si inserisce nascosto nella pagina: così il browser risolve da solo trasformazioni, classi CSS
+// e forme (percorsi, rettangoli, cerchi) e ne dà le coordinate sul foglio, nelle unità del viewBox.
+const PASSO = 1; // ogni quanti punti del foglio si campionano le linee
+
+async function leggiCartina(url) {
+  const testo = await (await fetch(url)).text();
+  const contenitore = document.createElement("div");
+  contenitore.style.cssText = "position:absolute;left:-20000px;top:0;visibility:hidden";
+  contenitore.innerHTML = testo;
+  document.body.appendChild(contenitore);
+  const svg = contenitore.querySelector("svg");
+  const radice = svg.getScreenCTM().inverse();
+  const versoFoglio = el => radice.multiply(el.getScreenCTM()); // dal sistema dell'elemento al foglio
+  const punto = (m, x, y) => [m.a * x + m.c * y + m.e, m.b * x + m.d * y + m.f];
+
+  // Un ritaglio non rettangolare (per esempio sull'arco della Mezzaluna) serve agli effetti grafici: le
+  // copie schiarite delle aree dentro l'arco. Quello che è ritagliato così non è contenuto e si salta.
+  // I ritagli rettangolari (la cornice, la pagina) invece non contano.
+  const ritaglioRettangolare = new Map();
+  function rettangolare(id) {
+    if (ritaglioRettangolare.has(id)) return ritaglioRettangolare.get(id);
+    const clip = svg.querySelector(`clipPath#${CSS.escape(id)}`);
+    const esito = !clip || [...clip.querySelectorAll("path, rect, polygon")].every(c => {
+      const m = c.transform.baseVal.consolidate()?.matrix ?? new DOMMatrix(), l = c.getTotalLength(), q = [];
+      for (let k = 0; k <= 40; k++) { const p = c.getPointAtLength(l * k / 40); q.push(punto(m, p.x, p.y)); }
+      const xs = q.map(p => p[0]), ys = q.map(p => p[1]), x0 = Math.min(...xs), x1 = Math.max(...xs), y0 = Math.min(...ys), y1 = Math.max(...ys);
+      return q.every(([x, y]) => Math.min(Math.abs(x - x0), Math.abs(x - x1), Math.abs(y - y0), Math.abs(y - y1)) < .5);
+    });
+    ritaglioRettangolare.set(id, esito);
+    return esito;
+  }
+  const effetto = el => {
+    for (let e = el; e && e !== svg; e = e.parentElement) {
+      const id = (e.getAttribute("clip-path") || "").match(/url\(["']?#([^"')]+)/)?.[1];
+      if (id && !rettangolare(id)) return true;
+    }
+    return false;
+  };
+
+  // tracciati e forme, campionati in linee spezzate (una per ogni sotto-tracciato)
+  const elementi = [...svg.querySelectorAll("path, rect, circle, ellipse, polygon, polyline, line")].filter(el => {
+    if (el.closest("defs, clipPath, mask, pattern, symbol") || effetto(el)) return false;
+    const st = getComputedStyle(el);
+    return st.display !== "none" && (st.fill !== "none" || st.stroke !== "none");
+  });
+  // Delle copie dello stesso tracciato con un altro colore (effetti grafici, come i colori schiariti
+  // dentro l'arco della Mezzaluna) si tiene quella disegnata sopra: è quella che si vede.
+  const firma = el => { const st = getComputedStyle(el); return [el.tagName, el.getAttribute("d") ?? el.outerHTML.length, el.getAttribute("transform"), st.fill !== "none", st.stroke !== "none"].join("|"); };
+  const ultima = new Map(elementi.map(el => [firma(el), el]));
+  const forme = [];
+  for (const el of elementi) {
+    if (ultima.get(firma(el)) !== el) continue;
+    const st = getComputedStyle(el), riempito = st.fill !== "none", tratto = st.stroke !== "none";
+    const m = versoFoglio(el), lunghezza = el.getTotalLength();
+    const n = Math.max(8, Math.ceil(lunghezza / PASSO)), parti = [];
+    let attuale = [], prima = null;
+    for (let k = 0; k <= n; k++) {
+      const p = el.getPointAtLength(lunghezza * k / n), q = punto(m, p.x, p.y);
+      // un salto lungo è un nuovo sotto-tracciato (un "sposta a" nel percorso)
+      if (prima && Math.hypot(q[0] - prima[0], q[1] - prima[1]) > PASSO * 4 * Math.hypot(m.a, m.b)) { if (attuale.length > 1) parti.push(attuale); attuale = []; }
+      attuale.push(q); prima = q;
+    }
+    if (attuale.length > 1) parti.push(attuale);
+    const xs = parti.flat().map(q => q[0]), ys = parti.flat().map(q => q[1]);
+    forme.push({
+      parti, riempito, tratto,
+      riempimento: st.fill, opacitaRiempimento: +st.fillOpacity,
+      colore: st.stroke, spessore: parseFloat(st.strokeWidth) * Math.hypot(m.a, m.b), tratteggio: st.strokeDasharray !== "none",
+      box: [Math.min(...xs), Math.min(...ys), Math.max(...xs), Math.max(...ys)]
+    });
+  }
+
+  // testi: ogni riga (tspan, o il testo intero) con il suo riquadro sul foglio e la sua inclinazione
+  const testi = [];
+  for (const t of svg.querySelectorAll("text")) {
+    const m = versoFoglio(t), righe = t.querySelectorAll("tspan").length ? [...t.querySelectorAll("tspan")] : [t];
+    let indice = 0;
+    for (const r of righe) {
+      const quanti = r.getNumberOfChars(), contenuto = r.textContent.replace(/ﬁ/g, "fi").replace(/ﬂ/g, "fl");
+      if (quanti && contenuto.trim()) {
+        const angoli = [];
+        for (const i of [indice, indice + quanti - 1]) {
+          const e = t.getExtentOfChar(i);
+          angoli.push(punto(m, e.x, e.y), punto(m, e.x + e.width, e.y), punto(m, e.x, e.y + e.height), punto(m, e.x + e.width, e.y + e.height));
+        }
+        const xs = angoli.map(q => q[0]), ys = angoli.map(q => q[1]);
+        testi.push({ testo: contenuto.trim(), box: [Math.min(...xs), Math.min(...ys), Math.max(...xs), Math.max(...ys)],
+          angolo: Math.atan2(m.b, m.a), colore: getComputedStyle(t).fill, dimensione: parseFloat(getComputedStyle(t).fontSize) * Math.hypot(m.a, m.b) });
+      }
+      indice += quanti;
+    }
+  }
+  contenitore.remove();
+
+  // La cornice è la forma riempita più grande (il fondo della cartina): tutto si ritaglia lì dentro
+  // e il fondo non si disegna. Il riquadro della legenda è un rettangolo bianco piccolo: quello che
+  // contiene non è carta e non si allinea.
+  const area = b => (b[2] - b[0]) * (b[3] - b[1]);
+  const cornice = forme.filter(f => f.riempito).reduce((a, f) => (area(f.box) > area(a.box) ? f : a)).box;
+  const dentro = (b, c) => b[0] >= c[0] - .5 && b[1] >= c[1] - .5 && b[2] <= c[2] + .5 && b[3] <= c[3] + .5;
+  const bianco = c => /^rgb\(255, 255, 255\)$/.test(c);
+  const legenda = forme.find(f => f.riempito && bianco(f.riempimento) && area(f.box) > area(cornice) * .01 && area(f.box) < area(cornice) * .15)?.box;
+  const fuoriLegenda = b => !legenda || !dentro(b, legenda);
+  return {
+    cornice,
+    forme: forme.filter(f => fuoriLegenda(f.box) && !(f.riempito && area(f.box) > area(cornice) * .9 && !f.tratto)),
+    testi: testi.filter(t => fuoriLegenda(t.box) && dentro(t.box, cornice))
+  };
+}
+
+/* ---------- Ritaglio sulla cornice ---------- */
+function ritagliaPoligono(anello, [x0, y0, x1, y1]) {
+  const lati = [[p => p[0] >= x0, (a, b) => taglia(a, b, 0, x0)], [p => p[0] <= x1, (a, b) => taglia(a, b, 0, x1)],
+    [p => p[1] >= y0, (a, b) => taglia(a, b, 1, y0)], [p => p[1] <= y1, (a, b) => taglia(a, b, 1, y1)]];
+  let uscita = anello;
+  for (const [dentro, incrocio] of lati) {
+    const entrata = uscita; uscita = [];
+    for (let i = 0; i < entrata.length; i++) {
+      const a = entrata[i], b = entrata[(i + 1) % entrata.length];
+      if (dentro(b)) { if (!dentro(a)) uscita.push(incrocio(a, b)); uscita.push(b); }
+      else if (dentro(a)) uscita.push(incrocio(a, b));
+    }
+    if (!uscita.length) break;
+  }
+  return uscita;
+}
+function taglia(a, b, asse, valore) {
+  const t = (valore - a[asse]) / (b[asse] - a[asse]);
+  return [a[0] + (b[0] - a[0]) * t, a[1] + (b[1] - a[1]) * t];
+}
+function ritagliaLinea(linea, [x0, y0, x1, y1]) {
+  const dentro = p => p[0] >= x0 && p[0] <= x1 && p[1] >= y0 && p[1] <= y1, pezzi = [];
+  let pezzo = [];
+  for (const p of linea) {
+    if (dentro(p)) pezzo.push(p);
+    else { if (pezzo.length > 1) pezzi.push(pezzo); pezzo = []; }
+  }
+  if (pezzo.length > 1) pezzi.push(pezzo);
+  return pezzi;
+}
+
+/* ---------- Abbinamento automatico dei nomi ai luoghi dell'anagrafe ---------- */
+const normale = s => s.normalize("NFD").replace(/[̀-ͯ]/g, "").toLowerCase().replace(/\bm\.\s*te\b/g, "monte").replace(/[^a-z' ]/g, " ").replace(/\s+/g, " ").trim();
+const PER_NOME = new Map();
+LUOGHI.forEach(l => [l.nome, ...l.altri].forEach(n => PER_NOME.set(normale(n), l)));
+
+function proponiPunti(disegno) {
+  // I simboli dei luoghi: forme riempite piccole (pallini delle città, triangoli delle vette). Non le
+  // punte di freccia, che hanno il colore della linea su cui stanno.
+  const centro = f => [(f.box[0] + f.box[2]) / 2, (f.box[1] + f.box[3]) / 2];
+  const sullaSuaLinea = f => disegno.forme.some(l => l.tratto && l.colore === f.riempimento &&
+    l.parti.some(p => p.some(q => Math.hypot(q[0] - centro(f)[0], q[1] - centro(f)[1]) < 4)));
+  const simboli = disegno.forme.filter(f => f.riempito && f.box[2] - f.box[0] < 6 && f.box[3] - f.box[1] < 6 && !sullaSuaLinea(f)).map(centro);
+  const nomi = disegno.testi.map(t => ({ t, luogo: PER_NOME.get(normale(t.testo)) })).filter(x => x.luogo);
+  // Ogni nome va al simbolo più vicino al suo riquadro, ma valutando tutti gli abbinamenti insieme: dove
+  // i nomi sono fitti (Canaan) il simbolo più vicino a un nome può essere quello del nome accanto.
+  // Il riquadro di un carattere comprende lo spazio per ascendenti e discendenti: si stringe in altezza
+  // alla parte occupata davvero dalle lettere, così non tocca il pallino della riga sopra o sotto.
+  const costo = (b, s) => {
+    const h = b[3] - b[1], y0 = b[1] + h * .25, y1 = b[3] - h * .2;
+    return Math.hypot(Math.max(b[0] - s[0], 0, s[0] - b[2]), Math.max(y0 - s[1], 0, s[1] - y1));
+  };
+  const coppie = [];
+  nomi.forEach((x, i) => simboli.forEach((s, j) => coppie.push([costo(x.t.box, s), i, j])));
+  coppie.sort((a, b) => a[0] - b[0]);
+  const scelta = new Map(), presi = new Set();
+  for (const [c, i, j] of coppie) if (c < 15 && !scelta.has(i) && !presi.has(j)) { scelta.set(i, j); presi.add(j); }
+  // poi si prova a scambiare i simboli tra due nomi, finché il totale delle distanze scende
+  for (let migliorato = true; migliorato;) {
+    migliorato = false;
+    const indici = [...scelta.keys()];
+    for (const i of indici) for (const k of indici) {
+      if (i >= k) continue;
+      const a = scelta.get(i), b = scelta.get(k);
+      if (costo(nomi[i].t.box, simboli[b]) + costo(nomi[k].t.box, simboli[a]) < costo(nomi[i].t.box, simboli[a]) + costo(nomi[k].t.box, simboli[b]) - 1e-6) {
+        scelta.set(i, b); scelta.set(k, a); migliorato = true;
+      }
+    }
+  }
+  return [...scelta].map(([i, j]) => ({
+    nome: nomi[i].luogo.nome, luogo: nomi[i].luogo.nome, sx: simboli[j][0], sy: simboli[j][1],
+    lng: nomi[i].luogo.lng, lat: nomi[i].luogo.lat, certezza: nomi[i].luogo.certezza, stato: "proposto"
+  })).sort((a, b) => b.lat - a.lat);
+}
+
+/* ---------- Deformazione: thin plate spline con un peso per spillo ---------- */
+// Dal foglio (coordinate normalizzate sulla cornice) alla carta (longitudine e latitudine di Mercatore).
+// Uno spillo "certo" tiene il disegno esattamente lì. Uno probabile o ipotetico cede: il suo punto del
+// disegno va solo in parte verso il luogo, il resto verso dove lo metterebbero gli altri spilli
+// (quanto cede è la parte di strada lasciata al disegno).
+const CEDE = { certa: 0, probabile: 0.35, ipotetica: 0.7 };
+const R = Math.PI / 180;
+const mercY = lat => Math.log(Math.tan(Math.PI / 4 + lat * R / 2)) / R;
+const daMercY = y => (2 * Math.atan(Math.exp(y * R)) - Math.PI / 2) / R;
+const U = r2 => (r2 > 1e-12 ? r2 * Math.log(r2) / 2 : 0); // r² log r
+let cornice = [0, 0, 1, 1], scala = 1;
+const norm = (x, y) => [(x - cornice[0]) / scala, (y - cornice[1]) / scala];
+
+function risolvi(A, colonne) {
+  const n = A.length;
+  for (let k = 0; k < n; k++) {
+    let p = k;
+    for (let i = k + 1; i < n; i++) if (Math.abs(A[i][k]) > Math.abs(A[p][k])) p = i;
+    [A[k], A[p]] = [A[p], A[k]]; colonne.forEach(c => ([c[k], c[p]] = [c[p], c[k]]));
+    for (let i = k + 1; i < n; i++) {
+      const f = A[i][k] / A[k][k];
+      if (!f) continue;
+      for (let j = k; j < n; j++) A[i][j] -= f * A[k][j];
+      colonne.forEach(c => (c[i] -= f * c[k]));
+    }
+  }
+  return colonne.map(c => {
+    const x = new Float64Array(n);
+    for (let i = n - 1; i >= 0; i--) { let s = c[i]; for (let j = i + 1; j < n; j++) s -= A[i][j] * x[j]; x[i] = s / A[i][i]; }
+    return x;
+  });
+}
+function adatta(punti, conCertezza = true) {
+  if (punti.length < 3) return null;
+  // dove va il punto di ogni spillo incerto: tra il luogo e la posizione che gli darebbero gli altri
+  const mete = punti.map((p, i) => {
+    const cede = conCertezza && punti.length >= 4 ? CEDE[p.certezza] ?? 0 : 0;
+    if (!cede) return [p.lng, mercY(p.lat)];
+    const [lng, lat] = trasforma(adatta(punti.filter((_, k) => k !== i), false), p.sx, p.sy);
+    return [p.lng + (lng - p.lng) * cede, mercY(p.lat) + (mercY(lat) - mercY(p.lat)) * cede];
+  });
+  const n = punti.length, N = n + 3, uv = punti.map(p => norm(p.sx, p.sy));
+  const A = Array.from({ length: N }, () => new Float64Array(N));
+  for (let i = 0; i < n; i++) {
+    for (let j = 0; j < n; j++) A[i][j] = U((uv[i][0] - uv[j][0]) ** 2 + (uv[i][1] - uv[j][1]) ** 2);
+    A[i][n] = A[n][i] = 1; A[i][n + 1] = A[n + 1][i] = uv[i][0]; A[i][n + 2] = A[n + 2][i] = uv[i][1];
+  }
+  const bx = new Float64Array(N), by = new Float64Array(N);
+  mete.forEach(([X, Y], i) => { bx[i] = X; by[i] = Y; });
+  const [wx, wy] = risolvi(A, [bx, by]);
+  return { uv, wx, wy, n };
+}
+function trasforma(m, x, y) {
+  const [u, v] = norm(x, y), { uv, wx, wy, n } = m;
+  let X = wx[n] + wx[n + 1] * u + wx[n + 2] * v, Y = wy[n] + wy[n + 1] * u + wy[n + 2] * v;
+  for (let i = 0; i < n; i++) { const k = U((u - uv[i][0]) ** 2 + (v - uv[i][1]) ** 2); X += wx[i] * k; Y += wy[i] * k; }
+  return [X, daMercY(Y)];
+}
+const km = ([a, b], [c, d]) => { // distanza sulla sfera, in km
+  const s = Math.sin((d - b) * R / 2) ** 2 + Math.cos(b * R) * Math.cos(d * R) * Math.sin((c - a) * R / 2) ** 2;
+  return 12742 * Math.asin(Math.sqrt(s));
+};
+// dal globo al foglio: il punto del disegno che ora si vede lì (per agganciare uno spillo nuovo)
+function inversa(m, lng, lat) {
+  let x = (cornice[0] + cornice[2]) / 2, y = (cornice[1] + cornice[3]) / 2;
+  for (let k = 0; k < 30; k++) {
+    const [X, Y] = trasforma(m, x, y), h = 0.5;
+    const [Xx, Yx] = trasforma(m, x + h, y), [Xy, Yy] = trasforma(m, x, y + h);
+    const a = (Xx - X) / h, b = (Xy - X) / h, c = (Yx - Y) / h, d = (Yy - Y) / h, det = a * d - b * c;
+    const ex = lng - X, ey = lat - Y;
+    x += (d * ex - b * ey) / det; y += (-c * ex + a * ey) / det;
+    if (Math.abs(ex) + Math.abs(ey) < 1e-7) break;
+  }
+  return [x, y];
+}
+
+/* ---------- Carta ---------- */
+maplibregl.addProtocol("pmtiles", new pmtiles.Protocol().tile);
+const vuota = { type: "FeatureCollection", features: [] };
+const map = new maplibregl.Map({
+  container: "map", center: [38, 33], zoom: 4.3, minZoom: 1, maxZoom: 9, renderWorldCopies: false,
+  attributionControl: { compact: true, customAttribution: "Natural Earth" },
+  style: {
+    version: 8, projection: { type: "globe" },
+    sources: {
+      bmng: { type: "raster", url: "pmtiles://" + new URL("../bmng/bmng.pmtiles", location.href).href, tileSize: 512,
+        attribution: "Immagini: NASA Earth Observatory, Blue Marble Next Generation" },
+      aree: { type: "geojson", data: vuota }, linee: { type: "geojson", data: vuota }, griglia: { type: "geojson", data: vuota },
+      pieghe: { type: "geojson", data: vuota }, scarti: { type: "geojson", data: vuota }
+    },
+    layers: [
+      { id: "fondo", type: "background", paint: { "background-color": "#0b1d3a" } },
+      { id: "bmng", type: "raster", source: "bmng" },
+      { id: "aree", type: "fill", source: "aree", paint: { "fill-color": ["get", "colore"], "fill-opacity": ["*", ["get", "opacita"], .55], "fill-antialias": false } },
+      { id: "linee", type: "line", source: "linee", layout: { "line-join": "round", "line-cap": "round" },
+        paint: { "line-color": ["get", "colore"], "line-width": ["interpolate", ["linear"], ["zoom"], 3, ["*", ["get", "spessore"], 1.2], 8, ["*", ["get", "spessore"], 4]], "line-opacity": .85 } },
+      { id: "griglia", type: "line", source: "griglia", layout: { visibility: "none" }, paint: { "line-color": "#ffffff", "line-width": .7, "line-opacity": .45 } },
+      { id: "pieghe", type: "fill", source: "pieghe", paint: { "fill-color": "#ff3b30", "fill-opacity": .55 } },
+      { id: "scarti", type: "line", source: "scarti", layout: { "line-cap": "round" }, paint: { "line-color": "#ffd166", "line-width": 2, "line-dasharray": [1, 1.5] } }
+    ]
+  }
+});
+map.addControl(new maplibregl.NavigationControl({ showCompass: false }), "bottom-right");
+
+let disegno, punti = [], modello = null, attivo = -1;
+const spilli = [], etichette = [];
+
+/* ---------- Disegno deformato ---------- */
+function geojsonDelDisegno() {
+  const aree = [], linee = [];
+  for (const f of disegno.forme) {
+    if (f.riempito) for (const anello of f.parti) {
+      const r = ritagliaPoligono(anello, cornice);
+      if (r.length < 3) continue;
+      const c = r.map(([x, y]) => trasforma(modello, x, y)); c.push(c[0]);
+      aree.push({ type: "Feature", properties: { colore: f.riempimento, opacita: f.opacitaRiempimento }, geometry: { type: "Polygon", coordinates: [c] } });
+    }
+    if (f.tratto) {
+      const pezzi = f.parti.flatMap(p => ritagliaLinea(p, cornice)).map(p => p.map(([x, y]) => trasforma(modello, x, y)));
+      if (pezzi.length) linee.push({ type: "Feature", properties: { colore: f.colore, spessore: Math.max(.6, f.spessore) }, geometry: { type: "MultiLineString", coordinates: pezzi } });
+    }
+  }
+  return { aree, linee };
+}
+// Griglia regolare sul foglio, deformata: mostra dove il disegno viene stirato o compresso. Una cella
+// che si capovolge è una piega: due spilli si contraddicono.
+// La griglia si controlla fitta (celle di ~3 punti del foglio, una ventina di km), più un controllo
+// proprio intorno a ogni spillo: una piega tra due città vicine scambiate è piccola.
+function grigliaEPieghe() {
+  const [x0, y0, x1, y1] = cornice, NX = 150, NY = Math.round(NX * (y1 - y0) / (x1 - x0));
+  const nodi = [];
+  for (let j = 0; j <= NY; j++) { nodi.push([]); for (let i = 0; i <= NX; i++) nodi[j].push(trasforma(modello, x0 + (x1 - x0) * i / NX, y0 + (y1 - y0) * j / NY)); }
+  const linee = [], passo = 12; // una linea ogni 12 celle
+  for (let j = 0; j <= NY; j += passo) linee.push(nodi[j]);
+  for (let i = 0; i <= NX; i += passo) linee.push(nodi.map(r => r[i]));
+  const segno = (a, b, c) => Math.sign((b[0] - a[0]) * (mercY(c[1]) - mercY(a[1])) - (mercY(b[1]) - mercY(a[1])) * (c[0] - a[0]));
+  const segni = [];
+  for (let j = 0; j < NY; j++) for (let i = 0; i < NX; i++) segni.push([segno(nodi[j][i], nodi[j][i + 1], nodi[j + 1][i]), nodi[j][i], nodi[j][i + 1], nodi[j + 1][i + 1], nodi[j + 1][i]]);
+  const normale = Math.sign(segni.reduce((s, [g]) => s + g, 0));
+  const piegate = segni.filter(([g]) => g !== normale).map(([, a, b, c, d]) => [a, b, c, d]);
+  // intorno a ogni spillo, un quadratino di un punto del foglio
+  for (const p of punti) {
+    const a = trasforma(modello, p.sx - .5, p.sy - .5), b = trasforma(modello, p.sx + .5, p.sy - .5);
+    const c = trasforma(modello, p.sx + .5, p.sy + .5), d = trasforma(modello, p.sx - .5, p.sy + .5);
+    if (segno(a, b, d) !== normale) {
+      const k = .06; // il quadratino è minuscolo: se ne segna uno più grande, perché si veda
+      piegate.push([[p.lng - k, p.lat - k], [p.lng + k, p.lat - k], [p.lng + k, p.lat + k], [p.lng - k, p.lat + k]]);
+    }
+  }
+  return {
+    griglia: { type: "Feature", properties: {}, geometry: { type: "MultiLineString", coordinates: linee } },
+    piegate: piegate.map(q => ({ type: "Feature", properties: {}, geometry: { type: "Polygon", coordinates: [[...q, q[0]]] } }))
+  };
+}
+
+let ridisegnoChiesto = false;
+function chiediRidisegno() { if (!ridisegnoChiesto) { ridisegnoChiesto = true; requestAnimationFrame(ridisegna); } }
+function ridisegna() {
+  ridisegnoChiesto = false;
+  modello = adatta(punti);
+  if (!modello) { $("stato").textContent = "Servono almeno 3 spilli per agganciare il disegno."; return; }
+  const { aree, linee } = geojsonDelDisegno();
+  map.getSource("aree").setData({ type: "FeatureCollection", features: aree });
+  map.getSource("linee").setData({ type: "FeatureCollection", features: linee });
+  const { griglia, piegate } = grigliaEPieghe();
+  map.getSource("griglia").setData(griglia);
+  map.getSource("pieghe").setData({ type: "FeatureCollection", features: piegate });
+  // dove cade davvero il punto del disegno, per gli spilli che lo tirano senza fissarlo
+  const scarti = punti.map(p => [trasforma(modello, p.sx, p.sy), [p.lng, p.lat]]).filter(([a, b]) => km(a, b) > .5);
+  map.getSource("scarti").setData({ type: "FeatureCollection", features: scarti.map(c => ({ type: "Feature", properties: {}, geometry: { type: "LineString", coordinates: c } })) });
+  disegno.testi.forEach((t, i) => etichette[i].setLngLat(trasforma(modello, (t.box[0] + t.box[2]) / 2, (t.box[1] + t.box[3]) / 2)));
+  $("pieghe").hidden = !piegate.length;
+  if (piegate.length) $("pieghe").textContent = "Il disegno si piega (in rosso): due spilli si contraddicono. Di solito è un nome abbinato al pallino sbagliato: controlla gli spilli vicini.";
+  aggiornaScarti();
+}
+
+/* ---------- Scarto di ogni spillo ---------- */
+// Si toglie lo spillo, si rifà la deformazione con gli altri e si guarda dove finisce il suo punto del
+// disegno: la distanza dal luogo vero è quanto il disegno, lì, si discosta dal vero.
+function aggiornaScarti() {
+  const n = punti.length;
+  punti.forEach((p, i) => {
+    let testo = "";
+    if (n >= 4) {
+      const m = adatta(punti.filter((_, k) => k !== i), false);
+      p.scarto = km(trasforma(m, p.sx, p.sy), [p.lng, p.lat]);
+      testo = `≈ ${Math.round(p.scarto)} km`;
+    }
+    const el = document.querySelector(`.punto[data-i="${i}"] .scarto`);
+    if (el) { el.textContent = testo; el.classList.toggle("alto", (p.scarto ?? 0) > 60); }
+  });
+  const scarti = punti.filter(p => p.scarto != null).map(p => p.scarto);
+  const medio = scarti.length ? scarti.reduce((a, b) => a + b, 0) / scarti.length : null;
+  const confermati = punti.filter(p => p.stato !== "proposto").length;
+  $("stato").textContent = `${punti.length} spilli, ${confermati} confermati` + (medio != null ? ` · il disegno si discosta dal vero in media di ${Math.round(medio)} km` : "");
+}
+
+/* ---------- Spilli sulla carta e nell'elenco ---------- */
+const COLORE = { proposto: "var(--proposto)", confermato: "var(--confermato)", manuale: "var(--manuale)" };
+function salva() { try { localStorage.setItem(CHIAVE, JSON.stringify(punti)); } catch {} statoPortale(); }
+
+/* ---------- Portale: gli spilli salvati nel progetto ---------- */
+// La bozza sta nel browser; il file accanto alla cartina contiene gli spilli con cui è stata generata
+// la cartina del portale. Si confrontano senza lo scarto, che è calcolato.
+let delPortale = null; // spilli del file, o null se il portale non ne ha ancora
+const senzaScarto = pp => pp.map(({ scarto, scarto_km, ...p }) => p);
+const firma = pp => JSON.stringify(senzaScarto(pp));
+function statoPortale() {
+  const uguali = delPortale && firma(punti) === firma(delPortale);
+  $("stato-portale").textContent = !delPortale ? "Il portale non usa ancora questi spilli."
+    : uguali ? "Il portale usa questi spilli." : "Ci sono modifiche non ancora portate nel portale.";
+  $("annulla").hidden = !delPortale || uguali;
+}
+function datiDaSalvare() {
+  return { cartina: ID_CARTINA, svg: SVG_CARTINA, metodo: "punti di controllo", cornice,
+    punti: punti.map(({ scarto, ...p }) => ({ ...p, scarto_km: scarto != null ? Math.round(scarto * 10) / 10 : null })) };
+}
+function mostraEsito(ok, testo, messaggi) {
+  const el = $("esito");
+  el.hidden = false; el.classList.toggle("errore", !ok); el.innerHTML = "";
+  const p = document.createElement("p"); p.textContent = testo; el.appendChild(p);
+  if (ok) {
+    const a = document.createElement("a"); a.href = "cammino.html"; a.target = "_blank"; a.rel = "noopener";
+    a.textContent = "Apri il portale ↗"; p.append(" ", a);
+  }
+  if (messaggi) { const pre = document.createElement("pre"); pre.textContent = messaggi; el.appendChild(pre); }
+}
+async function portaNelPortale() {
+  const b = $("porta"); b.disabled = true; b.textContent = "Rigenero la cartina…"; $("esito").hidden = true;
+  try {
+    const dati = datiDaSalvare();
+    const r = await fetch("/api/allinea", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify(dati) });
+    const j = await r.json().catch(() => null);
+    if (!j) mostraEsito(false, "Questo server non sa salvare gli spilli: avvia il server del progetto (py strumenti\\server.py) e riapri la pagina da lì.");
+    else if (!j.ok) mostraEsito(false, j.errore ? `Non salvato: ${j.errore}.` : "Spilli salvati, ma la cartina del portale non si è rigenerata:", j.messaggi);
+    else { delPortale = senzaScarto(dati.punti); mostraEsito(true, "Cartina del portale aggiornata.", j.messaggi); }
+  } catch {
+    mostraEsito(false, "Il server non risponde: avvia py strumenti\\server.py.");
+  } finally {
+    b.disabled = false; b.textContent = "Aggiorna la cartina del portale"; statoPortale();
+  }
+}
+
+function creaSpilli() {
+  spilli.forEach(s => s.remove()); spilli.length = 0;
+  punti.forEach((p, i) => {
+    const el = document.createElement("div");
+    el.className = "spillo" + (p.certezza === "ipotetica" ? " ipotetica" : "") + (i === attivo ? " attivo" : "");
+    el.style.setProperty("--c", COLORE[p.stato]); el.textContent = i + 1; el.title = p.nome;
+    const s = new maplibregl.Marker({ element: el, draggable: true }).setLngLat([p.lng, p.lat]).addTo(map);
+    s.on("drag", () => { const q = s.getLngLat(); p.lng = q.lng; p.lat = q.lat; chiediRidisegno(); });
+    s.on("dragstart", () => seleziona(i, false));
+    s.on("dragend", () => { if (p.stato === "proposto") p.stato = "confermato"; salva(); elenco(); creaSpilli(); });
+    el.addEventListener("click", e => { e.stopPropagation(); seleziona(i, false); });
+    spilli.push(s);
+  });
+}
+function seleziona(i, vola) {
+  attivo = i;
+  document.querySelectorAll(".punto").forEach(li => li.classList.toggle("attivo", +li.dataset.i === i));
+  spilli.forEach((s, k) => s.getElement().classList.toggle("attivo", k === i));
+  if (vola) map.flyTo({ center: [punti[i].lng, punti[i].lat], zoom: Math.max(map.getZoom(), 6.5) });
+}
+function elenco() {
+  const ol = $("punti"); ol.innerHTML = "";
+  punti.forEach((p, i) => {
+    const li = document.createElement("li");
+    li.className = "punto" + (i === attivo ? " attivo" : ""); li.dataset.i = i; li.style.setProperty("--c", COLORE[p.stato]);
+    li.innerHTML = `<span class="n">${i + 1}</span>
+      ${p.luogo ? `<button type="button" class="nome"></button>` : `<input class="nome" aria-label="Nome dello spillo ${i + 1}">`}
+      <span class="scarto"></span>
+      <span class="sotto">
+        <select aria-label="Certezza di ${p.nome}">${["certa", "probabile", "ipotetica"].map(c => `<option${c === p.certezza ? " selected" : ""}>${c}</option>`).join("")}</select>
+        ${p.stato === "proposto" ? `<button type="button" class="azione" data-fa="conferma">Conferma</button>` : ""}
+        <button type="button" class="azione" data-fa="togli">Togli</button>
+      </span>`;
+    const nome = li.querySelector(".nome");
+    if (p.luogo) { nome.textContent = p.nome; nome.addEventListener("click", () => seleziona(i, true)); }
+    else { nome.value = p.nome; nome.addEventListener("change", () => { p.nome = nome.value || p.nome; salva(); }); nome.addEventListener("focus", () => seleziona(i, true)); }
+    const luogo = LUOGHI.find(l => l.nome === p.luogo);
+    if (luogo?.nota) li.title = luogo.nota;
+    li.querySelector("select").addEventListener("change", e => { p.certezza = e.target.value; salva(); creaSpilli(); chiediRidisegno(); });
+    li.querySelector('[data-fa="conferma"]')?.addEventListener("click", () => { p.stato = "confermato"; salva(); elenco(); creaSpilli(); });
+    li.querySelector('[data-fa="togli"]').addEventListener("click", () => { punti.splice(i, 1); attivo = -1; salva(); elenco(); creaSpilli(); chiediRidisegno(); });
+    ol.appendChild(li);
+  });
+  aggiornaScarti();
+}
+
+/* ---------- Comandi ---------- */
+$("opacita").addEventListener("input", e => { const v = +e.target.value; map.setPaintProperty("aree", "fill-opacity", ["*", ["get", "opacita"], v]); map.setPaintProperty("linee", "line-opacity", Math.min(1, v + .3)); });
+$("v-aree").addEventListener("change", e => map.setLayoutProperty("aree", "visibility", e.target.checked ? "visible" : "none"));
+$("v-linee").addEventListener("change", e => map.setLayoutProperty("linee", "visibility", e.target.checked ? "visible" : "none"));
+$("v-nomi").addEventListener("change", e => $("map").classList.toggle("senza-nomi", !e.target.checked));
+$("v-griglia").addEventListener("change", e => map.setLayoutProperty("griglia", "visibility", e.target.checked ? "visible" : "none"));
+$("v-fiumi").addEventListener("change", e => {
+  if (!map.getSource("fiumi")) {
+    map.addSource("fiumi", { type: "geojson", data: new URL("dati/fiumi.geojson", location.href).href });
+    map.addLayer({ id: "fiumi", type: "line", source: "fiumi", paint: { "line-color": "#00e5ff", "line-width": 1.2, "line-opacity": .9 } }, "griglia");
+  }
+  map.setLayoutProperty("fiumi", "visibility", e.target.checked ? "visible" : "none");
+});
+let aggiunta = false;
+function modoAggiunta(attiva) {
+  aggiunta = attiva; $("aggiungi").setAttribute("aria-pressed", String(attiva));
+  $("nota-aggiungi").hidden = !attiva; $("map").classList.toggle("aggiungi", attiva);
+}
+$("aggiungi").addEventListener("click", () => modoAggiunta(!aggiunta));
+map.on("click", e => {
+  if (!aggiunta || !modello) return;
+  const [sx, sy] = inversa(modello, e.lngLat.lng, e.lngLat.lat);
+  punti.push({ nome: `Punto ${punti.length + 1}`, luogo: null, sx, sy, lng: e.lngLat.lng, lat: e.lngLat.lat, certezza: "certa", stato: "manuale" });
+  modoAggiunta(false); attivo = punti.length - 1; salva(); elenco(); creaSpilli(); chiediRidisegno();
+});
+document.addEventListener("keydown", e => { if (e.key === "Escape" && aggiunta) modoAggiunta(false); });
+$("conferma-tutti").addEventListener("click", () => { punti.forEach(p => { if (p.stato === "proposto") p.stato = "confermato"; }); salva(); elenco(); creaSpilli(); });
+$("ricomincia").addEventListener("click", () => { punti = proponiPunti(disegno); attivo = -1; salva(); elenco(); creaSpilli(); chiediRidisegno(); });
+$("porta").addEventListener("click", portaNelPortale);
+$("annulla").addEventListener("click", () => { punti = structuredClone(delPortale); attivo = -1; salva(); elenco(); creaSpilli(); chiediRidisegno(); });
+$("scarica").addEventListener("click", () => {
+  const a = document.createElement("a");
+  a.href = URL.createObjectURL(new Blob([JSON.stringify(datiDaSalvare(), null, 2)], { type: "application/json" }));
+  a.download = `punti_${ID_CARTINA}.json`; a.click(); URL.revokeObjectURL(a.href);
+});
+
+/* ---------- Avvio ---------- */
+map.on("load", async () => {
+  disegno = await leggiCartina(SVG_CARTINA);
+  cornice = disegno.cornice; scala = cornice[2] - cornice[0];
+  disegno.testi.forEach(t => {
+    const el = document.createElement("div");
+    el.className = "nome-disegno"; el.textContent = t.testo; el.style.color = t.colore;
+    el.style.fontSize = Math.max(9, Math.min(14, t.dimensione * 1.3)) + "px";
+    etichette.push(new maplibregl.Marker({ element: el, rotation: t.angolo / R, rotationAlignment: "viewport" }).setLngLat([0, 0]).addTo(map));
+  });
+  // si riparte dalla bozza del browser, se c'è; se no dagli spilli del portale; se no dalle proposte
+  let salvati = null;
+  try { salvati = JSON.parse(localStorage.getItem(CHIAVE)); } catch {}
+  try { const r = await fetch(FILE_PUNTI, { cache: "no-store" }); if (r.ok) delPortale = senzaScarto((await r.json()).punti); } catch {}
+  punti = Array.isArray(salvati) && salvati.length ? salvati : delPortale ? structuredClone(delPortale) : proponiPunti(disegno);
+  elenco(); creaSpilli(); ridisegna(); statoPortale();
+  $("caricamento").remove();
+  const angoli = [[cornice[0], cornice[1]], [cornice[2], cornice[1]], [cornice[2], cornice[3]], [cornice[0], cornice[3]]].map(([x, y]) => trasforma(modello, x, y));
+  const b = new maplibregl.LngLatBounds(angoli[0], angoli[0]); angoli.forEach(a => b.extend(a));
+  map.fitBounds(b, { padding: 30, duration: 0 });
+});
+</script>
+</body>
+</html>

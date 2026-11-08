@@ -1,0 +1,233 @@
+{
+  "cartina": "mezzaluna_1700ac",
+  "svg": "cartine/mezzaluna_1700ac.svg",
+  "metodo": "punti di controllo",
+  "cornice": [
+    91.80699920654297,
+    293.6979495568577,
+    502.83099365234375,
+    548.8160220666233
+  ],
+  "punti": [
+    {
+      "nome": "Monte Ararat",
+      "luogo": "Monte Ararat",
+      "sx": 347.68591943591673,
+      "sy": 303.205248848075,
+      "lng": 44.298,
+      "lat": 39.702,
+      "certezza": "certa",
+      "stato": "proposto",
+      "scarto_km": 46.3
+    },
+    {
+      "nome": "Carran",
+      "luogo": "Carran",
+      "sx": 287.27718922201166,
+      "sy": 358.9940671770874,
+      "lng": 39.033,
+      "lat": 36.867,
+      "certezza": "certa",
+      "stato": "proposto",
+      "scarto_km": 52
+    },
+    {
+      "nome": "Ninive",
+      "luogo": "Ninive",
+      "sx": 337.83440340099696,
+      "sy": 367.8904321773426,
+      "lng": 43.153,
+      "lat": 36.359,
+      "certezza": "certa",
+      "stato": "proposto",
+      "scarto_km": 13.5
+    },
+    {
+      "nome": "Assur",
+      "luogo": "Assur",
+      "sx": 341.98959238104,
+      "sy": 386.5897084860462,
+      "lng": 43.262,
+      "lat": 35.456,
+      "certezza": "certa",
+      "stato": "proposto",
+      "scarto_km": 16.6
+    },
+    {
+      "nome": "Palmira",
+      "luogo": "Palmira",
+      "sx": 277.2767924636901,
+      "sy": 408.99503178887113,
+      "lng": 38.268,
+      "lat": 34.551,
+      "certezza": "certa",
+      "stato": "proposto",
+      "scarto_km": 33.9
+    },
+    {
+      "nome": "Mari",
+      "luogo": "Mari",
+      "sx": 314.2152155692311,
+      "sy": 402.13953235953346,
+      "lng": 40.889,
+      "lat": 34.55,
+      "certezza": "certa",
+      "stato": "proposto",
+      "scarto_km": 27.6
+    },
+    {
+      "nome": "Biblos",
+      "luogo": "Biblos",
+      "sx": 232.27630339266761,
+      "sy": 417.9081610725539,
+      "lng": 35.648,
+      "lat": 34.119,
+      "certezza": "certa",
+      "stato": "proposto",
+      "scarto_km": 14.3
+    },
+    {
+      "nome": "Sidone",
+      "luogo": "Sidone",
+      "sx": 229.0155002406318,
+      "sy": 426.6039186508047,
+      "lng": 35.371,
+      "lat": 33.563,
+      "certezza": "certa",
+      "stato": "proposto",
+      "scarto_km": 8.6
+    },
+    {
+      "nome": "Damasco",
+      "luogo": "Damasco",
+      "sx": 243.36320200395858,
+      "sy": 425.40812864018386,
+      "lng": 36.292,
+      "lat": 33.513,
+      "certezza": "certa",
+      "stato": "proposto",
+      "scarto_km": 20.9
+    },
+    {
+      "nome": "Babilonia",
+      "luogo": "Babilonia",
+      "sx": 366.1268187206624,
+      "sy": 437.7923344044735,
+      "lng": 44.421,
+      "lat": 32.536,
+      "certezza": "certa",
+      "stato": "proposto",
+      "scarto_km": 39.4
+    },
+    {
+      "nome": "Sichem",
+      "luogo": "Sichem",
+      "sx": 228.14590136216793,
+      "sy": 451.1697715397077,
+      "lng": 35.284,
+      "lat": 32.214,
+      "certezza": "certa",
+      "stato": "proposto",
+      "scarto_km": 7
+    },
+    {
+      "nome": "Susa",
+      "luogo": "Susa",
+      "sx": 423.947692609916,
+      "sy": 429.85148373024055,
+      "lng": 48.257,
+      "lat": 32.19,
+      "certezza": "certa",
+      "stato": "proposto",
+      "scarto_km": 74.8
+    },
+    {
+      "nome": "Betel",
+      "luogo": "Betel",
+      "sx": 228.58050219872166,
+      "sy": 456.822109115446,
+      "lng": 35.239,
+      "lat": 31.928,
+      "certezza": "probabile",
+      "stato": "proposto",
+      "scarto_km": 6.4
+    },
+    {
+      "nome": "Gerusalemme",
+      "luogo": "Gerusalemme",
+      "sx": 228.79780237857995,
+      "sy": 461.8221525225286,
+      "lng": 35.235,
+      "lat": 31.778,
+      "certezza": "certa",
+      "stato": "proposto",
+      "scarto_km": 7.6
+    },
+    {
+      "nome": "Mamre",
+      "luogo": "Mamre",
+      "sx": 225.104397410596,
+      "sy": 466.7859827099074,
+      "lng": 35.1,
+      "lat": 31.533,
+      "certezza": "probabile",
+      "stato": "proposto",
+      "scarto_km": 4.4
+    },
+    {
+      "nome": "Bersabea",
+      "luogo": "Bersabea",
+      "sx": 220.32169775436705,
+      "sy": 472.6551628210487,
+      "lng": 34.841,
+      "lat": 31.245,
+      "certezza": "certa",
+      "stato": "proposto",
+      "scarto_km": 1.4
+    },
+    {
+      "nome": "Zoan",
+      "luogo": "Zoan",
+      "sx": 173.76459843352131,
+      "sy": 479.09660361850416,
+      "lng": 31.88,
+      "lat": 30.976,
+      "certezza": "certa",
+      "stato": "proposto",
+      "scarto_km": 1.7
+    },
+    {
+      "nome": "Ur",
+      "luogo": "Ur",
+      "sx": 406.12202090988285,
+      "sy": 461.37342013975103,
+      "lng": 46.103,
+      "lat": 30.963,
+      "certezza": "certa",
+      "stato": "proposto",
+      "scarto_km": 73.8
+    },
+    {
+      "nome": "Menfi",
+      "luogo": "Menfi",
+      "sx": 166.31819493277726,
+      "sy": 500.36072522939327,
+      "lng": 31.255,
+      "lat": 29.845,
+      "certezza": "certa",
+      "stato": "proposto",
+      "scarto_km": 3.4
+    },
+    {
+      "nome": "Monte Sinai",
+      "luogo": "Monte Sinai",
+      "sx": 211.84267119015203,
+      "sy": 522.3896538647442,
+      "lng": 33.975,
+      "lat": 28.539,
+      "certezza": "ipotetica",
+      "stato": "proposto",
+      "scarto_km": 11.2
+    }
+  ]
+}
