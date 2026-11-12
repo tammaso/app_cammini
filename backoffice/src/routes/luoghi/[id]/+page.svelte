@@ -1,6 +1,7 @@
 <script lang="ts">
   import { enhance } from '$app/forms';
   import { CERTEZZE, TIPI_LUOGO } from '#lib/cammini.ts';
+  import MappaLuogo from '#lib/components/MappaLuogo.svelte';
   import type { PageProps } from './$types';
 
   let { data, form }: PageProps = $props();
@@ -12,6 +13,18 @@
     lat: l ? String(l.lat) : '', lng: l ? String(l.lng) : '', tipo: l?.tipo ?? 'citta', certezza: l?.certezza ?? 'certa', nota: l?.nota ?? '',
   });
   const errori: Record<string, string | undefined> = $derived(form?.errori ?? {});
+
+  // coordinate modificabili sia nei campi sia sulla mappa
+  let lat = $state('');
+  let lng = $state('');
+  $effect.pre(() => { lat = valori.lat; lng = valori.lng; });
+  const numero = (s: string) => { const n = Number(s.trim().replace(',', '.')); return s.trim() && Number.isFinite(n) ? n : null; };
+  const coordinate = $derived.by((): [number | null, number | null] => {
+    // nel campo della latitudine si può incollare la coppia «lat, lng»
+    const coppia = lat.match(/^\s*(-?\d+(?:\.\d+)?)\s*,\s*(-?\d+(?:\.\d+)?)\s*$/);
+    return coppia && !lng.trim() ? [Number(coppia[1]), Number(coppia[2])] : [numero(lat), numero(lng)];
+  });
+  function sposta(nuovaLat: number, nuovaLng: number) { lat = String(nuovaLat); lng = String(nuovaLng); }
   const mappa = $derived(l ? `https://www.openstreetmap.org/?mlat=${l.lat}&mlon=${l.lng}#map=9/${l.lat}/${l.lng}` : '');
 </script>
 
@@ -56,13 +69,13 @@
       <div class="campo">
         <label for="lat">Latitudine</label>
         <span class="aiuto">Gradi decimali. Si può incollare qui la coppia «lat, lng» copiata da una mappa.</span>
-        <input id="lat" name="lat" value={valori.lat} required aria-invalid={errori.lat ? 'true' : undefined} />
+        <input id="lat" name="lat" bind:value={lat} required aria-invalid={errori.lat ? 'true' : undefined} />
         {#if errori.lat}<span class="errore">{errori.lat}</span>{/if}
       </div>
       <div class="campo">
         <label for="lng">Longitudine</label>
         <span class="aiuto">Gradi decimali, positivi a est di Greenwich.</span>
-        <input id="lng" name="lng" value={valori.lng} aria-invalid={errori.lng ? 'true' : undefined} />
+        <input id="lng" name="lng" bind:value={lng} aria-invalid={errori.lng ? 'true' : undefined} />
         {#if errori.lng}<span class="errore">{errori.lng}</span>{/if}
       </div>
     </div>
@@ -97,6 +110,9 @@
     </div>
   </form>
 
+  <div class="laterale">
+  <MappaLuogo lat={coordinate[0]} lng={coordinate[1]} spilli={data.spilli} {sposta} />
+
   {#if l}
     <section class="riquadro uso">
       <h2>Dove è usato</h2>
@@ -107,11 +123,13 @@
       {/if}
     </section>
   {/if}
+  </div>
 </div>
 
 <style>
   .disposizione { display: grid; grid-template-columns: minmax(0, 46rem) minmax(16rem, 1fr); gap: 1.5rem; align-items: start; }
   .modulo { max-width: none; }
+  .laterale { display: grid; gap: 1.5rem; }
   .due { display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; }
   .campo select { font: inherit; padding: .55rem .7rem; border: 1px solid var(--line); border-radius: var(--radius-sm); background: var(--surface); }
   .campo textarea { min-height: 5rem; }

@@ -12,8 +12,18 @@ function idDaParametro(parametro: string): number | null {
 
 export const load: PageServerLoad = ({ params }) => {
   const id = idDaParametro(params.id);
-  return id === null ? { luogo: null, usi: [] } : { luogo: leggiLuogo(db, id)!, usi: usiDelLuogo(db, id) };
+  return id === null ? { luogo: null, usi: [], spilli: [] } : { luogo: leggiLuogo(db, id)!, usi: usiDelLuogo(db, id), spilli: spilliDelLuogo(id) };
 };
+
+// gli spilli legati al luogo, su tutte le cartine: per vederli sulla mappa accanto alla posizione dell'anagrafe
+function spilliDelLuogo(id: number) {
+  return db.prepare(`SELECT p.lng, p.lat, p.stato, k.id AS cartina_id, k.pulsante, c.titolo FROM punti_controllo p
+      JOIN cartine k ON k.id = p.cartina_id JOIN cammini c ON c.id = k.cammino_id WHERE p.luogo_id = ? ORDER BY c.titolo, k.anno`).all(id)
+    .map((r) => ({
+      lng: Number(r.lng), lat: Number(r.lat), stato: String(r.stato) as 'proposto' | 'confermato' | 'manuale',
+      cartinaId: Number(r.cartina_id), cartina: `${String(r.pulsante)} di «${String(r.titolo)}»`,
+    }));
+}
 
 export const actions = {
   salva: async ({ request, params }) => {

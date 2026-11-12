@@ -51,7 +51,9 @@ Lingua di lavoro: italiano, anche per testi dell'interfaccia, commenti nel codic
   backup, archivio immagini con sharp e relative pagine, selettore di immagini, stile) è copiato
   dall'Atlante e adattato: i due progetti restano separati. Pagine: Cammini (testi, tappe con ordine
   ↑↓, cartine), tappa (luogo dall'anagrafe, testi, immagine dall'archivio, tracciato), Luoghi
-  (anagrafe con ricerca e «dove è usato»), cartina (pulsante e anno, stili modificabili: colori,
+  (anagrafe con ricerca e «dove è usato»; dal 2026-11-12 la scheda ha una mappa sul satellite con la posizione
+  dell'anagrafe, che si trascina o si sceglie con un clic, e gli spilli delle cartine legati al luogo, con la
+  distanza e il collegamento ad Allinea: `src/lib/components/MappaLuogo.svelte`), cartina (pulsante e anno, stili modificabili: colori,
   contorno, opacità e spessore a zoom 3 / 7, tratteggio, voce di legenda; conteggi; punti di
   controllo), Immagini, Pubblicazione («Aggiorna il portale»: scrive `prototipo/cammini/`, anche i
   cammini in bozza, segnati nell'indice; un tracciato che non parte dalla tappa precedente, per
