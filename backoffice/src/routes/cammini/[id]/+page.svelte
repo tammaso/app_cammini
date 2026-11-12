@@ -65,6 +65,17 @@
         {/each}
       </tbody>
     </table>
+    {#if data.tappe.length > 1}
+      <form class="ritorno" method="POST" action="?/ritorno" use:enhance={() => async ({ update }) => update({ reset: false })}>
+        <label for="ritorno">Dopo l'ultima tappa</label>
+        <select id="ritorno" name="ritorno" value={String(c.ritornoTappaId ?? '')}>
+          <option value="">il cammino finisce</option>
+          {#each data.tappe.slice(0, -1) as t, i (t.id)}<option value={String(t.id)}>torna alla tappa {i + 1}, {t.nome}</option>{/each}
+        </select>
+        <button class="pulsante secondario" type="submit">Salva</button>
+        <span class="aiuto">Il tracciato del ritorno viene dal percorso della cartina, alla prossima generazione.</span>
+      </form>
+    {/if}
   </section>
 
   <section class="riquadro sezione">
@@ -168,6 +179,9 @@
   h2 { font-size: 1.1rem; }
   .aiuto { color: var(--ink-soft); font-size: .9rem; margin: .2rem 0 .6rem; }
   .ordine form { display: flex; gap: .25rem; justify-content: flex-end; }
+  .ritorno { display: flex; gap: .5rem; align-items: center; flex-wrap: wrap; margin-top: .75rem; }
+  .ritorno label { font-weight: 600; }
+  .ritorno select { font: inherit; padding: .35rem .5rem; border: 1px solid var(--line); border-radius: var(--radius-sm); background: var(--surface); }
   .freccia { border: 1px solid var(--line); background: var(--surface); border-radius: var(--radius-sm); width: 2rem; height: 2rem; cursor: pointer; }
   .freccia:hover:not(:disabled) { border-color: var(--accent); }
   .freccia:disabled { opacity: .35; cursor: default; }

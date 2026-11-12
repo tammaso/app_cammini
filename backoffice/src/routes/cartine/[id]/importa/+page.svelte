@@ -1,7 +1,7 @@
 <script lang="ts">
   import { enhance } from '$app/forms';
   import { NOMI_CATEGORIE } from '#lib/cammini.ts';
-  import { CATEGORIE_NOMI } from '#lib/disegno.ts';
+  import { CATEGORIE_NOMI, NOMI_FISICI } from '#lib/disegno.ts';
   import { estraiDisegno } from '#lib/estrazione.ts';
   import type { PageProps } from './$types';
 
@@ -37,7 +37,9 @@
   let usi = $state<Record<string, string>>({});
   let categorie = $state<Record<string, string>>({});
   let testi = $state<Record<string, string>>({});
+  let oggi = $state<Record<string, boolean>>({});
   $effect.pre(() => {
+    oggi = Object.fromEntries(data.testi.map((t) => [t.chiave, !(t.uso.uso === 'nome' && t.uso.oggi === false)]));
     colori = Object.fromEntries(data.colori.map((c) => [c.chiave, valoreColore(c.uso)]));
     nuoviNomi = {};
     usi = Object.fromEntries(data.testi.map((t) => [t.chiave, t.uso.uso]));
@@ -156,6 +158,11 @@
                       <select name="categoria:{t.chiave}" bind:value={categorie[t.chiave]} aria-label="Categoria di «{t.testo}»">
                         {#each CATEGORIE_NOMI as c (c)}<option value={c}>{NOMI_CATEGORIE[c]}</option>{/each}
                       </select>
+                      {#if (NOMI_FISICI as readonly string[]).includes(categorie[t.chiave])}
+                        <!-- geografia fisica: compare anche in «Oggi», salvo i nomi antichi (Mare Inferiore) -->
+                        <input type="hidden" name="oggiMostrato:{t.chiave}" value="1" />
+                        <label class="spunta"><input type="checkbox" name="oggi:{t.chiave}" bind:checked={oggi[t.chiave]} /> anche in «Oggi»</label>
+                      {/if}
                     {/if}
                   </td>
                   <td>
@@ -211,6 +218,7 @@
   textarea { width: 100%; min-width: 12rem; resize: vertical; }
   .originale { font-weight: 600; }
   .spento .originale { opacity: .55; font-weight: 400; }
+  .spunta { font-size: .85rem; display: flex; gap: .35rem; align-items: center; }
   .luogo { display: block; font-size: .8rem; color: var(--accent-ink); }
   .luogo.manca { color: var(--danger); }
   .barra { position: sticky; bottom: 0; display: flex; gap: .6rem; align-items: center; padding: .75rem 1rem; flex-wrap: wrap; }

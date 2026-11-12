@@ -29,6 +29,9 @@ export interface Cammino {
   globo: { luogo: string | null; testo: string };
   panoramica: { testo: string };
   tappe: Tappa[]; // nell'ordine del viaggio
+  // Dopo l'ultima tappa il cammino può tornare a una tappa precedente (Abramo: da Mòria a Bersabea).
+  // verso: indice della tappa in "tappe"; tracciato dall'ultima tappa a quella, null: linea dritta.
+  ritorno?: { verso: number; tracciato: Coordinate[] | null };
   frecce: Freccia[]; // punte di freccia sul cammino, nel verso del viaggio, uguali in ogni epoca
   // Nomi scritti a mano sulla carta: i mari in ogni epoca; fiumi e regioni solo in "Oggi" (nell'epoca
   // storica valgono quelli della cartina).
@@ -79,10 +82,10 @@ export interface Cartina {
   // Gli stili con "legenda" compaiono nella legenda dell'epoca, dopo il cammino.
   stili: Stile[];
   elementi: Raccolta<{ stile: string; nome: string | null; origine: "importato" | "disegnato" | "modificato" }>;
-  // [tipo, nome, lng, lat, zoom di comparsa, { angolo, sotto }?]. Tipi: regno, regione-antica,
+  // [tipo, nome, lng, lat, zoom di comparsa, { angolo, sotto, oggi }?]. Tipi: regno, regione-antica,
   // capitale-antica, citta-antica, regione, mare, fiume, isola, vetta. Regione, mare e vetta sono
-  // geografia fisica: compaiono in ogni epoca.
-  nomi: [string, string, number, number, number, { angolo?: number; sotto?: string }?][];
+  // geografia fisica: compaiono in ogni epoca, salvo i nomi antichi (oggi: false, come «Mare Inferiore»).
+  nomi: [string, string, number, number, number, { angolo?: number; sotto?: string; oggi?: false }?][];
   alone: Raccolta<Record<string, never>>; // veli sovrapposti, ognuno con un buco più largo
 }
 

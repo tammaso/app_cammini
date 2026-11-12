@@ -19,19 +19,24 @@ import type { DatabaseSync } from 'node:sqlite';
 import { inTransazione } from '../../../db/connessione.ts';
 import { slug } from '../../../db/slug.ts';
 import {
-  CATEGORIE_NOMI, NOMI_DI_LUOGHI, ZOOM_NOMI, chiaveArea, chiaveLinea, eSimbolo, gruppiDiColore, gruppiDiTesto, normale,
+  CATEGORIE_NOMI, NOMI_DI_LUOGHI, NOMI_FISICI, ZOOM_NOMI, chiaveArea, chiaveLinea, eFreccia, eSimbolo, gruppiDiColore, gruppiDiTesto, normale,
   type CategoriaNome, type Classificazione, type Disegno, type GruppoDiColore, type GruppoDiTesto, type Punto, type UsoColore,
   type UsoTesto,
 } from '../disegno.ts';
 import { adatta, trasforma, type Spillo } from '../georeferenziazione.ts';
 import {
-  buffer, inGeoJSON, piuGrande, poligono, semplifica, terreEmerse, unione, geometria, type Geometria,
+  buffer, inGeoJSON, piuGrande, poligono, semplifica, soloPoligoni, terreEmerse, unione, geometria, type Geometria,
 } from './geometria.ts';
 import { adesso } from './moduli.ts';
 import { tracciaPercorso } from './percorso.ts';
 import { registraModifica } from './registro.ts';
 
 export const CARTELLA_CARTINE = process.env.CAMMINI_CARTINE ?? fileURLToPath(new URL('../../../dati/cartine/', import.meta.url));
+const FRECCE_LONTANE_KM = 30; // una punta di freccia più vicina di così a una tappa è quella del tratto che vi arriva
+const kmTra = (a: Punto, b: Punto) => {
+  const r = Math.PI / 180, h = Math.sin(((b[1] - a[1]) * r) / 2) ** 2 + Math.cos(a[1] * r) * Math.cos(b[1] * r) * Math.sin(((b[0] - a[0]) * r) / 2) ** 2;
+  return 2 * 6371 * Math.asin(Math.sqrt(h));
+};
 const ALONE = Array.from({ length: 16 }, (_, i) => Math.round((0.6 + 0.35 * i) * 100) / 100); // da 0,6 a 5,85 gradi
 
 // --- Lettura -----------------------------------------------------------------------------------------
@@ -96,7 +101,7 @@ function proponiColori(db: DatabaseSync, k: DatiCartina, disegno: Disegno): Reco
   const stili = db.prepare('SELECT chiave, tipo, colore, contorno FROM stili WHERE cartina_id = ?').all(k.id);
   // Il percorso è la linea che ha punte di freccia dello stesso colore
   const coloriFrecce = new Map<string, number>();
-  for (const f of disegno.forme) if (eSimbolo(f)) coloriFrecce.set(f.riempimento!, (coloriFrecce.get(f.riempimento!) ?? 0) + 1);
+  for (const f of disegno.forme) if (eFreccia(f)) coloriFrecce.set(f.riempimento!, (coloriFrecce.get(f.riempimento!) ?? 0) + 1);
   const proposte: Record<string, UsoColore> = {};
   for (const g of gruppiDiColore(disegno)) {
     const stile = stili.find((s) => s.tipo === g.tipo && s.colore === g.colore);
@@ -109,8 +114,11 @@ function proponiColori(db: DatabaseSync, k: DatiCartina, disegno: Disegno): Reco
 
 function proponiTesti(db: DatabaseSync, k: DatiCartina, gruppi: GruppoDiTesto[]): Record<string, UsoTesto> {
   const proposte: (UsoTesto | undefined)[] = new Array(gruppi.length);
-  const esistenti = db.prepare("SELECT categoria, testo, sotto FROM nomi WHERE cartina_id = ? ORDER BY posizione, id").all(k.id)
-    .map((n) => ({ categoria: String(n.categoria) as CategoriaNome, testo: String(n.testo), sotto: n.sotto == null ? null : String(n.sotto) }));
+  const esistenti = db.prepare("SELECT categoria, testo, sotto, anche_oggi FROM nomi WHERE cartina_id = ? ORDER BY posizione, id").all(k.id)
+    .map((n) => ({
+      categoria: String(n.categoria) as CategoriaNome, testo: String(n.testo), sotto: n.sotto == null ? null : String(n.sotto),
+      oggi: n.anche_oggi === 0 ? (false as const) : undefined,
+    }));
   // Una sequenza di gruppi liberi consecutivi il cui testo, unito, è quello cercato. Prima si cercano
   // gruppi scritti come la categoria vuole (regni e regioni in maiuscolo, città no): la città e la regione
   // di Babilonia hanno lo stesso nome.
@@ -141,7 +149,8 @@ function proponiTesti(db: DatabaseSync, k: DatiCartina, gruppi: GruppoDiTesto[])
     const s = sequenza(n.testo, n.categoria);
     if (!s) continue;
     const testa = gruppi[s[0]].chiave;
-    distribuisci(n.testo, s, (t) => ({ uso: 'nome', categoria: n.categoria, testo: t }), (t) => ({ uso: 'riga', testo: t, di: testa }));
+    distribuisci(n.testo, s, (t) => ({ uso: 'nome', categoria: n.categoria, testo: t, ...(n.oggi === false ? { oggi: false as const } : {}) }),
+      (t) => ({ uso: 'riga', testo: t, di: testa }));
     if (n.sotto) {
       const ss = sequenza(n.sotto);
       if (ss) distribuisci(n.sotto, ss, (t) => ({ uso: 'sotto', testo: t, di: testa }), (t) => ({ uso: 'sotto', testo: t, di: testa }));
@@ -248,7 +257,9 @@ export function salvaClassificazione(db: DatabaseSync, id: number, modulo: FormD
       const testo = String(modulo.get(`testo:${g.chiave}`) ?? '').trim();
       const categoria = String(modulo.get(`categoria:${g.chiave}`) ?? '') as CategoriaNome;
       if (uso === 'nome' && CATEGORIE_NOMI.includes(categoria)) {
-        testi[g.chiave] = { uso: 'nome', categoria, testo: testo || g.testo };
+        // geografia fisica: la casella «anche in Oggi» tolta vuol dire un nome antico (Mare Inferiore)
+        const soloAllora = NOMI_FISICI.includes(categoria) && modulo.has(`oggiMostrato:${g.chiave}`) && !modulo.has(`oggi:${g.chiave}`);
+        testi[g.chiave] = { uso: 'nome', categoria, testo: testo || g.testo, ...(soloAllora ? { oggi: false as const } : {}) };
         testa = g.chiave;
       } else if ((uso === 'riga' || uso === 'sotto') && testa) testi[g.chiave] = { uso, testo, di: testa };
       else testi[g.chiave] = { uso: 'ignora' };
@@ -273,7 +284,7 @@ export interface EsitoGenerazione {
   secondi: number;
 }
 
-type Nome = [string, string, number, number, number, { angolo?: number; sotto?: string }?];
+type Nome = [string, string, number, number, number, { angolo?: number; sotto?: string; oggi?: false }?];
 
 export async function generaCartina(db: DatabaseSync, id: number): Promise<EsitoGenerazione> {
   const inizio = Date.now();
@@ -307,7 +318,7 @@ export async function generaCartina(db: DatabaseSync, id: number): Promise<Esito
   }
   for (let j = 0; j < aree.length; j++) {
     if (!aree[j].opaca) continue;
-    for (let i = 0; i < j; i++) if (aree[i].g.intersects(aree[j].g)) aree[i].g = aree[i].g.difference(aree[j].g);
+    for (let i = 0; i < j; i++) if (aree[i].g.intersects(aree[j].g)) aree[i].g = soloPoligoni(aree[i].g.difference(aree[j].g));
   }
   // ritaglio sulle terre emerse, per gli stili che lo chiedono (i mari sono spesso disegnati sopra i regni)
   const daRitagliare = aree.filter((a) => stili.get(a.stile)!.ritaglio);
@@ -315,7 +326,7 @@ export async function generaCartina(db: DatabaseSync, id: number): Promise<Esito
     const inv = daRitagliare.map((a) => a.g.getEnvelopeInternal());
     const terre = await terreEmerse([Math.min(...inv.map((e) => e.getMinX())) - 1, Math.min(...inv.map((e) => e.getMinY())) - 1,
       Math.max(...inv.map((e) => e.getMaxX())) + 1, Math.max(...inv.map((e) => e.getMaxY())) + 1]);
-    for (const a of daRitagliare) a.g = a.g.intersection(terre);
+    for (const a of daRitagliare) a.g = soloPoligoni(a.g.intersection(terre));
   }
   const perStile = new Map<string, Geometria[]>();
   for (const a of aree) perStile.set(a.stile, [...(perStile.get(a.stile) ?? []), a.g]);
@@ -341,16 +352,25 @@ export async function generaCartina(db: DatabaseSync, id: number): Promise<Esito
     elementi.push({ stile, nome: stili.get(stile)!.nome, geometria: geometria({ type: 'MultiLineString', coordinates: pezzi }) });
   }
 
-  // 3. Tracciati delle tappe (dalla tappa precedente) e frecce, se la cartina ha il percorso
+  // 3. Tracciati delle tappe (dalla tappa precedente) e frecce, se la cartina ha il percorso; se il cammino
+  // dopo l'ultima tappa torna a una tappa precedente, anche il tracciato del ritorno
   const tappe = db.prepare('SELECT t.id, l.lng, l.lat FROM tappe t JOIN luoghi l ON l.id = t.luogo_id WHERE t.cammino_id = ? ORDER BY t.posizione')
     .all(k.camminoId).map((r) => ({ id: Number(r.id), at: [Number(r.lng), Number(r.lat)] as Punto }));
+  const ritornoId = db.prepare('SELECT ritorno_tappa_id FROM cammini WHERE id = ?').get(k.camminoId)?.ritorno_tappa_id;
+  const ritorno = ritornoId == null ? null : tappe.find((t) => t.id === Number(ritornoId) && t !== tappe.at(-1)) ?? null;
   let tracciati: (Punto[] | null)[] | null = null;
+  let tracciatoRitorno: Punto[] | null = null;
   let frecce: { coordinate: Punto; rotazione: number }[] | null = null;
   if (lineePercorso.length && tappe.length > 1) {
-    frecce = d.forme.filter((f) => eSimbolo(f) && coloriPercorso.has(f.riempimento!)).map((f) => freccia(f.parti[0], T));
-    const esito = tracciaPercorso(lineePercorso, tappe.map((t) => t.at), frecce);
-    tracciati = esito.tracciati;
+    // tutte le frecce danno il verso al percorso; sulla carta restano quelle lontane dalle tappe (le punte
+    // alla fine di ogni tratto finirebbero sotto i segnaposto)
+    const tutte = d.forme.filter((f) => eFreccia(f) && coloriPercorso.has(f.riempimento!)).map((f) => freccia(f.parti[0], T));
+    const punti = [...tappe.map((t) => t.at), ...(ritorno ? [ritorno.at] : [])];
+    const esito = tracciaPercorso(lineePercorso, punti, tutte);
+    tracciati = esito.tracciati.slice(0, tappe.length - 1);
+    if (ritorno) tracciatoRitorno = esito.tracciati.at(-1) ?? null;
     avvisi.push(...esito.avvisi);
+    frecce = tutte.filter((f) => tappe.every((t) => kmTra(f.coordinate, t.at) > FRECCE_LONTANE_KM));
   }
 
   // 4. Nomi
@@ -359,7 +379,9 @@ export async function generaCartina(db: DatabaseSync, id: number): Promise<Esito
   // 5. Alone: veli sovrapposti, ognuno il mondo intero con un buco sempre più largo intorno ai dati
   const dati = unione([
     ...aree.map((a) => a.g),
-    ...(tracciati ?? []).filter((t): t is Punto[] => !!t && t.length > 1).map((t) => geometria({ type: 'LineString', coordinates: t })),
+    // le linee entrano ingrossate: l'unione di aree e linee darebbe una raccolta mista
+    ...[...(tracciati ?? []), tracciatoRitorno].filter((t): t is Punto[] => !!t && t.length > 1)
+      .map((t) => buffer(geometria({ type: 'LineString', coordinates: t }), 0.05)),
     ...nomi.map((n) => buffer(geometria({ type: 'Point', coordinates: [n[2], n[3]] }), 0.3)),
   ]);
   const mondo = [[-180, -89.9], [180, -89.9], [180, 89.9], [-180, 89.9], [-180, -89.9]];
@@ -380,13 +402,14 @@ export async function generaCartina(db: DatabaseSync, id: number): Promise<Esito
     const elencoLuoghi = luoghi(db);
     nomi.forEach(([categoria, testo, lng, lat, zoom, extra], posizione) => {
       const luogo = NOMI_DI_LUOGHI.includes(categoria as CategoriaNome) ? trovaLuogo(elencoLuoghi, testo) : null;
-      db.prepare(`INSERT INTO nomi (cartina_id, posizione, categoria, testo, sotto, lng, lat, zoom, angolo, luogo_id, origine)
-        VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, 'importato')`)
-        .run(id, posizione, categoria, testo, extra?.sotto ?? null, lng, lat, zoom, extra?.angolo ?? null, luogo?.id ?? null);
+      db.prepare(`INSERT INTO nomi (cartina_id, posizione, categoria, testo, sotto, lng, lat, zoom, angolo, luogo_id, anche_oggi, origine)
+        VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, 'importato')`)
+        .run(id, posizione, categoria, testo, extra?.sotto ?? null, lng, lat, zoom, extra?.angolo ?? null, luogo?.id ?? null, extra?.oggi === false ? 0 : null);
     });
     db.prepare('UPDATE cartine SET alone = ?, generata_il = ?, importata_il = ? WHERE id = ?')
       .run(JSON.stringify({ type: 'FeatureCollection', features: veli }), adesso(), adesso(), id);
     if (tracciati) tracciati.forEach((t, i) => db.prepare('UPDATE tappe SET tracciato = ? WHERE id = ?').run(t ? JSON.stringify(t) : null, tappe[i + 1].id));
+    if (tracciati) db.prepare('UPDATE cammini SET ritorno_tracciato = ? WHERE id = ?').run(tracciatoRitorno ? JSON.stringify(tracciatoRitorno) : null, k.camminoId);
     if (frecce) db.prepare('UPDATE cammini SET frecce = ? WHERE id = ?').run(JSON.stringify(frecce), k.camminoId);
     db.prepare('UPDATE cammini SET modificato_il = ? WHERE id = ?').run(adesso(), k.camminoId);
     registraModifica(db, {
@@ -431,11 +454,16 @@ function freccia(contorno: Punto[], T: (p: Punto) => Punto): { coordinate: Punto
 function componiNomi(db: DatabaseSync, k: DatiCartina, d: Disegno, testi: RigaTesto[], T: (p: Punto) => Punto, avvisi: string[]): Nome[] {
   const elencoLuoghi = luoghi(db);
   const simboli = d.forme.filter(eSimbolo).map((f): Punto => [(f.box[0] + f.box[2]) / 2, (f.box[1] + f.box[3]) / 2]);
-  const teste = new Map<string, { categoria: CategoriaNome; testo: string; pezzi: number[]; box: number[]; sotto: string[]; boxTotale: number[] }>();
+  const teste = new Map<string, { categoria: CategoriaNome; testo: string; pezzi: number[]; box: number[]; sotto: string[]; boxTotale: number[]; soloAllora: boolean }>();
   const unisci = (a: number[], b: number[]) => [Math.min(a[0], b[0]), Math.min(a[1], b[1]), Math.max(a[2], b[2]), Math.max(a[3], b[3])];
   for (const g of testi) {
     const u = g.uso;
-    if (u.uso === 'nome') teste.set(g.chiave, { categoria: u.categoria, testo: u.testo, pezzi: [...g.pezzi], box: [...g.box], sotto: [], boxTotale: [...g.box] });
+    if (u.uso === 'nome') {
+      teste.set(g.chiave, {
+        categoria: u.categoria, testo: u.testo, pezzi: [...g.pezzi], box: [...g.box], sotto: [], boxTotale: [...g.box],
+        soloAllora: u.oggi === false && NOMI_FISICI.includes(u.categoria),
+      });
+    }
     else if (u.uso === 'riga' || u.uso === 'sotto') {
       const t = teste.get(u.di);
       if (!t) continue;
@@ -449,8 +477,9 @@ function componiNomi(db: DatabaseSync, k: DatiCartina, d: Disegno, testi: RigaTe
   }
   const nomi: Nome[] = [];
   for (const t of teste.values()) {
-    const extra: { angolo?: number; sotto?: string } = {};
+    const extra: { angolo?: number; sotto?: string; oggi?: false } = {};
     if (t.sotto.length) extra.sotto = t.sotto.join('\n');
+    if (t.soloAllora) extra.oggi = false;
     let lng: number, lat: number;
     const centro: Punto = [(t.boxTotale[0] + t.boxTotale[2]) / 2, (t.boxTotale[1] + t.boxTotale[3]) / 2];
     if (NOMI_DI_LUOGHI.includes(t.categoria)) {

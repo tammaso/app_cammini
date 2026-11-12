@@ -27,6 +27,7 @@ export function leggiCammino(db: DatabaseSync, id: number): Cammino | undefined 
     id: Number(r.id), slug: String(r.slug), titolo: String(r.titolo), nome: String(r.nome), sottotitolo: opz(r.sottotitolo),
     globoLuogo: opz(r.globo_luogo), globoTesto: String(r.globo_testo), panoramicaTesto: String(r.panoramica_testo),
     etichette: json(r.etichette, []), frecce: json(r.frecce, []), ordine: Number(r.ordine),
+    ritornoTappaId: r.ritorno_tappa_id == null ? null : Number(r.ritorno_tappa_id),
     stato: String(r.stato) as Stato, modificatoIl: String(r.modificato_il),
   };
 }
@@ -53,7 +54,7 @@ export function etichetteDaTesto(righe: string): { etichette: Etichetta[]; error
 
 const CAMPI_CAMMINO = ['slug', 'titolo', 'nome', 'sottotitolo', 'globoLuogo', 'globoTesto', 'panoramicaTesto', 'etichette', 'ordine', 'stato'] as const;
 export type CampoCammino = (typeof CAMPI_CAMMINO)[number];
-export type DatiCammino = Omit<Cammino, 'id' | 'frecce' | 'modificatoIl'>;
+export type DatiCammino = Omit<Cammino, 'id' | 'frecce' | 'ritornoTappaId' | 'modificatoIl'>;
 
 export type EsitoModulo<D, K extends string> =
   | { ok: true; dati: D }
@@ -114,6 +115,21 @@ export function eliminaCammino(db: DatabaseSync, id: number): void {
       azione: 'eliminazione', oggetto: 'cammino', oggettoId: id, camminoId: id, titolo: cammino.titolo,
       descrizione: 'Cammino eliminato, con tappe e cartine', datiPrecedenti: { cammino, tappe },
     });
+  });
+}
+
+// Dopo l'ultima tappa il cammino può tornare a una tappa precedente (null: finisce all'ultima). Il tracciato
+// del ritorno si rifà alla prossima generazione della cartina.
+export function impostaRitorno(db: DatabaseSync, camminoId: number, tappaId: number | null): void {
+  const tappe = elencaTappe(db, camminoId);
+  const valida = tappaId != null && tappe.slice(0, -1).some((t) => t.id === tappaId);
+  const verso = valida ? tappe.find((t) => t.id === tappaId)! : null;
+  const c = leggiCammino(db, camminoId)!;
+  if ((c.ritornoTappaId ?? null) === (verso?.id ?? null)) return;
+  db.prepare('UPDATE cammini SET ritorno_tappa_id = ?, ritorno_tracciato = NULL, modificato_il = ? WHERE id = ?').run(verso?.id ?? null, adesso(), camminoId);
+  registraModifica(db, {
+    azione: 'modifica', oggetto: 'cammino', oggettoId: camminoId, camminoId, titolo: c.titolo,
+    descrizione: verso ? `Dopo l'ultima tappa il cammino torna a «${verso.nome}»` : "Il cammino finisce all'ultima tappa, senza ritorno",
   });
 }
 

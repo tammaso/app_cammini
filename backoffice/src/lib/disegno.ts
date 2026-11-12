@@ -12,6 +12,9 @@ export interface Forma {
   spessore: number; // della linea, in unità del foglio
   tratteggiato: boolean;
   box: Riquadro;
+  // simbolo (pallino, vetta, punta di freccia): lo decide l'estrazione, secondo la scala del disegno;
+  // manca nei disegni estratti prima, e allora vale la soglia fissa di 6 unità
+  simbolo?: boolean;
 }
 
 export interface Testo {
@@ -34,7 +37,24 @@ export interface Disegno {
 
 // Simboli: forme riempite piccole (pallini delle città, triangoli delle vette, punte di freccia). Non
 // sono aree: servono ad agganciare gli spilli, a mettere le città al loro posto e a trovare le frecce.
-export const eSimbolo = (f: Forma) => f.riempimento !== null && f.box[2] - f.box[0] < 6 && f.box[3] - f.box[1] < 6;
+export const eSimbolo = (f: Forma) => f.riempimento !== null && (f.simbolo ?? (f.box[2] - f.box[0] < 6 && f.box[3] - f.box[1] < 6));
+// Una punta di freccia è un simbolo a forma di triangolo: il triangolo più grande che ci sta dentro ne
+// copre quasi tutta l'area (in un pallino al massimo il 41%; nelle punte con la tacca dietro, più del 100%)
+export function eFreccia(f: Forma): boolean {
+  if (!eSimbolo(f) || !f.parti[0] || f.parti[0].length < 4) return false;
+  const c = f.parti[0], passo = Math.max(1, Math.floor(c.length / 24)), q = c.filter((_, i) => i % passo === 0);
+  const superficie = Math.abs(c.reduce((s, p, i) => { const r = c[(i + 1) % c.length]; return s + p[0] * r[1] - r[0] * p[1]; }, 0)) / 2;
+  if (superficie <= 0) return false;
+  let triangolo = 0;
+  for (let i = 0; i < q.length; i++) for (let j = i + 1; j < q.length; j++) for (let l = j + 1; l < q.length; l++) {
+    triangolo = Math.max(triangolo, Math.abs((q[j][0] - q[i][0]) * (q[l][1] - q[i][1]) - (q[l][0] - q[i][0]) * (q[j][1] - q[i][1])) / 2);
+  }
+  return triangolo / superficie > 0.75;
+}
+
+// La soglia dei simboli in proporzione alla cornice: 6 unità su un foglio A4 di Illustrator, 15 su un
+// disegno largo mille unità (dove i pallini delle città sono di 10)
+export const sogliaSimboli = (cornice: Riquadro) => Math.max(6, (cornice[2] - cornice[0]) * 0.015);
 
 // Una forma può avere riempimento e linea: ognuno ha la sua chiave di classificazione.
 export const chiaveArea = (f: Forma) => `area|${f.riempimento}|${Math.round(f.opacita * 100) / 100}`;
@@ -121,9 +141,12 @@ export type CategoriaNome = (typeof CATEGORIE_NOMI)[number];
 // Città e vette si scrivono dove sta il luogo (dall'anagrafe), non dove sta il testo sulla cartina
 export const NOMI_DI_LUOGHI: readonly CategoriaNome[] = ['capitale-antica', 'citta-antica', 'vetta'];
 
+// Geografia fisica: compare in ogni epoca, anche in «Oggi», salvo i nomi antichi (oggi: false)
+export const NOMI_FISICI: readonly CategoriaNome[] = ['regione', 'mare', 'vetta'];
+
 export type UsoTesto =
   | { uso: 'ignora' }
-  | { uso: 'nome'; categoria: CategoriaNome; testo: string } // testo: come si scrive nel portale
+  | { uso: 'nome'; categoria: CategoriaNome; testo: string; oggi?: false } // testo: come si scrive nel portale
   | { uso: 'riga'; testo: string; di: string } // riga successiva del nome `di` (la chiave del suo gruppo)
   | { uso: 'sotto'; testo: string; di: string }; // sottotitolo (o sua riga successiva) del nome `di`
 

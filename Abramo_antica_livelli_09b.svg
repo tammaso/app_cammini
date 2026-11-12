@@ -1,0 +1,246 @@
+<?xml version='1.0' encoding='UTF-8'?>
+<svg xmlns="http://www.w3.org/2000/svg" xmlns:inkscape="http://www.inkscape.org/namespaces/inkscape" width="1040" height="1110" viewBox="0 0 1040 1110">
+  <title>Il cammino di Abramo — carta antica, anteprima vettoriale 09b</title>
+  <desc>Ricostruzione vettoriale dal PNG approvato; solo carta antica. Bozza per controllo visivo. Nessuna immagine raster incorporata. Localizzazioni e percorsi schematici. Versione 09b (2026-11-12): aggiunto il livello 03b con l’area di Canaan e il riempimento degli ovali, ricalcati dallo screenshot approvato per il portale; il resto è identico alla 09.</desc>
+  <defs>
+    <clipPath id="riquadro-carta">
+      <rect x="16" y="73" width="1004" height="725"/>
+    </clipPath>
+    <linearGradient id="terra" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#fff9e7"/>
+      <stop offset="65%" stop-color="#fff3d5"/>
+      <stop offset="100%" stop-color="#fff8e7"/>
+    </linearGradient>
+    <linearGradient id="acqua" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#b5eaff"/>
+      <stop offset="55%" stop-color="#89d8fa"/>
+      <stop offset="100%" stop-color="#9ce0ff"/>
+    </linearGradient>
+    <linearGradient id="fertile" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#edf6ac"/>
+      <stop offset="60%" stop-color="#d7ed80"/>
+      <stop offset="100%" stop-color="#deef98"/>
+    </linearGradient>
+    <marker id="punta-rossa" viewBox="0 0 12 10" refX="10" refY="5" markerWidth="15" markerHeight="12.5" orient="auto" markerUnits="userSpaceOnUse">
+      <path d="M0 0L12 5L0 10L3 5Z" fill="#ff1717" stroke="white" stroke-width=".8"/>
+    </marker>
+    <path d="M676 295C750 333 834 407 899 477" fill="none" id="asse-mesopotamia"/>
+  </defs>
+  <g id="sfondo" inkscape:groupmode="layer" inkscape:label="01 · Sfondo e titolo">
+    <rect width="1040" height="1110" fill="white"/>
+    <text x="20" y="47" font-family="DejaVu Sans Condensed, sans-serif" font-size="46" fill="#060e3d" textLength="480" lengthAdjust="spacingAndGlyphs" font-weight="bold">Il cammino di Abramo</text>
+    <rect x="16" y="73" width="1004" height="725" fill="url(#terra)"/>
+  </g>
+  <g id="mari-coste" inkscape:groupmode="layer" inkscape:label="02 · Mari e coste" clip-path="url(#riquadro-carta)">
+    <path d="M949.0,73.5L1015.0,73.5L1018.5,77.0L1018.5,80.0L1019.5,81.0L1018.5,82.0L1019.5,83.0L1019.5,89.0L1018.5,90.0L1018.5,91.0L1019.5,92.0L1019.5,127.0L1018.5,128.0L1018.5,129.0L1019.5,130.0L1019.5,132.0L1016.0,135.5L1015.0,135.5L1014.0,134.5L1013.0,134.5L1012.0,133.5L1010.0,133.5L1009.0,132.5L1005.0,132.5L1004.0,131.5L1001.0,131.5L1000.0,130.5L998.0,130.5L992.0,124.5L991.0,124.5L986.0,129.5L980.0,129.5L979.0,128.5L978.0,128.5L971.5,122.0L971.5,121.0L970.5,120.0L970.5,118.0L967.0,114.5L966.0,114.5L965.0,113.5L964.0,113.5L960.5,110.0L960.5,109.0L956.5,105.0L956.5,97.0L955.5,96.0L955.5,95.0L947.5,87.0L947.5,86.0L946.5,85.0L946.5,84.0L945.5,83.0L945.5,77.0L949.0,73.5L949.0,73.5Z" fill="url(#acqua)" stroke="#079fec" stroke-width="1.3"/>
+    <path d="M38.0,141.5L39.0,141.5L40.0,142.5L45.0,142.5L49.5,147.0L46.0,150.5L45.0,150.5L44.0,151.5L41.0,151.5L39.0,149.5L38.0,149.5L31.0,156.5L26.0,156.5L25.0,157.5L20.0,157.5L16.5,154.0L16.5,147.0L20.0,143.5L21.0,144.5L23.0,144.5L24.0,145.5L29.0,145.5L30.0,144.5L31.0,144.5L32.0,143.5L34.0,143.5L35.0,142.5L37.0,142.5L38.0,141.5L38.0,141.5Z" fill="url(#acqua)" stroke="#079fec" stroke-width="1.3"/>
+    <path d="M368.0,144.5L371.0,144.5L372.0,145.5L373.0,145.5L374.0,146.5L375.0,146.5L380.5,152.0L380.5,153.0L381.5,154.0L381.5,163.0L380.5,164.0L380.5,165.0L367.5,178.0L367.5,179.0L365.5,181.0L365.5,183.0L364.5,184.0L364.5,191.0L365.5,192.0L365.5,193.0L366.5,194.0L366.5,195.0L367.5,196.0L367.5,198.0L368.5,199.0L368.5,206.0L367.5,207.0L367.5,209.0L366.5,210.0L366.5,211.0L365.5,212.0L365.5,213.0L363.5,215.0L363.5,216.0L361.5,218.0L361.5,219.0L360.5,220.0L360.5,221.0L359.5,222.0L359.5,225.0L358.5,226.0L358.5,230.0L357.5,231.0L357.5,240.0L358.5,241.0L358.5,244.0L357.5,245.0L357.5,249.0L356.5,250.0L356.5,251.0L355.5,252.0L355.5,253.0L354.5,254.0L354.5,255.0L353.5,256.0L353.5,258.0L352.5,259.0L352.5,261.0L351.5,262.0L351.5,275.0L350.5,276.0L350.5,278.0L348.5,280.0L348.5,281.0L346.5,283.0L346.5,284.0L345.5,285.0L345.5,286.0L344.5,287.0L344.5,288.0L343.5,289.0L343.5,290.0L342.5,291.0L342.5,293.0L341.5,294.0L341.5,295.0L340.5,296.0L340.5,297.0L339.5,298.0L339.5,299.0L338.5,300.0L338.5,302.0L337.5,303.0L337.5,306.0L336.5,307.0L336.5,310.0L335.5,311.0L335.5,312.0L330.5,317.0L330.5,318.0L323.5,325.0L323.5,326.0L313.0,336.5L312.0,336.5L300.5,348.0L300.5,349.0L298.5,351.0L298.5,352.0L297.5,353.0L297.5,354.0L295.5,356.0L295.5,357.0L294.5,358.0L294.5,359.0L293.5,360.0L293.5,361.0L292.5,362.0L292.5,363.0L291.5,364.0L291.5,365.0L290.5,366.0L290.5,367.0L289.5,368.0L289.5,369.0L288.5,370.0L288.5,371.0L287.5,372.0L287.5,374.0L286.5,375.0L286.5,377.0L285.5,378.0L285.5,379.0L284.5,380.0L284.5,381.0L283.5,382.0L283.5,383.0L282.5,384.0L282.5,385.0L281.5,386.0L281.5,387.0L280.5,388.0L280.5,389.0L279.5,390.0L279.5,391.0L278.5,392.0L278.5,393.0L277.5,394.0L277.5,396.0L276.5,397.0L276.5,398.0L275.5,399.0L275.5,400.0L274.5,401.0L274.5,404.0L273.5,405.0L273.5,406.0L272.5,407.0L272.5,410.0L271.5,411.0L271.5,413.0L270.5,414.0L270.5,416.0L269.5,417.0L269.5,419.0L268.5,420.0L268.5,422.0L267.5,423.0L267.5,425.0L266.5,426.0L266.5,428.0L265.5,429.0L265.5,431.0L264.5,432.0L264.5,434.0L263.5,435.0L263.5,437.0L262.5,438.0L262.5,440.0L261.5,441.0L261.5,442.0L260.5,443.0L260.5,445.0L259.5,446.0L259.5,449.0L258.5,450.0L258.5,452.0L257.5,453.0L257.5,455.0L256.5,456.0L256.5,458.0L255.5,459.0L255.5,461.0L254.5,462.0L254.5,464.0L253.5,465.0L253.5,467.0L252.5,468.0L252.5,470.0L251.5,471.0L251.5,473.0L250.5,474.0L250.5,478.0L249.5,479.0L249.5,485.0L248.5,486.0L248.5,501.0L247.5,502.0L247.5,505.0L246.5,506.0L246.5,508.0L245.5,509.0L245.5,510.0L244.5,511.0L244.5,513.0L243.5,514.0L243.5,516.0L242.5,517.0L242.5,521.0L241.5,522.0L241.5,523.0L240.5,524.0L240.5,525.0L236.0,529.5L235.0,529.5L234.0,530.5L233.0,530.5L232.0,531.5L224.0,531.5L223.0,530.5L220.0,530.5L219.0,529.5L217.0,529.5L216.0,528.5L214.0,528.5L212.0,526.5L211.0,526.5L206.0,521.5L195.0,521.5L192.0,518.5L191.0,518.5L185.5,513.0L185.5,512.0L183.5,510.0L183.5,509.0L174.0,499.5L169.0,499.5L168.0,498.5L166.0,498.5L161.0,493.5L160.0,493.5L159.0,492.5L152.0,492.5L151.0,493.5L145.0,493.5L141.0,497.5L139.0,497.5L138.0,496.5L135.0,496.5L134.0,497.5L133.0,497.5L130.0,500.5L129.0,500.5L127.0,498.5L126.0,498.5L125.0,497.5L120.0,497.5L119.0,498.5L115.0,498.5L114.0,497.5L111.0,497.5L110.0,496.5L105.0,496.5L104.0,497.5L103.0,497.5L100.0,500.5L99.0,499.5L96.0,502.5L95.0,502.5L90.5,507.0L90.5,508.0L88.5,510.0L88.5,511.0L85.5,514.0L85.5,515.0L83.5,517.0L83.5,518.0L81.5,520.0L81.5,521.0L78.0,524.5L77.0,524.5L76.0,525.5L75.0,525.5L73.0,527.5L72.0,527.5L71.0,528.5L70.0,528.5L69.0,529.5L57.0,529.5L56.0,528.5L55.0,528.5L54.0,527.5L52.0,527.5L49.0,524.5L48.0,525.5L47.0,524.5L46.0,524.5L44.0,522.5L43.0,522.5L42.0,521.5L39.0,521.5L38.0,520.5L32.0,520.5L31.0,521.5L30.0,521.5L29.0,522.5L28.0,522.5L27.0,523.5L26.0,523.5L25.0,524.5L20.0,524.5L16.5,521.0L16.5,212.0L19.5,209.0L18.5,208.0L25.0,201.5L26.0,201.5L29.5,198.0L29.5,195.0L30.5,194.0L30.5,192.0L31.5,191.0L31.5,190.0L28.0,186.5L26.0,186.5L20.0,192.5L16.5,189.0L16.5,166.0L20.0,162.5L24.0,162.5L25.0,161.5L27.0,161.5L28.0,160.5L29.0,160.5L36.0,167.5L38.0,165.5L39.0,165.5L41.0,163.5L42.0,163.5L46.0,159.5L47.0,159.5L48.0,158.5L50.0,158.5L51.0,159.5L52.0,159.5L54.0,161.5L55.0,161.5L56.0,162.5L58.0,162.5L59.0,163.5L62.0,163.5L63.0,164.5L68.0,164.5L69.0,163.5L70.0,163.5L72.0,161.5L79.0,161.5L80.0,160.5L81.0,160.5L84.0,157.5L86.0,157.5L89.5,161.0L86.5,164.0L86.5,165.0L85.5,166.0L85.5,167.0L86.5,168.0L86.5,169.0L93.0,175.5L96.0,175.5L101.5,181.0L101.5,183.0L106.0,187.5L108.0,187.5L109.0,188.5L118.0,188.5L119.0,187.5L122.0,187.5L123.0,186.5L125.0,186.5L126.0,185.5L127.0,185.5L128.0,184.5L129.0,184.5L132.0,181.5L136.0,181.5L137.0,182.5L140.0,182.5L141.0,181.5L142.0,181.5L146.5,177.0L146.5,175.0L147.5,174.0L147.5,164.0L146.5,163.0L147.5,162.0L147.5,159.0L151.0,155.5L152.0,155.5L153.0,154.5L159.0,154.5L160.0,155.5L162.0,155.5L163.0,156.5L165.0,156.5L167.0,158.5L168.0,158.5L169.0,159.5L170.0,159.5L171.0,160.5L172.0,160.5L173.0,161.5L176.0,161.5L177.0,162.5L178.0,161.5L184.0,161.5L185.0,162.5L196.0,162.5L200.5,167.0L200.5,168.0L201.5,169.0L201.5,170.0L207.0,175.5L209.0,175.5L210.0,176.5L212.0,176.5L213.0,177.5L214.0,177.5L222.0,185.5L223.0,185.5L224.0,186.5L227.0,186.5L228.0,187.5L233.0,187.5L234.0,188.5L237.0,188.5L238.0,189.5L253.0,189.5L254.0,188.5L255.0,188.5L256.0,187.5L257.0,187.5L258.0,186.5L260.0,186.5L261.0,185.5L267.0,185.5L272.0,180.5L273.0,180.5L274.0,179.5L275.0,179.5L278.5,176.0L278.5,175.0L289.5,164.0L289.5,163.0L290.5,162.0L290.5,161.0L302.0,149.5L307.0,149.5L309.0,151.5L310.0,151.5L312.0,153.5L318.0,153.5L324.0,159.5L328.0,159.5L329.0,160.5L330.0,160.5L332.0,162.5L333.0,162.5L335.0,164.5L336.0,164.5L337.0,165.5L338.0,165.5L339.0,166.5L340.0,166.5L348.0,158.5L354.0,158.5L358.5,154.0L358.5,153.0L359.5,152.0L359.5,151.0L363.0,147.5L364.0,147.5L366.0,145.5L367.0,145.5L368.0,144.5L368.0,144.5Z" fill="url(#acqua)" stroke="#079fec" stroke-width="1.3"/>
+    <path d="M966.0,573.5L968.0,573.5L972.5,578.0L972.5,579.0L976.0,582.5L982.0,582.5L986.5,587.0L986.5,588.0L991.0,592.5L992.0,592.5L993.0,593.5L1000.0,593.5L1001.0,592.5L1002.0,592.5L1010.0,584.5L1015.0,584.5L1019.5,589.0L1019.5,793.0L1016.0,796.5L997.0,796.5L986.5,786.0L986.5,785.0L983.0,781.5L982.0,781.5L981.0,780.5L979.0,780.5L978.0,779.5L976.0,779.5L975.0,778.5L974.0,778.5L968.0,772.5L967.0,772.5L966.0,771.5L964.0,771.5L959.5,767.0L959.5,766.0L953.5,760.0L953.5,756.0L954.5,755.0L954.5,754.0L955.5,753.0L955.5,752.0L956.5,751.0L949.5,744.0L950.5,743.0L947.5,740.0L947.5,739.0L946.5,738.0L946.5,734.0L941.5,729.0L941.5,727.0L939.5,725.0L940.5,724.0L935.5,719.0L935.5,717.0L931.0,712.5L930.0,712.5L929.0,711.5L928.0,711.5L927.0,710.5L922.0,710.5L917.5,706.0L917.5,705.0L916.5,704.0L916.5,702.0L915.5,701.0L915.5,687.0L914.5,686.0L914.5,684.0L913.5,683.0L913.5,681.0L905.5,673.0L905.5,672.0L906.5,671.0L902.0,666.5L901.0,667.5L900.0,666.5L899.0,666.5L895.5,663.0L895.5,662.0L893.5,660.0L893.5,659.0L889.5,655.0L889.5,654.0L888.5,653.0L889.5,652.0L889.5,651.0L892.5,648.0L891.5,647.0L892.5,646.0L892.5,645.0L893.5,644.0L893.5,643.0L890.0,639.5L888.0,639.5L887.0,638.5L885.0,638.5L884.0,637.5L877.0,637.5L875.0,635.5L874.0,635.5L869.5,631.0L869.5,630.0L879.0,620.5L885.0,620.5L886.0,621.5L887.0,620.5L888.0,620.5L889.0,619.5L890.0,619.5L891.0,618.5L893.0,618.5L894.0,619.5L895.0,619.5L898.5,616.0L898.5,615.0L894.5,611.0L894.5,606.0L899.0,601.5L900.0,601.5L901.0,600.5L907.0,600.5L908.0,599.5L909.0,599.5L912.0,596.5L913.0,596.5L914.0,595.5L919.0,595.5L920.0,596.5L924.0,596.5L925.0,597.5L926.0,597.5L927.0,596.5L928.0,596.5L936.0,588.5L942.0,588.5L943.0,589.5L945.0,587.5L946.0,587.5L950.0,591.5L952.0,589.5L953.0,589.5L954.0,590.5L955.0,590.5L956.0,589.5L959.0,589.5L962.5,586.0L962.5,585.0L961.5,584.0L961.5,579.0L962.5,578.0L962.5,577.0L966.0,573.5L966.0,573.5Z" fill="url(#acqua)" stroke="#079fec" stroke-width="1.3"/>
+    <path d="M207 610C203 608 202 612 204 619C205 623 203 626 207 632C210 637 208 640 212 646C215 651 213 655 218 662C220 665 219 670 223 674C227 679 226 683 231 689C234 692 234 697 239 702C244 706 243 712 247 717C251 722 251 728 256 733C259 738 260 743 264 749C267 754 266 759 270 765C273 771 273 777 277 782C278 788 280 793 281 798H424C413 791 404 790 398 785C393 781 386 782 381 776C376 773 369 773 364 768C359 766 352 767 348 762C344 758 337 759 332 754C327 751 322 752 317 748C312 745 306 744 303 738C304 732 307 728 307 721C306 717 310 714 310 708C309 703 313 698 314 692C314 686 317 682 317 676C317 670 321 665 321 659C322 653 324 649 325 643C327 638 329 630 326 626C321 620 318 631 318 636C317 642 314 646 314 652C313 658 310 662 310 668C310 673 306 678 306 684C305 689 302 693 302 699C301 705 296 709 295 715C292 720 291 726 286 730C281 728 280 721 275 718C272 715 272 711 268 708C264 704 265 700 261 696C257 691 258 687 254 683C251 679 250 674 247 670C243 666 244 661 240 657C236 653 236 649 233 645C230 640 228 637 227 632C225 628 222 626 221 621C218 616 215 610 211 609C209 608 208 609 207 610Z" fill="url(#acqua)" stroke="#079fec" stroke-width="1.3" id="mar-rosso-golfi-sinai" stroke-linejoin="round"/>
+    <path d="M213 255L219 249L236 245L252 236L269 229L288 219L300 213L294 223L283 235L277 244L267 250L261 260L251 268L240 271L230 268L220 267Z" fill="url(#terra)" stroke="#079fec" stroke-width="1.3"/>
+  </g>
+  <g id="fascia-fertile" inkscape:groupmode="layer" inkscape:label="03 · Mezzaluna fertile" clip-path="url(#riquadro-carta)">
+    <path d="M342 516C332 438 340 344 360 268C382 182 422 131 484 116C545 95 621 102 679 140C719 181 768 235 816 285C837 301 827 320 849 338C867 351 877 363 878 388C885 416 882 441 903 465C919 482 930 491 942 503L958 599L896 538C876 513 855 484 826 455C803 432 780 409 748 387C721 367 695 350 656 322C635 307 626 280 598 267C574 254 560 227 529 226C483 213 480 199 474 182C448 233 420 277 399 340C378 409 374 478 365 527Z" fill="url(#fertile)" opacity=".78"/>
+  </g>
+  <g id="aree-ricalcate" inkscape:groupmode="layer" inkscape:label="03b · Canaan e aree non precisate (ricalcate dallo screenshot)" clip-path="url(#riquadro-carta)">
+    <path id="area-canaan" d="M236.6 535.4L236.7 543.5L286.6 543.5L288.2 539.7L295.4 538.8L297.2 539.9L297.6 543L327.3 528.8L333.6 522.4L341.1 482.3L344.6 449.8L346.1 412.1L355.1 319.4L340.4 314.5L339.6 320.1L330.6 321.9L327.9 327.7L312.6 338.9L310 343.7L301.6 351L292.6 367L288.5 380L283.6 387.1L280.6 397.6L278.6 399.1L277.5 406.8L274.6 409.1L270.7 426.4L268.6 428.2L266.5 438.2L262.6 445.2L262.5 450.6L260.6 452.2L258.7 461.9L256.6 464.3L256.6 469.4L254.6 471.3L254.6 477.4L252.6 479.3L252.6 486.1L250.6 490.3L250.6 505.2L242.6 526.4L242.5 532.5Z" fill="#fbe39a"/>
+    <ellipse id="area-negheb" cx="336" cy="580" rx="53" ry="31" fill="#fde2ad"/>
+    <ellipse id="area-egitto" cx="145" cy="582" rx="53" ry="37" fill="#fde2ad"/>
+  </g>
+  <g id="idrografia" inkscape:groupmode="layer" inkscape:label="04 · Fiumi e Mare Salato" clip-path="url(#riquadro-carta)">
+    <path d="M584 73C586 88 604 87 614 95C639 103 657 88 670 100C683 115 674 124 687 137L714 170C745 207 783 248 816 285C837 301 827 320 849 338C867 351 877 363 878 388C885 416 882 441 903 465C919 482 930 491 942 503L946 509L958 599" fill="none" stroke="#009ff0" stroke-width="2.4" stroke-linejoin="round" stroke-linecap="round"/>
+    <path d="M141 798C140 773 150 750 150 727C151 696 146 670 150 644C155 621 145 602 143 583C139 560 130 543 123 526C119 516 116 505 112 497 M143 583C148 564 157 548 167 532C174 522 178 513 181 508" fill="none" stroke="#009ff0" stroke-width="2.4" stroke-linejoin="round" stroke-linecap="round"/>
+    <path d="M143 583C143 560 139 540 135 520C133 511 131 504 130 498" fill="none" stroke="#009ff0" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+    <path d="M143 583C147 558 149 535 151 516L153 495" fill="none" stroke="#009ff0" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+    <path d="M365 472C370 475 369 485 368 493L367 506L363 520L360 525L356 517L356 506L354 501L356 489L359 478Z" fill="url(#acqua)" stroke="#009ff0" stroke-width="1.4"/>
+    <path d="M362 472C362 449 358 431 364 415C369 400 371 382 369 363" fill="none" stroke="#009ff0" stroke-width="1.8"/>
+  </g>
+  <g id="percorsi" inkscape:groupmode="layer" inkscape:label="05 · Cammino e frecce" clip-path="url(#riquadro-carta)">
+    <g id="01-ur-carran">
+      <path d="M908 525C857 474 827 419 773 378C718 335 649 310 618 268C593 238 555 238 548 204L530 143" fill="none" stroke="#fffdf4" stroke-width="5.5" stroke-linecap="round" stroke-linejoin="round"/>
+      <path d="M908 525C857 474 827 419 773 378C718 335 649 310 618 268C593 238 555 238 548 204L530 143" fill="none" stroke="#ff1717" stroke-width="3.1" stroke-dasharray="7 4" stroke-linecap="round" stroke-linejoin="round" marker-end="url(#punta-rossa)"/>
+    </g>
+    <g id="02-carran-sichem">
+      <path d="M530 143L437 181C408 195 393 229 382 263C363 315 344 363 344 423" fill="none" stroke="#fffdf4" stroke-width="5.5" stroke-linecap="round" stroke-linejoin="round"/>
+      <path d="M530 143L437 181C408 195 393 229 382 263C363 315 344 363 344 423" fill="none" stroke="#ff1717" stroke-width="3.1" stroke-dasharray="7 4" stroke-linecap="round" stroke-linejoin="round" marker-end="url(#punta-rossa)"/>
+    </g>
+    <g id="03-sichem-betel">
+      <path d="M344 423L340 454" fill="none" stroke="#fffdf4" stroke-width="5.5" stroke-linecap="round" stroke-linejoin="round"/>
+      <path d="M344 423L340 454" fill="none" stroke="#ff1717" stroke-width="3.1" stroke-dasharray="7 4" stroke-linecap="round" stroke-linejoin="round" marker-end="url(#punta-rossa)"/>
+    </g>
+    <g id="04-betel-negheb">
+      <path d="M340 454C331 474 317 506 304 530L315 573" fill="none" stroke="#fffdf4" stroke-width="5.5" stroke-linecap="round" stroke-linejoin="round"/>
+      <path d="M340 454C331 474 317 506 304 530L315 573" fill="none" stroke="#ff1717" stroke-width="3.1" stroke-dasharray="7 4" stroke-linecap="round" stroke-linejoin="round" marker-end="url(#punta-rossa)"/>
+    </g>
+    <g id="05-negheb-egitto">
+      <path d="M315 573C290 553 260 548 226 555C187 563 163 574 144 583" fill="none" stroke="#fffdf4" stroke-width="5.5" stroke-linecap="round" stroke-linejoin="round"/>
+      <path d="M315 573C290 553 260 548 226 555C187 563 163 574 144 583" fill="none" stroke="#ff1717" stroke-width="3.1" stroke-dasharray="7 4" stroke-linecap="round" stroke-linejoin="round" marker-end="url(#punta-rossa)"/>
+    </g>
+    <g id="06-egitto-negheb">
+      <path d="M150 591C185 586 214 572 249 573C279 573 296 583 315 583" fill="none" stroke="#fffdf4" stroke-width="5.5" stroke-linecap="round" stroke-linejoin="round"/>
+      <path d="M150 591C185 586 214 572 249 573C279 573 296 583 315 583" fill="none" stroke="#ff1717" stroke-width="3.1" stroke-dasharray="7 4" stroke-linecap="round" stroke-linejoin="round" marker-end="url(#punta-rossa)"/>
+    </g>
+    <g id="07-negheb-betel">
+      <path d="M315 583C334 555 345 513 351 482L351 454" fill="none" stroke="#fffdf4" stroke-width="5.5" stroke-linecap="round" stroke-linejoin="round"/>
+      <path d="M315 583C334 555 345 513 351 482L351 454" fill="none" stroke="#ff1717" stroke-width="3.1" stroke-dasharray="7 4" stroke-linecap="round" stroke-linejoin="round" marker-end="url(#punta-rossa)"/>
+    </g>
+    <g id="08-betel-mamre">
+      <path d="M351 454C370 462 351 482 331 496" fill="none" stroke="#fffdf4" stroke-width="5.5" stroke-linecap="round" stroke-linejoin="round"/>
+      <path d="M351 454C370 462 351 482 331 496" fill="none" stroke="#ff1717" stroke-width="3.1" stroke-dasharray="7 4" stroke-linecap="round" stroke-linejoin="round" marker-end="url(#punta-rossa)"/>
+    </g>
+    <g id="09-mamre-bersabea">
+      <path d="M331 496L303 521" fill="none" stroke="#fffdf4" stroke-width="5.5" stroke-linecap="round" stroke-linejoin="round"/>
+      <path d="M331 496L303 521" fill="none" stroke="#ff1717" stroke-width="3.1" stroke-dasharray="7 4" stroke-linecap="round" stroke-linejoin="round" marker-end="url(#punta-rossa)"/>
+    </g>
+    <g id="10-bersabea-moria">
+      <path d="M303 521C307 504 318 480 336 472" fill="none" stroke="#fffdf4" stroke-width="5.5" stroke-linecap="round" stroke-linejoin="round"/>
+      <path d="M303 521C307 504 318 480 336 472" fill="none" stroke="#ff1717" stroke-width="3.1" stroke-dasharray="4 3" stroke-linecap="round" stroke-linejoin="round" marker-end="url(#punta-rossa)"/>
+    </g>
+    <g id="11-moria-bersabea">
+      <path d="M336 472C346 488 326 516 303 521" fill="none" stroke="#fffdf4" stroke-width="5.5" stroke-linecap="round" stroke-linejoin="round"/>
+      <path d="M336 472C346 488 326 516 303 521" fill="none" stroke="#ff1717" stroke-width="3.1" stroke-dasharray="4 3" stroke-linecap="round" stroke-linejoin="round" marker-end="url(#punta-rossa)"/>
+    </g>
+    <path d="M181 568L157 579" fill="none" stroke="#ff1717" stroke-width="2.9" marker-end="url(#punta-rossa)"/>
+    <path d="M164 589L191 581" fill="none" stroke="#ff1717" stroke-width="2.9" marker-end="url(#punta-rossa)"/>
+    <path d="M764 373L720 341" fill="none" stroke="#ff1717" stroke-width="2.9" marker-end="url(#punta-rossa)"/>
+    <path d="M613 265L590 244" fill="none" stroke="#ff1717" stroke-width="2.9" marker-end="url(#punta-rossa)"/>
+    <path d="M432 184L418 195" fill="none" stroke="#ff1717" stroke-width="2.9" marker-end="url(#punta-rossa)"/>
+    <path d="M384 257L374 282" fill="none" stroke="#ff1717" stroke-width="2.9" marker-end="url(#punta-rossa)"/>
+    <path d="M511 73L509 81L479 94L469 125C456 151 471 166 474 182C483 213 498 224 529 226C560 227 574 254 598 267C626 280 635 307 656 322C695 350 721 367 748 387C780 409 803 432 826 455C855 484 876 513 896 538L958 599" fill="none" stroke="#009ff0" stroke-width="2.4" stroke-linejoin="round" stroke-linecap="round" id="corso-eufrate-continuo"/>
+  </g>
+  <g id="riferimenti" inkscape:groupmode="layer" inkscape:label="06 · Nomi geografici e politici" clip-path="url(#riquadro-carta)">
+    <text x="720" y="110" font-family="DejaVu Sans Condensed, sans-serif" font-size="22" fill="#0739cf" font-weight="bold">DOMINIO DI</text>
+    <text x="720" y="134" font-family="DejaVu Sans Condensed, sans-serif" font-size="22" fill="#0739cf" font-weight="bold">SHAMSHI-ADAD</text>
+    <text x="455" y="200" font-family="DejaVu Sans Condensed, sans-serif" font-size="40" fill="#145600" transform="rotate(18 455 200)" font-weight="bold">MEZZALUNA FERTILE</text>
+    <text x="0" y="0" font-family="DejaVu Sans Condensed, sans-serif" font-size="26" fill="#07536b" letter-spacing="5" font-weight="bold"><textPath href="#asse-mesopotamia" startOffset="0%" textLength="348" lengthAdjust="spacing">MESOPOTAMIA</textPath></text>
+    <text x="287" y="523" font-family="DejaVu Sans Condensed, sans-serif" font-size="33" fill="#e97500" transform="rotate(-72 287 523)" font-weight="bold">CANAAN</text>
+    <text x="221" y="639" font-family="DejaVu Sans Condensed, sans-serif" font-size="25" fill="#175d13" font-weight="bold">SINAI</text>
+    <text x="540" y="347" font-family="DejaVu Sans Condensed, sans-serif" font-size="23" fill="#ca0052" font-weight="bold">REGNO DI</text>
+    <text x="540" y="372" font-family="DejaVu Sans Condensed, sans-serif" font-size="23" fill="#ca0052" font-weight="bold">MARI</text>
+    <text x="626" y="397" font-family="DejaVu Sans Condensed, sans-serif" font-size="23" fill="#8000a8" font-weight="bold">REGNO DI</text>
+    <text x="626" y="422" font-family="DejaVu Sans Condensed, sans-serif" font-size="23" fill="#8000a8" font-weight="bold">BABILONIA</text>
+    <text x="761" y="569" font-family="DejaVu Sans Condensed, sans-serif" font-size="24" fill="#006675" font-weight="bold">REGNO DI</text>
+    <text x="761" y="595" font-family="DejaVu Sans Condensed, sans-serif" font-size="24" fill="#006675" font-weight="bold">LARSA</text>
+    <text x="38" y="699" font-family="DejaVu Sans Condensed, sans-serif" font-size="27" fill="#944008" font-weight="bold">REGNO</text>
+    <text x="38" y="727" font-family="DejaVu Sans Condensed, sans-serif" font-size="27" fill="#944008" font-weight="bold">D’EGITTO</text>
+    <text x="252" y="253" font-family="DejaVu Sans Condensed, sans-serif" font-size="17" fill="#83400e" text-anchor="middle" transform="rotate(-25 252 253)" font-weight="bold">Alashiya</text>
+  </g>
+  <g id="nomi-acque" inkscape:groupmode="layer" inkscape:label="07 · Nomi delle acque" clip-path="url(#riquadro-carta)">
+    <text x="145" y="339" font-family="DejaVu Sans Condensed, sans-serif" font-size="28" fill="#001ac6" text-anchor="middle" font-style="italic">Mar</text>
+    <text x="145" y="371" font-family="DejaVu Sans Condensed, sans-serif" font-size="28" fill="#001ac6" text-anchor="middle" font-style="italic">Mediterraneo</text>
+    <text x="488" y="253" font-family="DejaVu Sans Condensed, sans-serif" font-size="27" fill="#001ac6" transform="rotate(23 488 253)" font-style="italic">Eufrate</text>
+    <text x="868" y="338" font-family="DejaVu Sans Condensed, sans-serif" font-size="27" fill="#001ac6" transform="rotate(71 868 338)" font-style="italic">Tigri</text>
+    <text x="172" y="684" font-family="DejaVu Sans Condensed, sans-serif" font-size="26" fill="#001ac6" transform="rotate(-86 172 684)" font-style="italic">Nilo</text>
+    <text x="345" y="789" font-family="DejaVu Sans Condensed, sans-serif" font-size="22" fill="#001ac6" text-anchor="middle" font-style="italic">Mar Rosso</text>
+    <text x="961" y="642" font-family="DejaVu Sans Condensed, sans-serif" font-size="25" fill="#001ac6" text-anchor="middle" font-style="italic">Mare</text>
+    <text x="961" y="670" font-family="DejaVu Sans Condensed, sans-serif" font-size="25" fill="#001ac6" text-anchor="middle" font-style="italic">Inferiore</text>
+    <text x="490" y="680" font-family="DejaVu Sans Condensed, sans-serif" font-size="19" fill="#001ac6" font-style="italic">Mare Salato</text>
+    <path d="M484 673L370 511" fill="none" stroke="#555555" stroke-width="0.9"/>
+  </g>
+  <g id="citta" inkscape:groupmode="layer" inkscape:label="08 · Città dell’epoca" clip-path="url(#riquadro-carta)">
+    <g id="citta-assur">
+      <circle cx="797" cy="198" r="5" fill="#111" stroke="white" stroke-width="1.4"/>
+      <text x="807" y="199" font-family="DejaVu Sans Condensed, sans-serif" font-size="24" fill="#080a0a">Assur</text>
+    </g>
+    <g id="citta-mari">
+      <circle cx="627" cy="313" r="5" fill="#111" stroke="white" stroke-width="1.4"/>
+      <text x="569" y="320" font-family="DejaVu Sans Condensed, sans-serif" font-size="24" fill="#080a0a">Mari</text>
+    </g>
+    <g id="citta-biblo">
+      <circle cx="341" cy="317" r="5" fill="#111" stroke="white" stroke-width="1.4"/>
+      <text x="276" y="313" font-family="DejaVu Sans Condensed, sans-serif" font-size="24" fill="#080a0a">Biblo</text>
+    </g>
+    <g id="citta-babilonia">
+      <circle cx="800" cy="444" r="5" fill="#111" stroke="white" stroke-width="1.4"/>
+      <text x="691" y="451" font-family="DejaVu Sans Condensed, sans-serif" font-size="24" fill="#080a0a">Babilonia</text>
+    </g>
+    <g id="citta-larsa">
+      <circle cx="869" cy="493" r="5" fill="#111" stroke="white" stroke-width="1.4"/>
+      <text x="787" y="492" font-family="DejaVu Sans Condensed, sans-serif" font-size="24" fill="#080a0a">Larsa</text>
+    </g>
+    <g id="citta-menfi">
+      <circle cx="143" cy="583" r="5" fill="#111" stroke="white" stroke-width="1.4"/>
+      <text x="68" y="566" font-family="DejaVu Sans Condensed, sans-serif" font-size="24" fill="#080a0a">Menfi</text>
+    </g>
+    <circle cx="336" cy="472" r="4" fill="#111" stroke="white" stroke-width="1.4"/>
+  </g>
+  <g id="tappe" inkscape:groupmode="layer" inkscape:label="09 · Nove tappe e richiami" clip-path="url(#riquadro-carta)">
+    <circle cx="909" cy="525" r="14" fill="#fffbef" stroke="#ff1717" stroke-width="2"/>
+    <text x="909" y="531" font-family="DejaVu Sans Condensed, sans-serif" font-size="21" fill="#ff1717" text-anchor="middle" font-weight="bold">1</text>
+    <text x="933" y="522" font-family="DejaVu Sans Condensed, sans-serif" font-size="24" fill="#080a0a" font-weight="bold">Ur dei</text>
+    <text x="933" y="548" font-family="DejaVu Sans Condensed, sans-serif" font-size="24" fill="#080a0a" font-weight="bold">Caldei</text>
+    <circle cx="530" cy="143" r="14" fill="#fffbef" stroke="#ff1717" stroke-width="2"/>
+    <text x="530" y="149" font-family="DejaVu Sans Condensed, sans-serif" font-size="21" fill="#ff1717" text-anchor="middle" font-weight="bold">2</text>
+    <text x="552" y="151" font-family="DejaVu Sans Condensed, sans-serif" font-size="27" fill="#080a0a" font-weight="bold">Carran</text>
+    <circle cx="344" cy="423" r="4.5" fill="#ff1717" stroke="white" stroke-width="1.4"/>
+    <path d="M349 423L395 409" fill="none" stroke="#666" stroke-width="0.9"/>
+    <circle cx="410" cy="409" r="14" fill="#fffbef" stroke="#ff1717" stroke-width="2"/>
+    <text x="410" y="415" font-family="DejaVu Sans Condensed, sans-serif" font-size="21" fill="#ff1717" text-anchor="middle" font-weight="bold">3</text>
+    <text x="433" y="416" font-family="DejaVu Sans Condensed, sans-serif" font-size="24" fill="#080a0a" font-weight="bold">Sichem</text>
+    <circle cx="340" cy="454" r="4.5" fill="#ff1717" stroke="white" stroke-width="1.4"/>
+    <path d="M345 454L395 444" fill="none" stroke="#666" stroke-width="0.9"/>
+    <circle cx="410" cy="444" r="14" fill="#fffbef" stroke="#ff1717" stroke-width="2"/>
+    <text x="410" y="450" font-family="DejaVu Sans Condensed, sans-serif" font-size="21" fill="#ff1717" text-anchor="middle" font-weight="bold">4</text>
+    <text x="433" y="451" font-family="DejaVu Sans Condensed, sans-serif" font-size="24" fill="#080a0a" font-weight="bold">Tra Betel e Ai</text>
+    <circle cx="336" cy="472" r="4.5" fill="#ff1717" stroke="white" stroke-width="1.4"/>
+    <path d="M341 472L395 478" fill="none" stroke="#666" stroke-width="0.9"/>
+    <circle cx="410" cy="478" r="14" fill="#fffbef" stroke="#ff1717" stroke-width="2"/>
+    <text x="410" y="484" font-family="DejaVu Sans Condensed, sans-serif" font-size="21" fill="#ff1717" text-anchor="middle" font-weight="bold">9</text>
+    <text x="433" y="485" font-family="DejaVu Sans Condensed, sans-serif" font-size="24" fill="#080a0a" font-weight="bold">Mòria*</text>
+    <circle cx="331" cy="496" r="4.5" fill="#ff1717" stroke="white" stroke-width="1.4"/>
+    <path d="M336 496L395 537" fill="none" stroke="#666" stroke-width="0.9"/>
+    <circle cx="410" cy="537" r="14" fill="#fffbef" stroke="#ff1717" stroke-width="2"/>
+    <text x="410" y="543" font-family="DejaVu Sans Condensed, sans-serif" font-size="21" fill="#ff1717" text-anchor="middle" font-weight="bold">7</text>
+    <text x="433" y="544" font-family="DejaVu Sans Condensed, sans-serif" font-size="24" fill="#080a0a" font-weight="bold">Mamre</text>
+    <text x="433" y="569" font-family="DejaVu Sans Condensed, sans-serif" font-size="24" fill="#080a0a" font-weight="bold">presso Ebron</text>
+    <circle cx="303" cy="521" r="4.5" fill="#ff1717" stroke="white" stroke-width="1.4"/>
+    <path d="M308 521L395 590" fill="none" stroke="#666" stroke-width="0.9"/>
+    <circle cx="410" cy="590" r="14" fill="#fffbef" stroke="#ff1717" stroke-width="2"/>
+    <text x="410" y="596" font-family="DejaVu Sans Condensed, sans-serif" font-size="21" fill="#ff1717" text-anchor="middle" font-weight="bold">8</text>
+    <text x="433" y="597" font-family="DejaVu Sans Condensed, sans-serif" font-size="24" fill="#080a0a" font-weight="bold">Bersabea</text>
+    <ellipse cx="336" cy="580" rx="53" ry="31" fill="none" stroke="#f78611" stroke-width="1.8" stroke-dasharray="5 3"/>
+    <circle cx="315" cy="580" r="4.5" fill="#ff1717" stroke="white" stroke-width="1.4"/>
+    <circle cx="351" cy="581" r="14" fill="#fffbef" stroke="#ff1717" stroke-width="2"/>
+    <text x="351" y="587" font-family="DejaVu Sans Condensed, sans-serif" font-size="21" fill="#ff1717" text-anchor="middle" font-weight="bold">5</text>
+    <text x="338" y="637" font-family="DejaVu Sans Condensed, sans-serif" font-size="24" fill="#080a0a" font-weight="bold">Negheb</text>
+    <path d="M342 479L423 504" fill="none" stroke="#666" stroke-width="0.9"/>
+    <circle cx="336" cy="472" r="5.5" fill="#111" stroke="white" stroke-width="1.4"/>
+    <text x="433" y="511" font-family="DejaVu Sans Condensed, sans-serif" font-size="20" fill="#080a0a">Rushalimum</text>
+    <ellipse cx="145" cy="582" rx="53" ry="37" fill="none" stroke="#f78611" stroke-width="1.8" stroke-dasharray="5 3"/>
+    <circle cx="121" cy="596" r="14" fill="#fffbef" stroke="#ff1717" stroke-width="2"/>
+    <text x="121" y="602" font-family="DejaVu Sans Condensed, sans-serif" font-size="21" fill="#ff1717" text-anchor="middle" font-weight="bold">6</text>
+    <text x="54" y="666" font-family="DejaVu Sans Condensed, sans-serif" font-size="25" fill="#080a0a" font-weight="bold">Egitto</text>
+  </g>
+  <g id="cornice-scala" inkscape:groupmode="layer" inkscape:label="10 · Cornice orientamento e scala">
+    <rect x="16" y="73" width="1004" height="725" fill="none" stroke="#466665" stroke-width="1.2"/>
+    <text x="992" y="97" font-family="DejaVu Sans Condensed, sans-serif" font-size="20" fill="#080a0a" text-anchor="middle">N</text>
+    <path d="M992 137L992 105M986 114L992 105L998 114" fill="none" stroke="#172c2f" stroke-width="1.8"/>
+    <path d="M622 749H770M622 742V757M770 742V757" fill="none" stroke="#151515" stroke-width="2"/>
+    <text x="622" y="738" font-family="DejaVu Sans Condensed, sans-serif" font-size="20" fill="#080a0a" text-anchor="middle">0</text>
+    <text x="770" y="738" font-family="DejaVu Sans Condensed, sans-serif" font-size="20" fill="#080a0a" text-anchor="middle">200 km</text>
+  </g>
+  <g id="legenda-note" inkscape:groupmode="layer" inkscape:label="11 · Legenda e note sotto la carta">
+    <rect x="16" y="813" width="1004" height="280" fill="#fffefa" stroke="#b0a28a" stroke-width="1"/>
+    <circle cx="46" cy="839" r="14" fill="#fffbef" stroke="#ff1717" stroke-width="2"/>
+    <text x="46" y="845" font-family="DejaVu Sans Condensed, sans-serif" font-size="21" fill="#ff1717" text-anchor="middle" font-weight="bold">1</text>
+    <text x="70" y="846" font-family="DejaVu Sans Condensed, sans-serif" font-size="17" fill="#080a0a">Tappe del racconto biblico</text>
+    <circle cx="406" cy="839" r="14" fill="#fffbef" stroke="#ff1717" stroke-width="2"/>
+    <text x="406" y="845" font-family="DejaVu Sans Condensed, sans-serif" font-size="21" fill="#ff1717" text-anchor="middle" font-weight="bold">6</text>
+    <text x="430" y="846" font-family="DejaVu Sans Condensed, sans-serif" font-size="17" fill="#080a0a">Tappa in area non precisata</text>
+    <ellipse cx="765" cy="838" rx="21" ry="12" fill="none" stroke="#f78611" stroke-dasharray="5 3"/>
+    <text x="796" y="846" font-family="DejaVu Sans Condensed, sans-serif" font-size="17" fill="#080a0a">Area non precisata</text>
+    <path d="M32 879H86" fill="none" stroke="#ff1717" stroke-width="3" stroke-dasharray="7 4" marker-end="url(#punta-rossa)"/>
+    <text x="99" y="885" font-family="DejaVu Sans Condensed, sans-serif" font-size="17" fill="#080a0a">Cammino: andata, ritorno e tappe successive</text>
+    <circle cx="581" cy="878" r="5" fill="#111" stroke="white" stroke-width="1.4"/>
+    <text x="595" y="885" font-family="DejaVu Sans Condensed, sans-serif" font-size="17" fill="#080a0a">Altre città dell’epoca</text>
+    <rect x="802" y="866" width="26" height="21" fill="url(#fertile)"/>
+    <text x="841" y="884" font-family="DejaVu Sans Condensed, sans-serif" font-size="17" fill="#080a0a">Mezzaluna fertile</text>
+    <text x="31" y="925" font-family="DejaVu Sans Condensed, sans-serif" font-size="17" fill="#080a0a">*Mòria: posizione secondo la tradizione che la collega a Gerusalemme;</text>
+    <text x="31" y="948" font-family="DejaVu Sans Condensed, sans-serif" font-size="17" fill="#080a0a">non certa nel racconto della Genesi. Bersabea–Mòria: andata e ritorno.</text>
+    <text x="31" y="979" font-family="DejaVu Sans Condensed, sans-serif" font-size="16" fill="#080a0a">Percorsi e fascia fertile schematici. Il contesto storico non data con certezza il viaggio di Abramo.</text>
+    <text x="31" y="1001" font-family="DejaVu Sans Condensed, sans-serif" font-size="16" fill="#080a0a">Tratto finale dei fiumi e costa antica indicativi. Gli ovali tratteggiati non indicano confini.</text>
+    <text x="31" y="1032" font-family="DejaVu Sans Condensed, sans-serif" font-size="20" fill="#175d13" font-weight="bold">Carta antica – Riferimenti politici senza delimitazioni territoriali.</text>
+    <text x="31" y="1056" font-family="DejaVu Sans Condensed, sans-serif" font-size="15" fill="#080a0a">Nomi politici colorati: riferimenti intorno al 1800 a.C. Rushalimum: nome antico di Gerusalemme.</text>
+    <text x="31" y="1080" font-family="DejaVu Sans Condensed, sans-serif" font-size="14" fill="#555">Anteprima vettoriale 09 · Ricostruzione dal PNG approvato · Da controllare a dimensione effettiva.</text>
+  </g>
+</svg>

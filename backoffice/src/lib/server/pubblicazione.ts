@@ -75,6 +75,19 @@ export function componiCammino(db: DatabaseSync, id: number, generatoIl = new Da
     };
   });
   if (!tappe.length) avvisi.push('Il cammino non ha ancora tappe.');
+
+  // il ritorno dopo l'ultima tappa a una tappa precedente, con il suo tracciato se parte e arriva giusto
+  const rr = db.prepare('SELECT ritorno_tappa_id, ritorno_tracciato FROM cammini WHERE id = ?').get(id)!;
+  const verso = righe.findIndex((r) => Number(r.id) === Number(rr.ritorno_tappa_id));
+  let ritorno: CamminoPubblicato['ritorno'];
+  if (rr.ritorno_tappa_id != null && verso >= 0 && verso < tappe.length - 1) {
+    let tracciato = rr.ritorno_tracciato == null ? null : (JSON.parse(String(rr.ritorno_tracciato)) as Coordinate[]);
+    if (tracciato?.length && (km(tracciato[0], tappe.at(-1)!.coordinate) > TOLLERANZA_KM || km(tracciato.at(-1)!, tappe[verso].coordinate) > TOLLERANZA_KM)) {
+      avvisi.push(`Ritorno a ${tappe[verso].nome}: il tracciato non parte dall'ultima tappa o non arriva lì: al suo posto una linea dritta.`);
+      tracciato = null;
+    }
+    ritorno = { verso, tracciato };
+  }
   if (!c.globoTesto.trim() || !c.panoramicaTesto.trim()) avvisi.push('Mancano il testo del globo o quello della panoramica.');
 
   const cartine = db.prepare('SELECT * FROM cartine WHERE cammino_id = ? ORDER BY anno').all(id).map((k) => ({
@@ -87,7 +100,7 @@ export function componiCammino(db: DatabaseSync, id: number, generatoIl = new Da
     cammino: {
       versione: VERSIONE_FORMATO, generatoIl, id: c.slug, titolo: c.titolo, nome: c.nome, sottotitolo: c.sottotitolo,
       globo: { luogo: c.globoLuogo, testo: c.globoTesto }, panoramica: { testo: c.panoramicaTesto },
-      tappe, frecce: c.frecce, etichette: c.etichette, epoche: cartine.map((k) => k.epoca),
+      tappe, ...(ritorno ? { ritorno } : {}), frecce: c.frecce, etichette: c.etichette, epoche: cartine.map((k) => k.epoca),
     },
     cartine: cartine.map(({ file, dati }) => ({ file, dati })),
     immagini,
@@ -121,7 +134,10 @@ export function componiCartina(db: DatabaseSync, id: number): CartinaPubblicata 
       })),
     },
     nomi: db.prepare('SELECT * FROM nomi WHERE cartina_id = ? ORDER BY posizione, id').all(id).map((n) => {
-      const extra = { ...(n.angolo != null ? { angolo: Number(n.angolo) } : {}), ...(n.sotto != null ? { sotto: String(n.sotto) } : {}) };
+      const extra = {
+        ...(n.angolo != null ? { angolo: Number(n.angolo) } : {}), ...(n.sotto != null ? { sotto: String(n.sotto) } : {}),
+        ...(n.anche_oggi === 0 ? { oggi: false as const } : {}),
+      };
       const voce: CartinaPubblicata['nomi'][number] = [String(n.categoria), String(n.testo), Number(n.lng), Number(n.lat), Number(n.zoom)];
       if (Object.keys(extra).length) voce.push(extra);
       return voce;

@@ -28,6 +28,18 @@ export function poligono(anello: Punto[]): Geometria | null {
   return geometria({ type: 'Polygon', coordinates: [chiuso] });
 }
 
+// Le parti poligonali di una geometria: una differenza o un ritaglio possono lasciare, accanto alle aree,
+// linee e punti dove due contorni si toccano (una raccolta mista, che le unioni non accettano).
+export function soloPoligoni(g: Geometria): Geometria {
+  if (g.getGeometryType() !== 'GeometryCollection') return g;
+  const parti: Geometria[] = [];
+  for (let i = 0; i < g.getNumGeometries(); i++) {
+    const p = soloPoligoni(g.getGeometryN(i));
+    if (!p.isEmpty() && /Polygon/.test(p.getGeometryType())) parti.push(p);
+  }
+  return parti.length ? parti.reduce((a, b) => a.union(b)) : g.getFactory().buildGeometry([]);
+}
+
 export function unione(geometrie: Geometria[]): Geometria | null {
   const valide = geometrie.filter((g) => !g.isEmpty());
   if (!valide.length) return null;

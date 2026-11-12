@@ -1,7 +1,7 @@
 import { error, fail, redirect } from '@sveltejs/kit';
 import { db } from '#lib/server/db.ts';
 import {
-  aggiornaCammino, creaCammino, elencaTappe, eliminaCammino, etichetteInTesto, leggiCammino, spostaTappa, validaCammino,
+  aggiornaCammino, creaCammino, elencaTappe, eliminaCammino, etichetteInTesto, impostaRitorno, leggiCammino, spostaTappa, validaCammino,
 } from '#lib/server/cammini.ts';
 import { elencaCartine } from '#lib/server/cartine.ts';
 import { componiCammino } from '#lib/server/pubblicazione.ts';
@@ -43,6 +43,14 @@ export const actions = {
     }
     aggiornaCammino(db, id, esito.dati);
     return { salvato: true };
+  },
+
+  ritorno: async ({ request, params }) => {
+    const id = idDaParametro(params.id);
+    if (id === null) error(404, 'Cammino non trovato');
+    const scelta = Number((await request.formData()).get('ritorno'));
+    impostaRitorno(db, id, Number.isInteger(scelta) && scelta > 0 ? scelta : null);
+    return { ritornoSalvato: true };
   },
 
   sposta: async ({ request, params }) => {

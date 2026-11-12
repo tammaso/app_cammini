@@ -29,6 +29,7 @@ export interface Cammino {
   panoramicaTesto: string;
   etichette: Etichetta[];
   frecce: Freccia[];
+  ritornoTappaId: number | null; // dopo l'ultima tappa si torna a questa (Abramo: a Bersabea)
   ordine: number;
   stato: Stato;
   modificatoIl: string;

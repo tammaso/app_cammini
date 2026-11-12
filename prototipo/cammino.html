@@ -493,7 +493,15 @@ function partial(path, t) {
 }
 
 const fc = feats => ({ type: "FeatureCollection", features: feats });
-const routeFeatures = STOPS.map((s, i) => s.path ? { type: "Feature", properties: { i }, geometry: { type: "LineString", coordinates: s.path } } : null).filter(Boolean);
+// Il ritorno dopo l'ultima tappa (Abramo: da Mòria a Bersabea) si disegna con l'ultima tappa: compare
+// percorso quando la si raggiunge, alla fine del suo tratto.
+const RITORNO = DATI.ritorno && DATI.tappe[DATI.ritorno.verso] && STOPS.length > 1
+  ? (DATI.ritorno.tracciato?.length ? DATI.ritorno.tracciato : [STOPS.at(-1).at, DATI.tappe[DATI.ritorno.verso].coordinate])
+  : null;
+const routeFeatures = [
+  ...STOPS.map((s, i) => s.path ? { type: "Feature", properties: { i }, geometry: { type: "LineString", coordinates: s.path } } : null),
+  RITORNO && { type: "Feature", properties: { i: STOPS.length - 1, ritorno: true }, geometry: { type: "LineString", coordinates: RITORNO } }
+].filter(Boolean);
 const frecceFeatures = DATI.frecce.map(f => ({ type: "Feature", properties: { rotazione: f.rotazione }, geometry: { type: "Point", coordinates: f.coordinate } }));
 
 /* ---------- Le cartine storiche: livelli dai loro stili ---------- */
@@ -754,16 +762,18 @@ const PRECEDENZA = ["regno", "stato1", "stato2", "stato3", "capitale-antica", "c
   "continente", "mare", "isola", "rilievo", "regione", "citta-antica", "citta", "vetta"];
 const giaScritti = new Set(LABELS.map(([, testo]) => testo.toLowerCase()));
 // Ogni voce: [tipo, nome, lng, lat, zoom] e, per le vette, la quota; per i nomi della cartina,
-// eventualmente { angolo: inclinazione in gradi come nella cartina, sotto: sottotitolo }.
+// eventualmente { angolo: inclinazione in gradi come nella cartina, sotto: sottotitolo, oggi: false }.
 // Gruppi: "moderni" (solo "Oggi"), "cartina:<epoca>" (i nomi di una cartina, solo nella sua epoca),
-// "fisici" (in ogni epoca: anche quelli della cartina che sono geografia fisica, come Mar Morto).
+// "fisici" (in ogni epoca: anche quelli della cartina che sono geografia fisica, come Mar Morto, salvo i
+// nomi antichi, con oggi: false, come «Mare Inferiore»: quelli solo nella loro epoca).
 // daCartina: l'epoca della cartina da cui viene il nome (false per i nomi di oggi)
 function voce([tipo, nome, lng, lat, z, extra], daCartina) {
+  const fisico = /^(regione|mare|vetta)$/.test(tipo) && extra?.oggi !== false;
   return {
     tipo, nome, at: [lng, lat], z, daCartina,
     quota: typeof extra === "number" ? extra : undefined,
     angolo: extra?.angolo, sotto: extra?.sotto,
-    gruppo: daCartina ? (/^(regione|mare|vetta)$/.test(tipo) ? "fisici" : `cartina:${daCartina}`) : /^(stato\d|capitale|citta)$/.test(tipo) ? "moderni" : "fisici",
+    gruppo: daCartina ? (fisico ? "fisici" : `cartina:${daCartina}`) : /^(stato\d|capitale|citta)$/.test(tipo) ? "moderni" : "fisici",
     conSimbolo: /^(capitale|citta|vetta|capitale-antica|citta-antica)$/.test(tipo)
   };
 }

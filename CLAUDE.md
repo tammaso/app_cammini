@@ -38,8 +38,8 @@ Lingua di lavoro: italiano, anche per testi dell'interfaccia, commenti nel codic
 - **Dati del portale separati dalla pagina** (2026-11-08): `cammino.html` è una pagina sola per tutti
   i cammini e legge `prototipo/cammini/indice.json` e la cartella del cammino scelto
   (`cammino.html?cammino=abramo`; senza, il primo dell'indice): `cammino.json` (titoli, testi del globo
-  e della panoramica, tappe con coordinate e tracciato, frecce, nomi scritti a mano, epoche) e una
-  cartina per epoca (`1700ac.json`: stili, elementi, nomi, alone). Il formato è il contratto
+  e della panoramica, tappe con coordinate e tracciato, ritorno dopo l'ultima tappa, frecce, nomi scritti a
+  mano, epoche) e una cartina per epoca (`1800ac.json`: stili, elementi, nomi, alone). Il formato è il contratto
   `condiviso/cammino.ts`. I livelli della cartina storica si generano dai suoi stili (riempimenti,
   contorni, alone, linee), la legenda dagli stili con una voce di legenda, i pulsanti delle epoche dalle
   epoche del cammino (in ordine di anno, poi «Oggi»). Questi file li scrive il backoffice: non si
@@ -61,8 +61,12 @@ Lingua di lavoro: italiano, anche per testi dell'interfaccia, commenti nel codic
   demo»: aggiorna il portale e copia in `pubblicazione/` il sito pronto da caricare con FileZilla su
   qualunque server web: `index.html` (la pagina, con il satellite accanto in `bmng/` e `noindex`),
   `dati/` con i soli file comuni usati, `cammini/`, `robots.txt`, `LEGGIMI.txt`; «Apri la cartella»), Backup,
-  Registro. Abramo è stato caricato dal prototipo (`npm run carica-prototipo`) ed è in bozza; il giro
-  database → portale dà file identici a prima. Il backup salva anche i file SVG delle cartine.
+  Registro. Abramo è stato caricato dal prototipo (`npm run carica-prototipo`) ed è in bozza; dal
+  2026-11-12 ha la carta nuova (vedi «Nuova carta di Abramo»). Il backup salva anche i file SVG delle cartine.
+  Dal 2026-11-12: nella pagina del cammino «Dopo l'ultima tappa: il cammino finisce / torna alla tappa N»
+  (`cammini.ritorno_tappa_id`, tracciato in `ritorno_tracciato` dalla generazione; nel portale il ritorno
+  compare percorso all'ultima tappa); nella classificazione, per regioni, mari e vette, la casella «anche in
+  Oggi» (tolta = nome antico, solo nell'epoca storica: `nomi.anche_oggi = 0`, `{ oggi: false }` nel file).
   Mancano: il disegno di aree e tracciati nel backoffice, lo spostamento dei singoli nomi, l'IA per i
   nomi non in anagrafe, il ripristino dal registro, la pubblicazione vera su un server.
   Schema logico (discusso il 2026-11-08 a partire da `er-cammino.docx` di Tommaso): cammini; tappe
@@ -87,6 +91,13 @@ Lingua di lavoro: italiano, anche per testi dell'interfaccia, commenti nel codic
      compresa quella dei gruppi, testi con inizio e fine della riga; salta gli effetti ritagliati da un
      ritaglio non rettangolare, trova cornice e legenda) e lo manda al server con il file
      (`dati/cartine/<sha256>.svg`; colonne `svg`, `disegno`, `classificazione` di `cartine`).
+     Dal 2026-11-12 legge anche gli SVG «da disegno» (non da Illustrator): sfumature = colore medio delle
+     fermate; il foglio bianco sotto tutto non è la cornice; fuori dalla cornice (titolo, legenda, note sotto
+     la carta) non si importa niente; cerchi ed ellissi distinti per geometria (prima quelli scritti uguali
+     si perdevano); soglia dei simboli in proporzione alla cornice (`sogliaSimboli`, flag `simbolo` della
+     forma); punte di freccia `marker-end` ricostruite come triangoli; testi lungo una curva (`textPath`) con
+     l'inclinazione della curva. Le frecce sono i simboli a triangolo (`eFreccia`), non i pallini dello
+     stesso colore. Verificato: la vecchia cartina del volume si legge identica a prima.
   2. *Allinea* (`/cartine/[id]/allinea`, da `allinea.html`): spilli nel database (punti di controllo),
      proposti dai nomi dell'anagrafe se la cartina non ne ha; deformazione dal vivo
      (`src/lib/georeferenziazione.ts`, la stessa del server), scarti, pieghe, griglia, fiumi veri,
@@ -106,6 +117,30 @@ Lingua di lavoro: italiano, anche per testi dell'interfaccia, commenti nel codic
      colore del percorso; tracciati delle tappe dalla rete delle linee del percorso (`percorso.ts`: pezzi
      ricollegati entro 60 km, strada più breve, più cara contromano rispetto alle frecce e sui tratti già
      fatti, raccordo esatto sulle tappe); alone. Sostituisce solo elementi e nomi «importati».
+     Tutte le frecce danno il verso al percorso, ma sulla carta restano solo quelle a più di 30 km dalle
+     tappe (`FRECCE_LONTANE_KM`: le punte alla fine di ogni tratto starebbero sotto i segnaposto). Dalle aree
+     ritagliate si tengono solo le parti poligonali (`soloPoligoni`).
+  **Nuova carta di Abramo** (2026-11-12, al posto della cartina 1700 a.C. del volume, eliminata con i suoi
+  stili, nomi, spilli e file): istruzioni della redazione «aree colorate e luoghi dallo screenshot approvato,
+  percorso dall'SVG». Fonte `Abramo_antica_livelli_09 (1).svg` (ricostruzione vettoriale dal PNG approvato,
+  «riferimenti politici senza delimitazioni territoriali», nomi politici intorno al 1800 a.C.); nel
+  backoffice `Abramo_antica_livelli_09b.svg`, la stessa con il livello 03b: area di Canaan e riempimento
+  degli ovali, ricalcati da noi dallo screenshot (che coincide con il riquadro dell'SVG a meno di un pixel).
+  Epoca «1800 a.C.» (`1800ac`, anno -1800). Stili: Mezzaluna fertile (verde #dff092, velo, in legenda),
+  Canaan (#fbe39a), Area non precisata (ovali #fde2ad, in legenda) con il contorno tratteggiato arancio
+  come stile di linea; percorso = le 11 linee rosse tratteggiate. Nomi: Dominio di Shamshi-Adad, regni di
+  Mari, Babilonia, Larsa, d'Egitto; Mezzaluna fertile, Mesopotamia, Canaan; Sinai (anche in Oggi); Eufrate,
+  Tigri, Nilo; Assur, Mari, Biblo, Babilonia, Larsa, Menfi. Esclusi Rushalimum e Alashiya (non sono nello
+  screenshot) e Mar Mediterraneo e Mar Rosso (ci sono già le etichette scritte a mano). «Mare Salato» e «Mare
+  Inferiore» sono nomi «disegnati» sulle acque di oggi (nella carta stanno lontani dalle acque), solo allora.
+  Tappe (9, numerazione della carta): Ur dei Caldei, Carran, Sichem, Tra Betel e Ai (luogo Betel), Negheb
+  (luogo nuovo, ipotetico, dove la carta mette la tappa: 30,52° N 34,70° E), Egitto (luogo Menfi, non più
+  Zoan), Mamre presso Ebron, Bersabea, Mòria (luogo nuovo, ipotetico, a Gerusalemme secondo la tradizione);
+  dopo Mòria il ritorno a Bersabea. La tappa 7 passa per Negheb e Betel (ritorno dall'Egitto). Testi di
+  Negheb e Mòria e ritocchi di Sichem, Egitto e panoramica: bozze da far rivedere alla redazione. Spilli:
+  i 13 pallini del disegno (Ur, Carran, Sichem, Betel, Gerusalemme, Mamre, Bersabea, Assur, Mari, Biblo,
+  Babilonia, Larsa, Menfi) e 3 punti della costa di Canaan (Netanya, Ashdod, Rafah): la carta è schematica,
+  Canaan è disegnato circa 1,6 volte più grande del resto; scarto medio 45 km.
   Rigenerata così, la cartina di Abramo coincide con quella di Python: aree entro lo 0,2%, stili
   identici, tracciati entro 2-3 km, nomi entro 1-5 km (misure dei caratteri del browser). Due correzioni:
   la regione «Babilonia» va sulla sua scritta (Python la metteva sulla città, 113 km più in là).
@@ -160,15 +195,14 @@ Lingua di lavoro: italiano, anche per testi dell'interfaccia, commenti nel codic
   ed è scritta in un solo punto, la tabella `EPOCHE` di `cammino.html`:
   | Sempre, in ogni epoca | Solo "Oggi" | Solo nell'epoca storica ("allora") |
   |---|---|---|
-  | satellite (di oggi, dichiarato), fiumi, geografia fisica in tondo (mari, rilievi, deserti; dalla cartina anche Mar Morto, Penisola del Sinai, M.te Ararat, M.te Sinai), cammino con le frecce e tappe | confini e nomi degli Stati attuali, capitali, grandi città, etichette scritte a mano di fiumi e regioni (`LABELS`: Eufrate, Tigri, Nilo, Giordano, Mesopotamia, Deserto siriano) | **la cartina del volume disegnata sopra il satellite, con tutti i suoi dettagli** (dal 2026-11-07): regni con i colori della cartina (pieni, più coprenti della stampa perché si vedano sul satellite) e il contorno grigio, Mari in giallo pieno; arco della Mezzaluna (velo bianco e contorno blu, intero, anche sul mare e nella parte che la stampa taglia); costa di allora; tutti i nomi della cartina (regni e popoli in maiuscolo, regioni in maiuscolo spaziato, sottotitoli «12ª dinastia…» e «Sotto Hammurabi…», nomi inclinati come nella cartina, fiumi al posto e con l'inclinazione della cartina, Cipro); capitali con il pallino rosso, città con quello bianco; alone: il mondo si scurisce gradualmente allontanandosi dai dati della cartina (16 veli leggeri, `ALONE` in `importa_cartina_ai.py`), senza riquadri |
+  | satellite (di oggi, dichiarato), fiumi, geografia fisica in tondo (mari, rilievi, deserti; dalla cartina anche Mar Morto, Penisola del Sinai, M.te Ararat, M.te Sinai), cammino con le frecce e tappe | confini e nomi degli Stati attuali, capitali, grandi città, etichette scritte a mano di fiumi e regioni (`LABELS`: Eufrate, Tigri, Nilo, Giordano, Mesopotamia, Deserto siriano) | **la cartina disegnata sopra il satellite, con tutti i suoi dettagli** (dal 2026-11-07; dal 2026-11-12 la carta nuova, «1800 a.C.»): Mezzaluna fertile verde (velo), Canaan giallo, aree non precisate di Negheb ed Egitto (ovali pieni con il contorno tratteggiato), aree ritagliate sulle terre emerse; nomi politici senza confini (Dominio di Shamshi-Adad, regni di Mari, Babilonia, Larsa, d'Egitto), regioni antiche (Mezzaluna fertile, Mesopotamia, Canaan), fiumi con l'inclinazione della carta, mari con il nome antico (Mare Inferiore, Mare Salato); città dell'epoca con il pallino bianco; alone: il mondo si scurisce gradualmente allontanandosi dai dati della cartina (16 veli leggeri, `ALONE` in `importazione-svg.ts`), senza riquadri |
   In "Oggi" nessuna area tematica (Mezzaluna fertile e Valle del Nilo tolte il 2026-11-07): sopra la
   carta di oggi c'è solo il cammino.
   Legenda: al primo posto, in entrambe le epoche, «Cammino di Abramo» con il simbolo della carta
-  (tratteggio rosso su bordo bianco). Nell'epoca storica poi le voci della cartina del volume, senza
-  interruttori: «Regno di Mari conquistato da Hammurabi nel 1700 a.C. circa», «Capitali» (la Mezzaluna fertile non è in legenda: deciso il 2026-11-08; uno stile «velo»
-  con voce di legenda avrebbe in legenda un simbolo a velo, tinta leggera e bordo del suo colore). Sulla carta il nome «Mezzaluna fertile» (regione antica,
-  aggiunto nel backoffice come nome «disegnato», quindi resta rigenerando) sta dentro l'arco nel deserto
-  siriano (40° E, 32,9° N), dove il bordo interno è quasi orizzontale e non ci sono altri nomi. In "Oggi"
+  (tratteggio rosso su bordo bianco). Nell'epoca storica poi le voci della cartina, senza interruttori:
+  con la carta nuova (2026-11-12) «Mezzaluna fertile» e «Area non precisata», come nella legenda della carta
+  (con la cartina del volume la Mezzaluna non era in legenda: deciso il 2026-11-08). Il nome «Mezzaluna
+  fertile» ora viene dalla carta, inclinato come lì. In "Oggi"
   poi l'interruttore "Cartina muta", che toglie tutti i nomi dalla carta, anche quelli delle tappe
   (restano i numeri), e vale solo in "Oggi". Niente altre voci.
   Niente di moderno nell'epoca storica, niente di antico in "Oggi". Per un itinerario con un'altra
@@ -221,7 +255,7 @@ app_cammini/
 ├── prototipo/
 │   ├── cammino.html          il portale: una pagina per tutti i cammini (sorgente leggibile, librerie da CDN)
 │   ├── cammini/              SCRITTO DAL BACKOFFICE: indice.json e una cartella per cammino
-│   │   └── abramo/           cammino.json, 1700ac.json (la cartina), immagini/ (WebP)
+│   │   └── abramo/           cammino.json, 1800ac.json (la cartina), immagini/ (WebP)
 │   ├── allinea.html          prima prova della georeferenziazione assistita (superata dal backoffice)
 │   ├── cartine/mezzaluna_1700ac.svg  la cartina del volume in SVG (da cartina_in_svg.py, per le prove)
 │   ├── cartine/mezzaluna_1700ac.punti.json  gli spilli con cui è generata la cartina del portale (da allinea.html)
@@ -253,7 +287,9 @@ app_cammini/
 │   ├── importazioni/         risultato del vecchio importatore, non più letto (non versionato)
 │   ├── estrai_regni_da_cartina.py  cartina raster (PSD) → poligoni dai colori (superato)
 │   └── mezzal_punti_controllo.json  punti di controllo usati per Mezzal.psd
-├── Mezzal.psd                cartina del volume (Mezzaluna fertile, 1700 a.C.), raster
+├── Abramo_antica_livelli_09 (1).svg  la carta nuova di Abramo (2026-11-12), come consegnata
+├── Abramo_antica_livelli_09b.svg     la stessa con Canaan e gli ovali pieni (livello 03b): è quella nel backoffice
+├── Mezzal.psd                cartina del volume (Mezzaluna fertile, 1700 a.C.), raster (superata)
 ├── Mezzal-e-perc-Abramo_mod.ai  la stessa cartina in vettoriale (Illustrator CS5.1, PDF compatibile):
 │                             aree, percorso, arco della Mezzaluna, pallini e testi come oggetti
 └── quadranti mondo NASA Blue Marble Next Generation/   8 GeoTIFF (locale, non versionato)
@@ -286,7 +322,15 @@ da file://): usare sempre il server.
 
 ## Questioni aperte
 
-- Regni del 1700 a.C.: **dalla cartina vettoriale** `Mezzal-e-perc-Abramo_mod.ai`. La cartina si discosta dal vero in media ~35 km (è il disegno); con la
+- Carta nuova di Abramo (2026-11-12), da verificare con la redazione: epoca «1800 a.C.» (la carta dice
+  «riferimenti intorno al 1800 a.C.»); testi di Negheb e Mòria e ritocchi di Sichem, Egitto e panoramica
+  (bozze); Canaan e il riempimento degli ovali sono ricalcati da noi dallo screenshot: meglio averli dal
+  cartografo nell'SVG; nell'SVG «MESOPOTAMIA» corre su una curva troppo corta e il browser ne taglia le ultime
+  lettere (nel portale il nome è intero); lo screenshot ha in viola l'andata e il ritorno in Egitto, l'SVG in
+  rosso (si è seguito l'SVG); nell'epoca storica compare anche l'etichetta scritta a mano «Golfo Persico»
+  accanto a «Mare Inferiore» (le etichette dei mari valgono in ogni epoca); in anagrafe restano luoghi della
+  cartina vecchia non più usati (Palmira, Damasco, Zoan, Ninive, Susa, Sidone, Monte Ararat, Monte Sinai).
+- (Cartina vecchia, superata il 2026-11-12) Regni del 1700 a.C.: **dalla cartina vettoriale** `Mezzal-e-perc-Abramo_mod.ai`. La cartina si discosta dal vero in media ~35 km (è il disegno); con la
   thin plate spline le città coincidono esattamente e lo scarto resta tra una città e l'altra.
   Nel file: l'Assiria non è un'area a sé ma la parte nord dell'Impero babilonese; Egitto e Canaan
   sono un unico tracciato (chiedere alla redazione il significato); non c'è una versione "prima"
