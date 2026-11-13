@@ -124,15 +124,25 @@ Lingua di lavoro: italiano, anche per testi dell'interfaccia, commenti nel codic
   stili, nomi, spilli e file): istruzioni della redazione «aree colorate e luoghi dallo screenshot approvato,
   percorso dall'SVG». Fonte `Abramo_antica_livelli_09 (1).svg` (ricostruzione vettoriale dal PNG approvato,
   «riferimenti politici senza delimitazioni territoriali», nomi politici intorno al 1800 a.C.); nel
-  backoffice `Abramo_antica_livelli_09b.svg`, la stessa con il livello 03b: area di Canaan e riempimento
-  degli ovali, ricalcati da noi dallo screenshot (che coincide con il riquadro dell'SVG a meno di un pixel).
+  backoffice `Abramo_antica_livelli_09b.svg`: il percorso della 09, tutto il resto come nella PNG approvata
+  `Il cammino di Abramo_ mappa antica (1).png` (l'unica PNG di riferimento; il riquadro della carta grande
+  coincide al pixel con quello dell'SVG). Ricontrollato il 2026-11-12 sovrapponendo alla PNG i dati
+  pubblicati riportati sul foglio: l'SVG 09 differiva dalla PNG nella fascia della Mezzaluna (più larga a nord
+  e fino al golfo), negli ovali (in Egitto quello della PNG è grande, sotto Menfi), nelle scritte MEZZALUNA
+  FERTILE e MESOPOTAMIA (spostate di 80-90 px) e nel pallino di Larsa (22 px). Nella 09b: fascia, Canaan e
+  ovale dell'Egitto ricalcati dalla PNG; ovale del Negheb a sud di Bersabea come nel riquadro «Ingrandimento
+  delle tappe» della PNG (quello della carta grande, dove Canaan è «a scala diversa» e il Mare Salato sta
+  persino a ovest delle tappe, deformato cadrebbe in Giordania); scritte e Larsa dove sono nella PNG.
   Epoca «1800 a.C.» (`1800ac`, anno -1800). Stili: Mezzaluna fertile (verde #dff092, velo, in legenda),
-  Canaan (#fbe39a), Area non precisata (ovali #fde2ad, in legenda) con il contorno tratteggiato arancio
-  come stile di linea; percorso = le 11 linee rosse tratteggiate. Nomi: Dominio di Shamshi-Adad, regni di
-  Mari, Babilonia, Larsa, d'Egitto; Mezzaluna fertile, Mesopotamia, Canaan; Sinai (anche in Oggi); Eufrate,
-  Tigri, Nilo; Assur, Mari, Biblo, Babilonia, Larsa, Menfi. Esclusi Rushalimum e Alashiya (non sono nello
-  screenshot) e Mar Mediterraneo e Mar Rosso (ci sono già le etichette scritte a mano). «Mare Salato» e «Mare
-  Inferiore» sono nomi «disegnati» sulle acque di oggi (nella carta stanno lontani dalle acque), solo allora.
+  Canaan (#fbe39a), Area non precisata (ovali #fde2ad; in legenda «Tappa in un'area non precisata», come
+  nella PNG) con il contorno tratteggiato arancio come stile di linea, «Altre città dell'epoca» (punto, solo
+  legenda); percorso = le 11 linee rosse tratteggiate. Nomi: Dominio di Shamshi-Adad, regni di Mari,
+  Babilonia, Larsa, d'Egitto; Mezzaluna fertile, Mesopotamia, Canaan; Sinai (anche in Oggi); Assur, Mari,
+  Biblo, Babilonia, Larsa, Menfi. Esclusi Rushalimum e Alashiya (non sono nella PNG) e Mar Mediterraneo e Mar
+  Rosso (ci sono già le etichette scritte a mano; quella del Mar Rosso spostata dove la mette la PNG, a nord
+  vicino al Sinai, 34,75° E 27,15° N). Nomi «disegnati» (la carta li mette lontani dal vero): «Mare Salato» e
+  «Mare Inferiore» sulle acque di oggi, solo allora; Eufrate, Tigri e Nilo accanto ai fiumi veri, nel tratto
+  dove li scrive la PNG (il Tigri della carta passa un centinaio di km a est di quello vero).
   Tappe (9, numerazione della carta): Ur dei Caldei, Carran, Sichem, Tra Betel e Ai (luogo Betel), Negheb
   (luogo nuovo, ipotetico, dove la carta mette la tappa: 30,52° N 34,70° E), Egitto (luogo Menfi, non più
   Zoan), Mamre presso Ebron, Bersabea, Mòria (luogo nuovo, ipotetico, a Gerusalemme secondo la tradizione);
@@ -141,6 +151,9 @@ Lingua di lavoro: italiano, anche per testi dell'interfaccia, commenti nel codic
   i 13 pallini del disegno (Ur, Carran, Sichem, Betel, Gerusalemme, Mamre, Bersabea, Assur, Mari, Biblo,
   Babilonia, Larsa, Menfi) e 3 punti della costa di Canaan (Netanya, Ashdod, Rafah): la carta è schematica,
   Canaan è disegnato circa 1,6 volte più grande del resto; scarto medio 45 km.
+  Della PNG il portale non sa ancora rappresentare: i due colori del cammino («Verso l'Egitto» rosso fino alla
+  tappa 6, «Ritorno e tappe successive» viola dopo) e il cerchio tratteggiato della tappa 4 («Localizzazione
+  indicativa»); i segnaposto di Negheb ed Egitto sono come gli altri (l'ovale c'è).
   Rigenerata così, la cartina di Abramo coincide con quella di Python: aree entro lo 0,2%, stili
   identici, tracciati entro 2-3 km, nomi entro 1-5 km (misure dei caratteri del browser). Due correzioni:
   la regione «Babilonia» va sulla sua scritta (Python la metteva sulla città, 113 km più in là).
@@ -187,6 +200,17 @@ Lingua di lavoro: italiano, anche per testi dell'interfaccia, commenti nel codic
 - **Confini e nomi attuali secondo il punto di vista ufficiale italiano** (Natural Earth,
   `ne_10m_admin_0_countries_ita`), a piena risoluzione; tratti contesi o provvisori puntinati,
   con nota esplicita nel portale. Preferenza della redazione: nomi e suddivisioni moderne.
+  Verificati il 2026-11-12 (`strumenti/prepara_confini_fiumi.py`, fonti Natural Earth di GitHub, identiche
+  alla copia locale): corretti Cipro intera, Kosovo, Crimea in Ucraina, Abcasia e Ossezia in Georgia,
+  Somaliland in Somalia, Sahara occidentale a sé. Due correzioni: (1) le terre che il punto di vista
+  italiano (come quelli francese, tedesco e britannico) non assegna a nessuno Stato restavano senza confini;
+  ora se ne disegna il contorno verso gli Stati vicini (dal file delle aree contese): Golan con la vecchia
+  linea verso Israele continua e la linea del cessate il fuoco del 1974 puntinata, Abyei, triangolo di Ilemi,
+  campo di ghiaccio della Patagonia, angolo di Artigas, fiume Dragonja; (2) a Gerusalemme Natural Earth
+  segue il confine municipale israeliano (Gerusalemme Est in Israele): lì si usa la linea del 1949, che
+  Natural Earth ha solo nel punto di vista palestinese (riquadro `GERUSALEMME`; il saliente di Latrun resta
+  com'è). Da decidere con la redazione: Libano-Siria e Israele-Libano sono puntinati perché «non definiti»
+  (non tracciati sul terreno), pur non essendo contesi.
 - **Capitali**: Natural Earth segna Gerusalemme come capitale di Israele anche nel punto di vista
   italiano, il che non corrisponde alla posizione ufficiale italiana. L'elenco delle capitali va
   quindi validato dalla redazione: tabella nel backoffice, precompilata e corretta.
@@ -277,7 +301,9 @@ app_cammini/
 │   ├── server.py             server locale con richieste Range (necessario per .pmtiles); chiede al
 │   │                         browser di ricontrollare pagina e dati a ogni caricamento (no-cache);
 │   │                         lascia leggere i file al backoffice; non riceve più gli spilli di allinea.html
-│   ├── prepara_confini_fiumi.py  rigenera confini.geojson e fiumi.geojson
+│   ├── prepara_confini_fiumi.py  rigenera confini.geojson e fiumi.geojson (per i soli confini:
+│   │                         py -c "import sys; sys.path.insert(0,'strumenti'); import prepara_confini_fiumi as p; p.confini()")
+│   ├── natural_earth/        copie dei file di Natural Earth usati dagli script (non versionate)
 │   ├── prepara_etichette_mondo.py rigenera mondo.js e capitali_da_validare.csv (scelte e correzioni nel codice)
 │   ├── capitali_da_validare.csv  capitali per la redazione, con esito e nota (Excel, separatore ;)
 │   ├── cartina_in_svg.py     .ai → SVG, solo per le prove (il cartografo consegnerà l'SVG)
@@ -324,10 +350,10 @@ da file://): usare sempre il server.
 
 - Carta nuova di Abramo (2026-11-12), da verificare con la redazione: epoca «1800 a.C.» (la carta dice
   «riferimenti intorno al 1800 a.C.»); testi di Negheb e Mòria e ritocchi di Sichem, Egitto e panoramica
-  (bozze); Canaan e il riempimento degli ovali sono ricalcati da noi dallo screenshot: meglio averli dal
-  cartografo nell'SVG; nell'SVG «MESOPOTAMIA» corre su una curva troppo corta e il browser ne taglia le ultime
-  lettere (nel portale il nome è intero); lo screenshot ha in viola l'andata e il ritorno in Egitto, l'SVG in
-  rosso (si è seguito l'SVG); nell'epoca storica compare anche l'etichetta scritta a mano «Golfo Persico»
+  (bozze); fascia, Canaan e ovali sono ricalcati da noi dalla PNG: meglio un SVG del cartografo fedele alla
+  PNG; la PNG distingue «Verso l'Egitto» (rosso) e «Ritorno e tappe successive» (viola) e segna la tappa 4
+  come «Localizzazione indicativa»: il portale per ora no (da decidere se aggiungerlo); nell'epoca storica
+  compare anche l'etichetta scritta a mano «Golfo Persico»
   accanto a «Mare Inferiore» (le etichette dei mari valgono in ogni epoca); in anagrafe restano luoghi della
   cartina vecchia non più usati (Palmira, Damasco, Zoan, Ninive, Susa, Sidone, Monte Ararat, Monte Sinai).
 - (Cartina vecchia, superata il 2026-11-12) Regni del 1700 a.C.: **dalla cartina vettoriale** `Mezzal-e-perc-Abramo_mod.ai`. La cartina si discosta dal vero in media ~35 km (è il disegno); con la
