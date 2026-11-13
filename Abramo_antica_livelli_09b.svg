@@ -1,7 +1,7 @@
 <?xml version='1.0' encoding='UTF-8'?>
 <svg xmlns="http://www.w3.org/2000/svg" xmlns:inkscape="http://www.inkscape.org/namespaces/inkscape" width="1040" height="1110" viewBox="0 0 1040 1110">
   <title>Il cammino di Abramo — carta antica, anteprima vettoriale 09b</title>
-  <desc>Ricostruzione vettoriale dal PNG approvato; solo carta antica. Bozza per controllo visivo. Nessuna immagine raster incorporata. Localizzazioni e percorsi schematici. Versione 09b (2026-11-12) per il portale: il percorso è quello della 09; aree e luoghi sono quelli della PNG approvata («Il cammino di Abramo_ mappa antica»): fascia della Mezzaluna, Canaan e ovale dell’Egitto ricalcati dalla PNG; ovale del Negheb a sud di Bersabea come nel riquadro «Ingrandimento delle tappe» della PNG; scritte MEZZALUNA FERTILE e MESOPOTAMIA e pallino di Larsa dove sono nella PNG.</desc>
+  <desc>Ricostruzione vettoriale dal PNG approvato; solo carta antica. Bozza per controllo visivo. Nessuna immagine raster incorporata. Localizzazioni e percorsi schematici. Versione 09b (2026-11-12) per il portale: il percorso è quello della 09; aree e luoghi sono quelli della PNG approvata («Il cammino di Abramo_ mappa antica»): fascia della Mezzaluna e Canaan ricalcati dalla PNG; ovale dell’Egitto della stessa forma e grandezza di quello del Negheb, intorno a Menfi (richiesta della redazione); ovale del Negheb a sud di Bersabea come nel riquadro «Ingrandimento delle tappe» della PNG; scritte MEZZALUNA FERTILE (più in alto a sinistra) e CANAAN (tra Biblo e Sichem), su richiesta della redazione, e MESOPOTAMIA e pallino di Larsa dove sono nella PNG; colori delle scritte presi dalla PNG.</desc>
   <defs>
     <clipPath id="riquadro-carta">
       <rect x="16" y="73" width="1004" height="725"/>
@@ -44,8 +44,8 @@
   </g>
   <g id="aree-ricalcate" inkscape:groupmode="layer" inkscape:label="03b · Canaan e aree non precisate (dalla PNG approvata)" clip-path="url(#riquadro-carta)">
     <path id="area-canaan" d="M236.6 535.4L236.7 543.5L286.6 543.5L288.2 539.7L295.4 538.8L297.2 539.9L297.6 543L327.3 528.8L333.6 522.4L341.1 482.3L344.6 449.8L346.1 412.1L355.1 319.4L340.4 314.5L339.6 320.1L330.6 321.9L327.9 327.7L312.6 338.9L310 343.7L301.6 351L292.6 367L288.5 380L283.6 387.1L280.6 397.6L278.6 399.1L277.5 406.8L274.6 409.1L270.7 426.4L268.6 428.2L266.5 438.2L262.6 445.2L262.5 450.6L260.6 452.2L258.7 461.9L256.6 464.3L256.6 469.4L254.6 471.3L254.6 477.4L252.6 479.3L252.6 486.1L250.6 490.3L250.6 505.2L242.6 526.4L242.5 532.5Z" fill="#fbe39a"/>
-    <path id="area-negheb" d="M352.2 580.7L351.3 578L349.8 575.3L347.7 572.7L345 570.2L341.7 567.8L337.8 565.7L333.4 563.8L328.5 562.2L323.2 560.9L317.6 560.1L311.8 559.6L306 559.6L300.3 560L295.1 560.8L290.3 561.9L286.1 563.2L282.6 564.8L279.8 566.5L277.7 568.4L276.3 570.4L275.6 572.6L275.5 574.9L276.1 577.3L277.3 579.7L279.1 582.1L281.5 584.5L284.3 586.9L287.6 589.2L291.3 591.3L295.3 593.3L299.6 595L304.1 596.5L308.7 597.8L313.4 598.7L318.1 599.4L322.7 599.7L327.2 599.7L331.5 599.3L335.5 598.7L339.2 597.6L342.6 596.3L345.5 594.7L347.9 592.9L349.9 590.7L351.3 588.4L352.2 586L352.5 583.4Z" fill="#fde2ad"/>
-    <path id="area-egitto" d="M27.7 685.8L25.3 675.2L23.7 664.6L22.9 653.9L23 643.3L23.9 632.8L25.7 622.7L28.3 613L31.7 603.7L35.9 595.1L40.8 587.1L46.3 579.8L52.5 573.3L59.3 567.7L66.5 563L74.2 559.2L82.2 556.5L90.6 554.8L99.1 554.1L107.7 554.5L116.4 556L125 558.4L133.5 561.9L141.7 566.4L149.7 571.8L157.3 578L164.5 585.1L171.1 592.9L177.2 601.5L182.6 610.6L187.4 620.2L191.4 630.2L194.6 640.6L197 651.1L198.6 661.8L199.4 672.5L199.3 683.1L198.4 693.5L196.6 703.6L194 713.4L190.6 722.6L186.4 731.3L181.6 739.3L176 746.6L169.8 753.1L163.1 758.7L155.8 763.4L148.1 767.1L140.1 769.8L131.8 771.5L123.2 772.2L114.6 771.8L105.9 770.4L97.3 767.9L88.9 764.4L80.6 760L72.6 754.6L65 748.3L57.9 741.2L51.2 733.4L45.1 724.9L39.7 715.8L35 706.2L31 696.1Z" fill="#fde2ad"/>
+    <path id="area-negheb" d="M346.4 577.1L345.7 574.5L344.5 572L342.6 569.6L340.2 567.3L337.2 565.1L333.6 563.2L329.5 561.6L324.9 560.2L319.8 559.2L314.5 558.6L308.9 558.3L303.3 558.5L297.8 559L292.7 559.9L288 561L283.9 562.3L280.4 563.8L277.6 565.5L275.5 567.4L274 569.4L273.2 571.5L273 573.7L273.4 575.9L274.5 578.2L276.1 580.6L278.2 582.9L280.8 585.1L283.8 587.2L287.2 589.2L290.9 591L295 592.5L299.2 593.9L303.5 594.9L308 595.7L312.5 596.2L316.9 596.3L321.2 596.2L325.3 595.7L329.2 594.9L332.8 593.8L336.1 592.4L339 590.7L341.5 588.9L343.5 586.8L345 584.5L346 582.1L346.5 579.6Z" fill="#fde2ad"/>
+    <path id="area-egitto" d="M166.6 592.4L165.4 589.7L163.7 586.8L161.7 583.9L159.4 580.9L156.7 578L153.8 575.2L150.6 572.5L147.3 570L143.8 567.8L140.3 565.8L136.9 564.2L133.5 562.9L130.3 562L127.2 561.5L124.5 561.3L122 561.6L119.9 562.2L118.2 563.2L116.9 564.5L116.1 566.1L115.7 568L115.8 570.2L116.3 572.5L117.3 575L118.7 577.7L120.5 580.4L122.7 583.2L125.3 586L128.1 588.7L131.1 591.4L134.2 593.9L137.5 596.3L140.8 598.5L144.1 600.4L147.3 602L150.5 603.4L153.5 604.4L156.4 605L159 605.3L161.3 605.2L163.4 604.7L165.1 603.9L166.4 602.7L167.3 601.2L167.8 599.4L167.8 597.3L167.4 595Z" fill="#fde2ad"/>
   </g>
   <g id="idrografia" inkscape:groupmode="layer" inkscape:label="04 · Fiumi e Mare Salato" clip-path="url(#riquadro-carta)">
     <path d="M584 73C586 88 604 87 614 95C639 103 657 88 670 100C683 115 674 124 687 137L714 170C745 207 783 248 816 285C837 301 827 320 849 338C867 351 877 363 878 388C885 416 882 441 903 465C919 482 930 491 942 503L946 509L958 599" fill="none" stroke="#009ff0" stroke-width="2.4" stroke-linejoin="round" stroke-linecap="round"/>
@@ -109,138 +109,138 @@
     <path d="M511 73L509 81L479 94L469 125C456 151 471 166 474 182C483 213 498 224 529 226C560 227 574 254 598 267C626 280 635 307 656 322C695 350 721 367 748 387C780 409 803 432 826 455C855 484 876 513 896 538L958 599" fill="none" stroke="#009ff0" stroke-width="2.4" stroke-linejoin="round" stroke-linecap="round" id="corso-eufrate-continuo"/>
   </g>
   <g id="riferimenti" inkscape:groupmode="layer" inkscape:label="06 · Nomi geografici e politici" clip-path="url(#riquadro-carta)">
-    <text x="720" y="110" font-family="DejaVu Sans Condensed, sans-serif" font-size="22" fill="#0739cf" font-weight="bold">DOMINIO DI</text>
-    <text x="720" y="134" font-family="DejaVu Sans Condensed, sans-serif" font-size="22" fill="#0739cf" font-weight="bold">SHAMSHI-ADAD</text>
-    <text x="517" y="193" font-family="DejaVu Sans Condensed, sans-serif" font-size="40" fill="#145600" transform="rotate(18 517 193)" font-weight="bold" textLength="455" lengthAdjust="spacingAndGlyphs">MEZZALUNA FERTILE</text>
-    <text x="0" y="0" font-family="DejaVu Sans Condensed, sans-serif" font-size="26" fill="#07536b" letter-spacing="5" font-weight="bold"><textPath href="#asse-mesopotamia" startOffset="0%" textLength="232" lengthAdjust="spacing">MESOPOTAMIA</textPath></text>
-    <text x="287" y="523" font-family="DejaVu Sans Condensed, sans-serif" font-size="33" fill="#e97500" transform="rotate(-72 287 523)" font-weight="bold">CANAAN</text>
-    <text x="221" y="639" font-family="DejaVu Sans Condensed, sans-serif" font-size="25" fill="#175d13" font-weight="bold">SINAI</text>
-    <text x="540" y="347" font-family="DejaVu Sans Condensed, sans-serif" font-size="23" fill="#ca0052" font-weight="bold">REGNO DI</text>
-    <text x="540" y="372" font-family="DejaVu Sans Condensed, sans-serif" font-size="23" fill="#ca0052" font-weight="bold">MARI</text>
-    <text x="626" y="397" font-family="DejaVu Sans Condensed, sans-serif" font-size="23" fill="#8000a8" font-weight="bold">REGNO DI</text>
-    <text x="626" y="422" font-family="DejaVu Sans Condensed, sans-serif" font-size="23" fill="#8000a8" font-weight="bold">BABILONIA</text>
-    <text x="761" y="569" font-family="DejaVu Sans Condensed, sans-serif" font-size="24" fill="#006675" font-weight="bold">REGNO DI</text>
-    <text x="761" y="595" font-family="DejaVu Sans Condensed, sans-serif" font-size="24" fill="#006675" font-weight="bold">LARSA</text>
-    <text x="38" y="699" font-family="DejaVu Sans Condensed, sans-serif" font-size="27" fill="#944008" font-weight="bold">REGNO</text>
-    <text x="38" y="727" font-family="DejaVu Sans Condensed, sans-serif" font-size="27" fill="#944008" font-weight="bold">D’EGITTO</text>
+    <text x="720" y="110" font-family="DejaVu Sans Condensed, sans-serif" font-size="22" fill="#073de4" font-weight="bold">DOMINIO DI</text>
+    <text x="720" y="134" font-family="DejaVu Sans Condensed, sans-serif" font-size="22" fill="#073de4" font-weight="bold">SHAMSHI-ADAD</text>
+    <text x="557" y="157" font-family="DejaVu Sans Condensed, sans-serif" font-size="40" fill="#075a07" transform="rotate(18 557 157)" font-weight="bold" textLength="455" lengthAdjust="spacingAndGlyphs">MEZZALUNA FERTILE</text>
+    <text x="0" y="0" font-family="DejaVu Sans Condensed, sans-serif" font-size="26" fill="#08555f" letter-spacing="5" font-weight="bold"><textPath href="#asse-mesopotamia" startOffset="0%" textLength="232" lengthAdjust="spacing">MESOPOTAMIA</textPath></text>
+    <text x="287" y="523" font-family="DejaVu Sans Condensed, sans-serif" font-size="33" fill="#944005" transform="translate(36 -100) rotate(-72 287 523)" font-weight="bold">CANAAN</text>
+    <text x="221" y="639" font-family="DejaVu Sans Condensed, sans-serif" font-size="25" fill="#085a08" font-weight="bold">SINAI</text>
+    <text x="540" y="347" font-family="DejaVu Sans Condensed, sans-serif" font-size="23" fill="#cc0948" font-weight="bold">REGNO DI</text>
+    <text x="540" y="372" font-family="DejaVu Sans Condensed, sans-serif" font-size="23" fill="#cc0948" font-weight="bold">MARI</text>
+    <text x="626" y="397" font-family="DejaVu Sans Condensed, sans-serif" font-size="23" fill="#7808a8" font-weight="bold">REGNO DI</text>
+    <text x="626" y="422" font-family="DejaVu Sans Condensed, sans-serif" font-size="23" fill="#7808a8" font-weight="bold">BABILONIA</text>
+    <text x="761" y="569" font-family="DejaVu Sans Condensed, sans-serif" font-size="24" fill="#953d08" font-weight="bold">REGNO DI</text>
+    <text x="761" y="595" font-family="DejaVu Sans Condensed, sans-serif" font-size="24" fill="#953d08" font-weight="bold">LARSA</text>
+    <text x="38" y="699" font-family="DejaVu Sans Condensed, sans-serif" font-size="27" fill="#923e07" font-weight="bold">REGNO</text>
+    <text x="38" y="727" font-family="DejaVu Sans Condensed, sans-serif" font-size="27" fill="#923e07" font-weight="bold">D’EGITTO</text>
     <text x="252" y="253" font-family="DejaVu Sans Condensed, sans-serif" font-size="17" fill="#83400e" text-anchor="middle" transform="rotate(-25 252 253)" font-weight="bold">Alashiya</text>
   </g>
   <g id="nomi-acque" inkscape:groupmode="layer" inkscape:label="07 · Nomi delle acque" clip-path="url(#riquadro-carta)">
-    <text x="145" y="339" font-family="DejaVu Sans Condensed, sans-serif" font-size="28" fill="#001ac6" text-anchor="middle" font-style="italic">Mar</text>
-    <text x="145" y="371" font-family="DejaVu Sans Condensed, sans-serif" font-size="28" fill="#001ac6" text-anchor="middle" font-style="italic">Mediterraneo</text>
-    <text x="488" y="253" font-family="DejaVu Sans Condensed, sans-serif" font-size="27" fill="#001ac6" transform="rotate(23 488 253)" font-style="italic">Eufrate</text>
-    <text x="868" y="338" font-family="DejaVu Sans Condensed, sans-serif" font-size="27" fill="#001ac6" transform="rotate(71 868 338)" font-style="italic">Tigri</text>
-    <text x="172" y="684" font-family="DejaVu Sans Condensed, sans-serif" font-size="26" fill="#001ac6" transform="rotate(-86 172 684)" font-style="italic">Nilo</text>
-    <text x="345" y="789" font-family="DejaVu Sans Condensed, sans-serif" font-size="22" fill="#001ac6" text-anchor="middle" font-style="italic">Mar Rosso</text>
-    <text x="961" y="642" font-family="DejaVu Sans Condensed, sans-serif" font-size="25" fill="#001ac6" text-anchor="middle" font-style="italic">Mare</text>
-    <text x="961" y="670" font-family="DejaVu Sans Condensed, sans-serif" font-size="25" fill="#001ac6" text-anchor="middle" font-style="italic">Inferiore</text>
-    <text x="490" y="680" font-family="DejaVu Sans Condensed, sans-serif" font-size="19" fill="#001ac6" font-style="italic">Mare Salato</text>
+    <text x="145" y="339" font-family="DejaVu Sans Condensed, sans-serif" font-size="28" fill="#0b2ee6" text-anchor="middle" font-style="italic">Mar</text>
+    <text x="145" y="371" font-family="DejaVu Sans Condensed, sans-serif" font-size="28" fill="#0b2ee6" text-anchor="middle" font-style="italic">Mediterraneo</text>
+    <text x="488" y="253" font-family="DejaVu Sans Condensed, sans-serif" font-size="27" fill="#0b2ee6" transform="rotate(23 488 253)" font-style="italic">Eufrate</text>
+    <text x="868" y="338" font-family="DejaVu Sans Condensed, sans-serif" font-size="27" fill="#0b2ee6" transform="rotate(71 868 338)" font-style="italic">Tigri</text>
+    <text x="172" y="684" font-family="DejaVu Sans Condensed, sans-serif" font-size="26" fill="#0b2ee6" transform="rotate(-86 172 684)" font-style="italic">Nilo</text>
+    <text x="345" y="789" font-family="DejaVu Sans Condensed, sans-serif" font-size="22" fill="#0b2ee6" text-anchor="middle" font-style="italic">Mar Rosso</text>
+    <text x="961" y="642" font-family="DejaVu Sans Condensed, sans-serif" font-size="25" fill="#0b2ee6" text-anchor="middle" font-style="italic">Mare</text>
+    <text x="961" y="670" font-family="DejaVu Sans Condensed, sans-serif" font-size="25" fill="#0b2ee6" text-anchor="middle" font-style="italic">Inferiore</text>
+    <text x="490" y="680" font-family="DejaVu Sans Condensed, sans-serif" font-size="19" fill="#0b2ee6" font-style="italic">Mare Salato</text>
     <path d="M484 673L370 511" fill="none" stroke="#555555" stroke-width="0.9"/>
   </g>
   <g id="citta" inkscape:groupmode="layer" inkscape:label="08 · Città dell’epoca" clip-path="url(#riquadro-carta)">
     <g id="citta-assur">
       <circle cx="797" cy="198" r="5" fill="#111" stroke="white" stroke-width="1.4"/>
-      <text x="807" y="199" font-family="DejaVu Sans Condensed, sans-serif" font-size="24" fill="#080a0a">Assur</text>
+      <text x="807" y="199" font-family="DejaVu Sans Condensed, sans-serif" font-size="24" fill="#141414">Assur</text>
     </g>
     <g id="citta-mari">
       <circle cx="627" cy="313" r="5" fill="#111" stroke="white" stroke-width="1.4"/>
-      <text x="569" y="320" font-family="DejaVu Sans Condensed, sans-serif" font-size="24" fill="#080a0a">Mari</text>
+      <text x="569" y="320" font-family="DejaVu Sans Condensed, sans-serif" font-size="24" fill="#141414">Mari</text>
     </g>
     <g id="citta-biblo">
       <circle cx="341" cy="317" r="5" fill="#111" stroke="white" stroke-width="1.4"/>
-      <text x="276" y="313" font-family="DejaVu Sans Condensed, sans-serif" font-size="24" fill="#080a0a">Biblo</text>
+      <text x="276" y="313" font-family="DejaVu Sans Condensed, sans-serif" font-size="24" fill="#141414">Biblo</text>
     </g>
     <g id="citta-babilonia">
       <circle cx="800" cy="444" r="5" fill="#111" stroke="white" stroke-width="1.4"/>
-      <text x="691" y="451" font-family="DejaVu Sans Condensed, sans-serif" font-size="24" fill="#080a0a">Babilonia</text>
+      <text x="691" y="451" font-family="DejaVu Sans Condensed, sans-serif" font-size="24" fill="#141414">Babilonia</text>
     </g>
     <g id="citta-larsa">
       <circle cx="847" cy="497" r="5" fill="#111" stroke="white" stroke-width="1.4"/>
-      <text x="787" y="492" font-family="DejaVu Sans Condensed, sans-serif" font-size="24" fill="#080a0a">Larsa</text>
+      <text x="787" y="492" font-family="DejaVu Sans Condensed, sans-serif" font-size="24" fill="#141414">Larsa</text>
     </g>
     <g id="citta-menfi">
       <circle cx="143" cy="583" r="5" fill="#111" stroke="white" stroke-width="1.4"/>
-      <text x="68" y="566" font-family="DejaVu Sans Condensed, sans-serif" font-size="24" fill="#080a0a">Menfi</text>
+      <text x="68" y="566" font-family="DejaVu Sans Condensed, sans-serif" font-size="24" fill="#141414">Menfi</text>
     </g>
     <circle cx="336" cy="472" r="4" fill="#111" stroke="white" stroke-width="1.4"/>
   </g>
   <g id="tappe" inkscape:groupmode="layer" inkscape:label="09 · Nove tappe e richiami" clip-path="url(#riquadro-carta)">
     <circle cx="909" cy="525" r="14" fill="#fffbef" stroke="#ff1717" stroke-width="2"/>
     <text x="909" y="531" font-family="DejaVu Sans Condensed, sans-serif" font-size="21" fill="#ff1717" text-anchor="middle" font-weight="bold">1</text>
-    <text x="933" y="522" font-family="DejaVu Sans Condensed, sans-serif" font-size="24" fill="#080a0a" font-weight="bold">Ur dei</text>
-    <text x="933" y="548" font-family="DejaVu Sans Condensed, sans-serif" font-size="24" fill="#080a0a" font-weight="bold">Caldei</text>
+    <text x="933" y="522" font-family="DejaVu Sans Condensed, sans-serif" font-size="24" fill="#141414" font-weight="bold">Ur dei</text>
+    <text x="933" y="548" font-family="DejaVu Sans Condensed, sans-serif" font-size="24" fill="#141414" font-weight="bold">Caldei</text>
     <circle cx="530" cy="143" r="14" fill="#fffbef" stroke="#ff1717" stroke-width="2"/>
     <text x="530" y="149" font-family="DejaVu Sans Condensed, sans-serif" font-size="21" fill="#ff1717" text-anchor="middle" font-weight="bold">2</text>
-    <text x="552" y="151" font-family="DejaVu Sans Condensed, sans-serif" font-size="27" fill="#080a0a" font-weight="bold">Carran</text>
+    <text x="552" y="151" font-family="DejaVu Sans Condensed, sans-serif" font-size="27" fill="#141414" font-weight="bold">Carran</text>
     <circle cx="344" cy="423" r="4.5" fill="#ff1717" stroke="white" stroke-width="1.4"/>
     <path d="M349 423L395 409" fill="none" stroke="#666" stroke-width="0.9"/>
     <circle cx="410" cy="409" r="14" fill="#fffbef" stroke="#ff1717" stroke-width="2"/>
     <text x="410" y="415" font-family="DejaVu Sans Condensed, sans-serif" font-size="21" fill="#ff1717" text-anchor="middle" font-weight="bold">3</text>
-    <text x="433" y="416" font-family="DejaVu Sans Condensed, sans-serif" font-size="24" fill="#080a0a" font-weight="bold">Sichem</text>
+    <text x="433" y="416" font-family="DejaVu Sans Condensed, sans-serif" font-size="24" fill="#141414" font-weight="bold">Sichem</text>
     <circle cx="340" cy="454" r="4.5" fill="#ff1717" stroke="white" stroke-width="1.4"/>
     <path d="M345 454L395 444" fill="none" stroke="#666" stroke-width="0.9"/>
     <circle cx="410" cy="444" r="14" fill="#fffbef" stroke="#ff1717" stroke-width="2"/>
     <text x="410" y="450" font-family="DejaVu Sans Condensed, sans-serif" font-size="21" fill="#ff1717" text-anchor="middle" font-weight="bold">4</text>
-    <text x="433" y="451" font-family="DejaVu Sans Condensed, sans-serif" font-size="24" fill="#080a0a" font-weight="bold">Tra Betel e Ai</text>
+    <text x="433" y="451" font-family="DejaVu Sans Condensed, sans-serif" font-size="24" fill="#141414" font-weight="bold">Tra Betel e Ai</text>
     <circle cx="336" cy="472" r="4.5" fill="#ff1717" stroke="white" stroke-width="1.4"/>
     <path d="M341 472L395 478" fill="none" stroke="#666" stroke-width="0.9"/>
     <circle cx="410" cy="478" r="14" fill="#fffbef" stroke="#ff1717" stroke-width="2"/>
     <text x="410" y="484" font-family="DejaVu Sans Condensed, sans-serif" font-size="21" fill="#ff1717" text-anchor="middle" font-weight="bold">9</text>
-    <text x="433" y="485" font-family="DejaVu Sans Condensed, sans-serif" font-size="24" fill="#080a0a" font-weight="bold">Mòria*</text>
+    <text x="433" y="485" font-family="DejaVu Sans Condensed, sans-serif" font-size="24" fill="#141414" font-weight="bold">Mòria*</text>
     <circle cx="331" cy="496" r="4.5" fill="#ff1717" stroke="white" stroke-width="1.4"/>
     <path d="M336 496L395 537" fill="none" stroke="#666" stroke-width="0.9"/>
     <circle cx="410" cy="537" r="14" fill="#fffbef" stroke="#ff1717" stroke-width="2"/>
     <text x="410" y="543" font-family="DejaVu Sans Condensed, sans-serif" font-size="21" fill="#ff1717" text-anchor="middle" font-weight="bold">7</text>
-    <text x="433" y="544" font-family="DejaVu Sans Condensed, sans-serif" font-size="24" fill="#080a0a" font-weight="bold">Mamre</text>
-    <text x="433" y="569" font-family="DejaVu Sans Condensed, sans-serif" font-size="24" fill="#080a0a" font-weight="bold">presso Ebron</text>
+    <text x="433" y="544" font-family="DejaVu Sans Condensed, sans-serif" font-size="24" fill="#141414" font-weight="bold">Mamre</text>
+    <text x="433" y="569" font-family="DejaVu Sans Condensed, sans-serif" font-size="24" fill="#141414" font-weight="bold">presso Ebron</text>
     <circle cx="303" cy="521" r="4.5" fill="#ff1717" stroke="white" stroke-width="1.4"/>
     <path d="M308 521L395 590" fill="none" stroke="#666" stroke-width="0.9"/>
     <circle cx="410" cy="590" r="14" fill="#fffbef" stroke="#ff1717" stroke-width="2"/>
     <text x="410" y="596" font-family="DejaVu Sans Condensed, sans-serif" font-size="21" fill="#ff1717" text-anchor="middle" font-weight="bold">8</text>
-    <text x="433" y="597" font-family="DejaVu Sans Condensed, sans-serif" font-size="24" fill="#080a0a" font-weight="bold">Bersabea</text>
-    <path d="M352.2 580.7L351.3 578L349.8 575.3L347.7 572.7L345 570.2L341.7 567.8L337.8 565.7L333.4 563.8L328.5 562.2L323.2 560.9L317.6 560.1L311.8 559.6L306 559.6L300.3 560L295.1 560.8L290.3 561.9L286.1 563.2L282.6 564.8L279.8 566.5L277.7 568.4L276.3 570.4L275.6 572.6L275.5 574.9L276.1 577.3L277.3 579.7L279.1 582.1L281.5 584.5L284.3 586.9L287.6 589.2L291.3 591.3L295.3 593.3L299.6 595L304.1 596.5L308.7 597.8L313.4 598.7L318.1 599.4L322.7 599.7L327.2 599.7L331.5 599.3L335.5 598.7L339.2 597.6L342.6 596.3L345.5 594.7L347.9 592.9L349.9 590.7L351.3 588.4L352.2 586L352.5 583.4Z" fill="none" stroke="#f78611" stroke-width="1.8" stroke-dasharray="5 3"/>
+    <text x="433" y="597" font-family="DejaVu Sans Condensed, sans-serif" font-size="24" fill="#141414" font-weight="bold">Bersabea</text>
+    <path d="M346.4 577.1L345.7 574.5L344.5 572L342.6 569.6L340.2 567.3L337.2 565.1L333.6 563.2L329.5 561.6L324.9 560.2L319.8 559.2L314.5 558.6L308.9 558.3L303.3 558.5L297.8 559L292.7 559.9L288 561L283.9 562.3L280.4 563.8L277.6 565.5L275.5 567.4L274 569.4L273.2 571.5L273 573.7L273.4 575.9L274.5 578.2L276.1 580.6L278.2 582.9L280.8 585.1L283.8 587.2L287.2 589.2L290.9 591L295 592.5L299.2 593.9L303.5 594.9L308 595.7L312.5 596.2L316.9 596.3L321.2 596.2L325.3 595.7L329.2 594.9L332.8 593.8L336.1 592.4L339 590.7L341.5 588.9L343.5 586.8L345 584.5L346 582.1L346.5 579.6Z" fill="none" stroke="#f78611" stroke-width="1.8" stroke-dasharray="5 3"/>
     <circle cx="315" cy="580" r="4.5" fill="#ff1717" stroke="white" stroke-width="1.4"/>
     <circle cx="351" cy="581" r="14" fill="#fffbef" stroke="#ff1717" stroke-width="2"/>
     <text x="351" y="587" font-family="DejaVu Sans Condensed, sans-serif" font-size="21" fill="#ff1717" text-anchor="middle" font-weight="bold">5</text>
-    <text x="338" y="637" font-family="DejaVu Sans Condensed, sans-serif" font-size="24" fill="#080a0a" font-weight="bold">Negheb</text>
+    <text x="338" y="637" font-family="DejaVu Sans Condensed, sans-serif" font-size="24" fill="#141414" font-weight="bold">Negheb</text>
     <path d="M342 479L423 504" fill="none" stroke="#666" stroke-width="0.9"/>
     <circle cx="336" cy="472" r="5.5" fill="#111" stroke="white" stroke-width="1.4"/>
-    <text x="433" y="511" font-family="DejaVu Sans Condensed, sans-serif" font-size="20" fill="#080a0a">Rushalimum</text>
-    <path d="M27.7 685.8L25.3 675.2L23.7 664.6L22.9 653.9L23 643.3L23.9 632.8L25.7 622.7L28.3 613L31.7 603.7L35.9 595.1L40.8 587.1L46.3 579.8L52.5 573.3L59.3 567.7L66.5 563L74.2 559.2L82.2 556.5L90.6 554.8L99.1 554.1L107.7 554.5L116.4 556L125 558.4L133.5 561.9L141.7 566.4L149.7 571.8L157.3 578L164.5 585.1L171.1 592.9L177.2 601.5L182.6 610.6L187.4 620.2L191.4 630.2L194.6 640.6L197 651.1L198.6 661.8L199.4 672.5L199.3 683.1L198.4 693.5L196.6 703.6L194 713.4L190.6 722.6L186.4 731.3L181.6 739.3L176 746.6L169.8 753.1L163.1 758.7L155.8 763.4L148.1 767.1L140.1 769.8L131.8 771.5L123.2 772.2L114.6 771.8L105.9 770.4L97.3 767.9L88.9 764.4L80.6 760L72.6 754.6L65 748.3L57.9 741.2L51.2 733.4L45.1 724.9L39.7 715.8L35 706.2L31 696.1Z" fill="none" stroke="#f78611" stroke-width="1.8" stroke-dasharray="5 3"/>
+    <text x="433" y="511" font-family="DejaVu Sans Condensed, sans-serif" font-size="20" fill="#141414">Rushalimum</text>
+    <path d="M166.6 592.4L165.4 589.7L163.7 586.8L161.7 583.9L159.4 580.9L156.7 578L153.8 575.2L150.6 572.5L147.3 570L143.8 567.8L140.3 565.8L136.9 564.2L133.5 562.9L130.3 562L127.2 561.5L124.5 561.3L122 561.6L119.9 562.2L118.2 563.2L116.9 564.5L116.1 566.1L115.7 568L115.8 570.2L116.3 572.5L117.3 575L118.7 577.7L120.5 580.4L122.7 583.2L125.3 586L128.1 588.7L131.1 591.4L134.2 593.9L137.5 596.3L140.8 598.5L144.1 600.4L147.3 602L150.5 603.4L153.5 604.4L156.4 605L159 605.3L161.3 605.2L163.4 604.7L165.1 603.9L166.4 602.7L167.3 601.2L167.8 599.4L167.8 597.3L167.4 595Z" fill="none" stroke="#f78611" stroke-width="1.8" stroke-dasharray="5 3"/>
     <circle cx="121" cy="596" r="14" fill="#fffbef" stroke="#ff1717" stroke-width="2"/>
     <text x="121" y="602" font-family="DejaVu Sans Condensed, sans-serif" font-size="21" fill="#ff1717" text-anchor="middle" font-weight="bold">6</text>
-    <text x="54" y="666" font-family="DejaVu Sans Condensed, sans-serif" font-size="25" fill="#080a0a" font-weight="bold">Egitto</text>
+    <text x="54" y="666" font-family="DejaVu Sans Condensed, sans-serif" font-size="25" fill="#141414" font-weight="bold">Egitto</text>
   </g>
   <g id="cornice-scala" inkscape:groupmode="layer" inkscape:label="10 · Cornice orientamento e scala">
     <rect x="16" y="73" width="1004" height="725" fill="none" stroke="#466665" stroke-width="1.2"/>
-    <text x="992" y="97" font-family="DejaVu Sans Condensed, sans-serif" font-size="20" fill="#080a0a" text-anchor="middle">N</text>
+    <text x="992" y="97" font-family="DejaVu Sans Condensed, sans-serif" font-size="20" fill="#141414" text-anchor="middle">N</text>
     <path d="M992 137L992 105M986 114L992 105L998 114" fill="none" stroke="#172c2f" stroke-width="1.8"/>
     <path d="M622 749H770M622 742V757M770 742V757" fill="none" stroke="#151515" stroke-width="2"/>
-    <text x="622" y="738" font-family="DejaVu Sans Condensed, sans-serif" font-size="20" fill="#080a0a" text-anchor="middle">0</text>
-    <text x="770" y="738" font-family="DejaVu Sans Condensed, sans-serif" font-size="20" fill="#080a0a" text-anchor="middle">200 km</text>
+    <text x="622" y="738" font-family="DejaVu Sans Condensed, sans-serif" font-size="20" fill="#141414" text-anchor="middle">0</text>
+    <text x="770" y="738" font-family="DejaVu Sans Condensed, sans-serif" font-size="20" fill="#141414" text-anchor="middle">200 km</text>
   </g>
   <g id="legenda-note" inkscape:groupmode="layer" inkscape:label="11 · Legenda e note sotto la carta">
     <rect x="16" y="813" width="1004" height="280" fill="#fffefa" stroke="#b0a28a" stroke-width="1"/>
     <circle cx="46" cy="839" r="14" fill="#fffbef" stroke="#ff1717" stroke-width="2"/>
     <text x="46" y="845" font-family="DejaVu Sans Condensed, sans-serif" font-size="21" fill="#ff1717" text-anchor="middle" font-weight="bold">1</text>
-    <text x="70" y="846" font-family="DejaVu Sans Condensed, sans-serif" font-size="17" fill="#080a0a">Tappe del racconto biblico</text>
+    <text x="70" y="846" font-family="DejaVu Sans Condensed, sans-serif" font-size="17" fill="#141414">Tappe del racconto biblico</text>
     <circle cx="406" cy="839" r="14" fill="#fffbef" stroke="#ff1717" stroke-width="2"/>
     <text x="406" y="845" font-family="DejaVu Sans Condensed, sans-serif" font-size="21" fill="#ff1717" text-anchor="middle" font-weight="bold">6</text>
-    <text x="430" y="846" font-family="DejaVu Sans Condensed, sans-serif" font-size="17" fill="#080a0a">Tappa in area non precisata</text>
+    <text x="430" y="846" font-family="DejaVu Sans Condensed, sans-serif" font-size="17" fill="#141414">Tappa in area non precisata</text>
     <ellipse cx="765" cy="838" rx="21" ry="12" fill="none" stroke="#f78611" stroke-dasharray="5 3"/>
-    <text x="796" y="846" font-family="DejaVu Sans Condensed, sans-serif" font-size="17" fill="#080a0a">Area non precisata</text>
+    <text x="796" y="846" font-family="DejaVu Sans Condensed, sans-serif" font-size="17" fill="#141414">Area non precisata</text>
     <path d="M32 879H86" fill="none" stroke="#ff1717" stroke-width="3" stroke-dasharray="7 4" marker-end="url(#punta-rossa)"/>
-    <text x="99" y="885" font-family="DejaVu Sans Condensed, sans-serif" font-size="17" fill="#080a0a">Cammino: andata, ritorno e tappe successive</text>
+    <text x="99" y="885" font-family="DejaVu Sans Condensed, sans-serif" font-size="17" fill="#141414">Cammino: andata, ritorno e tappe successive</text>
     <circle cx="581" cy="878" r="5" fill="#111" stroke="white" stroke-width="1.4"/>
-    <text x="595" y="885" font-family="DejaVu Sans Condensed, sans-serif" font-size="17" fill="#080a0a">Altre città dell’epoca</text>
+    <text x="595" y="885" font-family="DejaVu Sans Condensed, sans-serif" font-size="17" fill="#141414">Altre città dell’epoca</text>
     <rect x="802" y="866" width="26" height="21" fill="url(#fertile)"/>
-    <text x="841" y="884" font-family="DejaVu Sans Condensed, sans-serif" font-size="17" fill="#080a0a">Mezzaluna fertile</text>
-    <text x="31" y="925" font-family="DejaVu Sans Condensed, sans-serif" font-size="17" fill="#080a0a">*Mòria: posizione secondo la tradizione che la collega a Gerusalemme;</text>
-    <text x="31" y="948" font-family="DejaVu Sans Condensed, sans-serif" font-size="17" fill="#080a0a">non certa nel racconto della Genesi. Bersabea–Mòria: andata e ritorno.</text>
-    <text x="31" y="979" font-family="DejaVu Sans Condensed, sans-serif" font-size="16" fill="#080a0a">Percorsi e fascia fertile schematici. Il contesto storico non data con certezza il viaggio di Abramo.</text>
-    <text x="31" y="1001" font-family="DejaVu Sans Condensed, sans-serif" font-size="16" fill="#080a0a">Tratto finale dei fiumi e costa antica indicativi. Gli ovali tratteggiati non indicano confini.</text>
-    <text x="31" y="1032" font-family="DejaVu Sans Condensed, sans-serif" font-size="20" fill="#175d13" font-weight="bold">Carta antica – Riferimenti politici senza delimitazioni territoriali.</text>
-    <text x="31" y="1056" font-family="DejaVu Sans Condensed, sans-serif" font-size="15" fill="#080a0a">Nomi politici colorati: riferimenti intorno al 1800 a.C. Rushalimum: nome antico di Gerusalemme.</text>
+    <text x="841" y="884" font-family="DejaVu Sans Condensed, sans-serif" font-size="17" fill="#141414">Mezzaluna fertile</text>
+    <text x="31" y="925" font-family="DejaVu Sans Condensed, sans-serif" font-size="17" fill="#141414">*Mòria: posizione secondo la tradizione che la collega a Gerusalemme;</text>
+    <text x="31" y="948" font-family="DejaVu Sans Condensed, sans-serif" font-size="17" fill="#141414">non certa nel racconto della Genesi. Bersabea–Mòria: andata e ritorno.</text>
+    <text x="31" y="979" font-family="DejaVu Sans Condensed, sans-serif" font-size="16" fill="#141414">Percorsi e fascia fertile schematici. Il contesto storico non data con certezza il viaggio di Abramo.</text>
+    <text x="31" y="1001" font-family="DejaVu Sans Condensed, sans-serif" font-size="16" fill="#141414">Tratto finale dei fiumi e costa antica indicativi. Gli ovali tratteggiati non indicano confini.</text>
+    <text x="31" y="1032" font-family="DejaVu Sans Condensed, sans-serif" font-size="20" fill="#085a08" font-weight="bold">Carta antica – Riferimenti politici senza delimitazioni territoriali.</text>
+    <text x="31" y="1056" font-family="DejaVu Sans Condensed, sans-serif" font-size="15" fill="#141414">Nomi politici colorati: riferimenti intorno al 1800 a.C. Rushalimum: nome antico di Gerusalemme.</text>
     <text x="31" y="1080" font-family="DejaVu Sans Condensed, sans-serif" font-size="14" fill="#555">Anteprima vettoriale 09 · Ricostruzione dal PNG approvato · Da controllare a dimensione effettiva.</text>
   </g>
 </svg>

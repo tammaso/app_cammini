@@ -163,6 +163,11 @@
                         <input type="hidden" name="oggiMostrato:{t.chiave}" value="1" />
                         <label class="spunta"><input type="checkbox" name="oggi:{t.chiave}" bind:checked={oggi[t.chiave]} /> anche in «Oggi»</label>
                       {/if}
+                      <span class="opzioni">
+                        <label class="spunta">corpo <input class="corpo" name="corpo:{t.chiave}" inputmode="decimal" placeholder="—"
+                          value={t.uso.uso === 'nome' && t.uso.corpo ? String(t.uso.corpo) : ''} aria-label="Corpo in pixel di «{t.testo}»" /> px</label>
+                        <label class="spunta"><input type="checkbox" name="sempre:{t.chiave}" checked={t.uso.uso === 'nome' && !!t.uso.sempre} /> sempre visibile</label>
+                      </span>
                     {/if}
                   </td>
                   <td>
@@ -219,6 +224,8 @@
   .originale { font-weight: 600; }
   .spento .originale { opacity: .55; font-weight: 400; }
   .spunta { font-size: .85rem; display: flex; gap: .35rem; align-items: center; }
+  .opzioni { display: flex; gap: .75rem; flex-wrap: wrap; }
+  .corpo { width: 3.5rem; }
   .luogo { display: block; font-size: .8rem; color: var(--accent-ink); }
   .luogo.manca { color: var(--danger); }
   .barra { position: sticky; bottom: 0; display: flex; gap: .6rem; align-items: center; padding: .75rem 1rem; flex-wrap: wrap; }

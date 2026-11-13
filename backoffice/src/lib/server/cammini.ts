@@ -2,7 +2,7 @@
 import type { DatabaseSync } from 'node:sqlite';
 import type { Coordinate, Etichetta } from '../../../../condiviso/cammino.ts';
 import { inTransazione } from '../../../db/connessione.ts';
-import type { Cammino, CamminoInElenco, Errori, Stato, Tappa, TappaInElenco } from '../cammini.ts';
+import { MAX_IMMAGINI_TAPPA, type Cammino, type CamminoInElenco, type Errori, type Stato, type Tappa, type TappaInElenco } from '../cammini.ts';
 import { adesso, facoltativo, intero, testo, valoriDi } from './moduli.ts';
 import { registraModifica } from './registro.ts';
 
@@ -139,25 +139,36 @@ const toccaCammino = (db: DatabaseSync, id: number) => db.prepare('UPDATE cammin
 
 export function elencaTappe(db: DatabaseSync, camminoId: number): TappaInElenco[] {
   return db.prepare(`SELECT t.id, t.posizione, t.nome, t.breve, t.riferimento, l.nome AS luogo,
-      coalesce(json_array_length(t.tracciato), 0) AS punti, t.immagine_id IS NOT NULL AS immagine
+      coalesce(json_array_length(t.tracciato), 0) AS punti, (SELECT count(*) FROM tappe_immagini ti WHERE ti.tappa_id = t.id) AS immagini
     FROM tappe t JOIN luoghi l ON l.id = t.luogo_id WHERE t.cammino_id = ? ORDER BY t.posizione`).all(camminoId).map((r) => ({
     id: Number(r.id), posizione: Number(r.posizione), nome: String(r.nome), breve: String(r.breve), luogo: String(r.luogo),
-    riferimento: opz(r.riferimento), puntiTracciato: Number(r.punti), immagine: Boolean(r.immagine),
+    riferimento: opz(r.riferimento), puntiTracciato: Number(r.punti), immagini: Number(r.immagini),
   }));
 }
+
+// Le immagini della galleria di una tappa, nell'ordine.
+export const immaginiDellaTappa = (db: DatabaseSync, tappaId: number): number[] =>
+  db.prepare('SELECT immagine_id FROM tappe_immagini WHERE tappa_id = ? ORDER BY posizione').all(tappaId).map((r) => Number(r.immagine_id));
 
 export function leggiTappa(db: DatabaseSync, id: number): Tappa | undefined {
   const r = db.prepare('SELECT * FROM tappe WHERE id = ?').get(id);
   if (!r) return undefined;
   return {
     id: Number(r.id), camminoId: Number(r.cammino_id), posizione: Number(r.posizione), nome: String(r.nome), breve: String(r.breve),
-    luogoId: Number(r.luogo_id), luogoAttuale: opz(r.luogo_attuale), riferimento: opz(r.riferimento), testo: String(r.testo),
-    approfondimento: opz(r.approfondimento), immagineId: r.immagine_id == null ? null : Number(r.immagine_id),
+    breveOggi: opz(r.breve_oggi), luogoId: Number(r.luogo_id), luogoAttuale: opz(r.luogo_attuale), riferimento: opz(r.riferimento), testo: String(r.testo),
+    approfondimento: opz(r.approfondimento), immagini: immaginiDellaTappa(db, id),
     tracciato: json<Coordinate[] | null>(r.tracciato, null), secondaria: Boolean(r.secondaria),
   };
 }
 
-const CAMPI_TAPPA = ['nome', 'breve', 'luogoId', 'luogoAttuale', 'riferimento', 'testo', 'approfondimento', 'immagineId', 'secondaria'] as const;
+// La galleria si riscrive intera, nell'ordine dato.
+function scriviGalleria(db: DatabaseSync, tappaId: number, immagini: number[]): void {
+  db.prepare('DELETE FROM tappe_immagini WHERE tappa_id = ?').run(tappaId);
+  const inserisci = db.prepare('INSERT INTO tappe_immagini (tappa_id, posizione, immagine_id) VALUES (?, ?, ?)');
+  immagini.forEach((immagineId, posizione) => inserisci.run(tappaId, posizione, immagineId));
+}
+
+const CAMPI_TAPPA = ['nome', 'breve', 'breveOggi', 'luogoId', 'luogoAttuale', 'riferimento', 'testo', 'approfondimento', 'immagini', 'secondaria'] as const;
 export type CampoTappa = (typeof CAMPI_TAPPA)[number];
 export type DatiTappa = Omit<Tappa, 'id' | 'camminoId' | 'posizione' | 'tracciato'>;
 
@@ -167,22 +178,28 @@ export function validaTappa(db: DatabaseSync, modulo: FormData): EsitoModulo<Dat
   if (!valori.nome) errori.nome = 'Il nome è obbligatorio.';
   if (!valori.breve) errori.breve = 'Il nome breve è obbligatorio: compare accanto al pin.';
   else if (valori.breve.length > 24) errori.breve = 'Al massimo 24 caratteri: sta accanto al pin.';
+  if (valori.breveOggi && valori.breveOggi.length > 24) errori.breveOggi = 'Al massimo 24 caratteri: sta accanto al pin.';
   const luogoId = intero(modulo, 'luogoId');
   if (luogoId === null || !db.prepare('SELECT 1 FROM luoghi WHERE id = ?').get(luogoId)) {
     errori.luogoId = "Scegli il luogo dall'anagrafe: le coordinate vengono da lì.";
   }
   if (!valori.testo) errori.testo = 'Il testo del pannello è obbligatorio.';
-  const immagineId = valori.immagineId ? intero(modulo, 'immagineId') : null;
-  if (valori.immagineId && (immagineId === null || !db.prepare('SELECT 1 FROM immagini WHERE id = ?').get(immagineId))) {
-    errori.immagineId = "L'immagine scelta non è nell'archivio.";
+  // galleria della scheda: gli id delle immagini dell'archivio, nell'ordine, separati da virgole
+  const immagini = valori.immagini ? valori.immagini.split(',').map((v) => Number(v.trim())) : [];
+  if (immagini.some((i) => !Number.isInteger(i) || !db.prepare('SELECT 1 FROM immagini WHERE id = ?').get(i))) {
+    errori.immagini = "Un'immagine scelta non è più nell'archivio: toglila dalla galleria.";
+  } else if (new Set(immagini).size !== immagini.length) {
+    errori.immagini = "Un'immagine compare due volte nella galleria.";
+  } else if (immagini.length > MAX_IMMAGINI_TAPPA) {
+    errori.immagini = `Al massimo ${MAX_IMMAGINI_TAPPA} immagini per tappa.`;
   }
   if (Object.keys(errori).length) return { ok: false, errori, valori };
   return {
     ok: true,
     dati: {
-      nome: valori.nome, breve: valori.breve, luogoId: luogoId!, luogoAttuale: facoltativo(modulo, 'luogoAttuale'),
+      nome: valori.nome, breve: valori.breve, breveOggi: facoltativo(modulo, 'breveOggi'), luogoId: luogoId!, luogoAttuale: facoltativo(modulo, 'luogoAttuale'),
       riferimento: facoltativo(modulo, 'riferimento'), testo: valori.testo, approfondimento: facoltativo(modulo, 'approfondimento'),
-      immagineId, secondaria: modulo.get('secondaria') === 'on',
+      immagini, secondaria: modulo.get('secondaria') === 'on',
     },
   };
 }
@@ -190,11 +207,12 @@ export function validaTappa(db: DatabaseSync, modulo: FormData): EsitoModulo<Dat
 export function creaTappa(db: DatabaseSync, camminoId: number, d: DatiTappa): number {
   return inTransazione(db, () => {
     const posizione = Number(db.prepare('SELECT coalesce(max(posizione) + 1, 0) AS n FROM tappe WHERE cammino_id = ?').get(camminoId)!.n);
-    const { lastInsertRowid } = db.prepare(`INSERT INTO tappe (cammino_id, posizione, nome, breve, luogo_id, luogo_attuale, riferimento,
-        testo, approfondimento, immagine_id, secondaria) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`)
-      .run(camminoId, posizione, d.nome, d.breve, d.luogoId, d.luogoAttuale, d.riferimento, d.testo, d.approfondimento, d.immagineId, d.secondaria ? 1 : 0);
-    toccaCammino(db, camminoId);
+    const { lastInsertRowid } = db.prepare(`INSERT INTO tappe (cammino_id, posizione, nome, breve, breve_oggi, luogo_id, luogo_attuale, riferimento,
+        testo, approfondimento, secondaria) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`)
+      .run(camminoId, posizione, d.nome, d.breve, d.breveOggi, d.luogoId, d.luogoAttuale, d.riferimento, d.testo, d.approfondimento, d.secondaria ? 1 : 0);
     const id = Number(lastInsertRowid);
+    scriviGalleria(db, id, d.immagini);
+    toccaCammino(db, camminoId);
     registraModifica(db, { azione: 'creazione', oggetto: 'tappa', oggettoId: id, camminoId, titolo: d.nome, descrizione: `Tappa aggiunta, in posizione ${posizione + 1}` });
     return id;
   });
@@ -202,11 +220,14 @@ export function creaTappa(db: DatabaseSync, camminoId: number, d: DatiTappa): nu
 
 export function aggiornaTappa(db: DatabaseSync, id: number, d: DatiTappa): void {
   const tappa = leggiTappa(db, id)!;
-  db.prepare(`UPDATE tappe SET nome = ?, breve = ?, luogo_id = ?, luogo_attuale = ?, riferimento = ?, testo = ?, approfondimento = ?,
-      immagine_id = ?, secondaria = ? WHERE id = ?`)
-    .run(d.nome, d.breve, d.luogoId, d.luogoAttuale, d.riferimento, d.testo, d.approfondimento, d.immagineId, d.secondaria ? 1 : 0, id);
-  toccaCammino(db, tappa.camminoId);
-  registraModifica(db, { azione: 'modifica', oggetto: 'tappa', oggettoId: id, camminoId: tappa.camminoId, titolo: d.nome, descrizione: 'Tappa modificata' });
+  inTransazione(db, () => {
+    db.prepare(`UPDATE tappe SET nome = ?, breve = ?, breve_oggi = ?, luogo_id = ?, luogo_attuale = ?, riferimento = ?, testo = ?, approfondimento = ?,
+        secondaria = ? WHERE id = ?`)
+      .run(d.nome, d.breve, d.breveOggi, d.luogoId, d.luogoAttuale, d.riferimento, d.testo, d.approfondimento, d.secondaria ? 1 : 0, id);
+    scriviGalleria(db, id, d.immagini);
+    toccaCammino(db, tappa.camminoId);
+    registraModifica(db, { azione: 'modifica', oggetto: 'tappa', oggettoId: id, camminoId: tappa.camminoId, titolo: d.nome, descrizione: 'Tappa modificata' });
+  });
 }
 
 // Il tracciato dalla tappa precedente torna una linea dritta (per esempio dopo aver spostato le tappe).

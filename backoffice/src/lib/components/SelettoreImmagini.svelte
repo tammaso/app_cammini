@@ -89,7 +89,7 @@
               aria-pressed={multiplo ? indice >= 0 : undefined}
               onclick={() => alterna(immagine)}
             >
-              <img src={urlAnteprima(immagine.id, 320)} alt="" loading="lazy" />
+              <img src={urlAnteprima(immagine, 320)} alt="" loading="lazy" />
               {#if indice >= 0}<span class="numero" aria-hidden="true">{indice + 1}</span>{/if}
               <span class="testo">{immagine.alt || immagine.nomeOriginale}</span>
               {#if esclusa}

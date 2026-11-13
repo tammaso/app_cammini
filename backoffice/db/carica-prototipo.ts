@@ -54,18 +54,18 @@ for (const [ordine, voce] of indice.cammini.entries()) {
     .run(c.id, c.titolo, c.nome, c.sottotitolo, c.globo.luogo, c.globo.testo, c.panoramica.testo, JSON.stringify(c.etichette),
       JSON.stringify(c.frecce), ordine).lastInsertRowid);
   for (const [posizione, t] of c.tappe.entries()) {
-    let immagineId: number | null = null;
-    if (t.immagine) {
-      const file = join(cartella, t.immagine.src);
+    const tappaId = Number(db.prepare(`INSERT INTO tappe (cammino_id, posizione, nome, breve, breve_oggi, luogo_id, luogo_attuale, riferimento,
+        testo, approfondimento, tracciato, secondaria) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`)
+      .run(camminoId, posizione, t.nome, t.breve, t.breveOggi ?? null, luogoDellaTappa(t.breve, t.coordinate), t.luogoAttuale, t.riferimento,
+        t.testo, t.approfondimento, t.tracciato ? JSON.stringify(t.tracciato) : null, t.secondaria ? 1 : 0).lastInsertRowid);
+    // la galleria della scheda: le immagini pubblicate tornano nell'archivio (se c'erano già, si riusano)
+    for (const [ordine, immagine] of (t.immagini ?? []).entries()) {
+      const file = join(cartella, immagine.src);
       const esito = await caricaImmagine(db, CARTELLA_IMMAGINI, await readFile(file), basename(file));
       if (!esito.ok) throw new Error(`${file}: ${esito.messaggio}`);
-      immagineId = esito.id;
-      aggiornaMetadati(db, immagineId, { alt: t.immagine.alt, didascalia: null, crediti: t.immagine.crediti || null, licenza: null });
+      aggiornaMetadati(db, esito.id, { alt: immagine.alt, didascalia: immagine.didascalia, crediti: immagine.crediti || null, licenza: null });
+      db.prepare('INSERT INTO tappe_immagini (tappa_id, posizione, immagine_id) VALUES (?, ?, ?)').run(tappaId, ordine, esito.id);
     }
-    db.prepare(`INSERT INTO tappe (cammino_id, posizione, nome, breve, luogo_id, luogo_attuale, riferimento, testo, approfondimento,
-        immagine_id, tracciato, secondaria) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`)
-      .run(camminoId, posizione, t.nome, t.breve, luogoDellaTappa(t.breve, t.coordinate), t.luogoAttuale, t.riferimento, t.testo,
-        t.approfondimento, immagineId, t.tracciato ? JSON.stringify(t.tracciato) : null, t.secondaria ? 1 : 0);
   }
   console.log(`«${c.titolo}»: ${c.tappe.length} tappe`);
   for (const e of c.epoche) {

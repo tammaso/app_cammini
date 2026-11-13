@@ -31,7 +31,7 @@ html, body { height: 100%; }
 body { background: var(--bg); color: var(--ink); font-family: var(--body); font-size: 16px; line-height: 1.5; }
 *, *::before, *::after { box-sizing: border-box; }
 
-.app { height: 100%; display: grid; grid-template-columns: minmax(320px, 400px) 1fr; }
+.app { height: 100%; display: grid; grid-template-columns: minmax(320px, 400px) 1fr; grid-template-rows: minmax(0, 1fr) auto; }
 .panel {
   background: var(--panel); border-right: 1px solid var(--line);
   overflow-y: auto; min-width: 0;
@@ -115,6 +115,13 @@ h1 { font-family: var(--display); font-weight: 700; font-size: 34px; line-height
   display: flex; align-items: center; gap: 6px; padding: 0; border: 0; background: none; cursor: pointer;
   transition: opacity .3s;
 }
+/* linea di richiamo dal segnaposto spostato in colonna al suo luogo, con un pallino sul luogo (il segnaposto
+   è già posizionato da MapLibre: niente position qui, o i segnaposto si accodano) */
+.pin .richiamo { position: absolute; left: 13px; top: 50%; height: 0; border-top: 1.5px solid rgba(255,250,244,.9);
+  transform-origin: 0 0; z-index: -1; pointer-events: none; filter: drop-shadow(0 0 1px rgba(0,0,0,.8)); }
+.pin .richiamo::after { content: ""; position: absolute; right: -4px; top: -4.5px; width: 7px; height: 7px; border-radius: 50%;
+  background: #9b2335; border: 1.5px solid #fffaf4; box-sizing: border-box; }
+.pin .richiamo[hidden] { display: none; }
 .pin .pn {
   width: 26px; height: 26px; border-radius: 50%; display: grid; place-items: center;
   background: #fffaf4; color: #9b2335; border: 2px solid #9b2335;
@@ -126,8 +133,9 @@ h1 { font-family: var(--display); font-weight: 700; font-size: 34px; line-height
   text-shadow: 0 0 3px rgba(10,14,20,.9), 0 0 3px rgba(10,14,20,.9), 0 0 6px rgba(10,14,20,.7);
 }
 .pin.future { opacity: .55; }
-.pin.current .pn { background: #9b2335; color: #fff; transform: scale(1.2); }
-.pin.visited .pn { background: #9b2335; color: #fff; }
+/* la tappa raggiunta (quando la linea del cammino arriva) e quelle già percorse: blu */
+.pin.current .pn { transform: scale(1.2); }
+.pin.current.arrivata .pn, .pin.visited .pn { background: #1f5fbf; border-color: #1f5fbf; color: #fff; }
 .hide-pins .pin { visibility: hidden; }
 .mid .pin.minor:not(.current) .pl { visibility: hidden; }
 
@@ -137,11 +145,11 @@ h1 { font-family: var(--display); font-weight: 700; font-size: 34px; line-height
 .geo-label.sea { font: 500 calc(15px * var(--scala, 1))/1.1 "Alegreya Sans", Arial, sans-serif; color: #8fcfff; letter-spacing: .04em; text-shadow: 0 0 3px rgba(10,14,20,.9), 0 0 3px rgba(10,14,20,.9), 0 0 6px rgba(10,14,20,.7); }
 .geo-label.river { font: 500 calc(13px * var(--scala, 1))/1 "Alegreya Sans", Arial, sans-serif; color: #8fcfff; text-shadow: 0 0 3px rgba(10,14,20,.9), 0 0 3px rgba(10,14,20,.9), 0 0 6px rgba(10,14,20,.7); }
 .geo-label.region { font: 500 calc(15px * var(--scala, 1))/1 "Alegreya Sans", Arial, sans-serif; letter-spacing: .06em; color: #f6e7c8; text-shadow: 0 0 3px rgba(10,14,20,.9), 0 0 3px rgba(10,14,20,.9), 0 0 6px rgba(10,14,20,.7); }
-.geo-label.country { font: 700 calc(11px * var(--scala, 1))/1 "Alegreya Sans", Arial, sans-serif; letter-spacing: .2em; text-transform: uppercase; color: #ffffff; opacity: .92; text-shadow: 0 0 3px rgba(10,14,20,.9), 0 0 3px rgba(10,14,20,.9), 0 0 6px rgba(10,14,20,.7); }
+.geo-label.country { font: 700 calc(11px * var(--scala, 1))/1 "Alegreya Sans", Arial, sans-serif; letter-spacing: .2em; text-transform: uppercase; color: #ffffff; text-shadow: 0 0 3px rgba(10,14,20,.9), 0 0 3px rgba(10,14,20,.9), 0 0 6px rgba(10,14,20,.7); }
 /* Nomi di tutto il mondo (dati/mondo.js), in un livello proprio sopra la mappa: quali mostrare e dove
    lo decide la pagina, in base allo zoom e allo spazio libero */
 .livello-nomi { position: absolute; inset: 0; overflow: hidden; pointer-events: none; }
-.livello-nomi .geo-label { position: absolute; left: 0; top: 0; will-change: transform; text-shadow: 0 0 3px rgba(10,14,20,.9), 0 0 3px rgba(10,14,20,.9), 0 0 6px rgba(10,14,20,.7); }
+.livello-nomi .geo-label { position: absolute; left: 0; top: 0; will-change: transform; }
 .geo-label.nascosta { opacity: 0; }
 /* un nome che sparisce non resta a dissolversi fermo mentre la mappa si sposta: compare piano, sparisce subito */
 .livello-nomi .geo-label.nascosta { transition: none; }
@@ -154,19 +162,23 @@ h1 { font-family: var(--display); font-weight: 700; font-size: 34px; line-height
 /* capitali, città e vette: il simbolo cade sul punto, il nome accanto (a destra, o a sinistra se manca spazio) */
 .geo-label.capitale, .geo-label.citta, .geo-label.vetta { display: flex; align-items: center; gap: 5px; }
 .geo-label.sinistra { flex-direction: row-reverse; }
+/* città della cartina scritta sopra o sotto il suo pallino, che resta sul punto (vedi posizioniPossibili) */
+.geo-label.sopra { flex-direction: column-reverse; gap: 1px; }
+.geo-label.sotto { flex-direction: column; gap: 1px; }
 .geo-label.capitale::before, .geo-label.citta::before { content: ""; flex: none; width: 7px; height: 7px; box-sizing: border-box; background: #ffffff; border: 1.5px solid #1a1f24; }
 .geo-label.citta::before { border-radius: 50%; }
 .geo-label.capitale { font: 600 calc(12px * var(--scala, 1))/1 "Alegreya Sans", Arial, sans-serif; color: #ffffff; }
 .geo-label.citta { font: 400 calc(11px * var(--scala, 1))/1 "Alegreya Sans", Arial, sans-serif; color: #eef2f4; }
-/* nomi antichi (vista 1700 a.C.), come nella cartina del volume ma in corsivo: regni e popoli in
-   maiuscolo, regioni in maiuscolo spaziato; capitali con il pallino rosso, città con il pallino bianco */
+/* nomi antichi (epoca storica), come nella cartina: regni e popoli in maiuscolo, regioni in maiuscolo spaziato;
+   capitali con il pallino rosso, città con il pallino bianco. Dal 2026-11-13 in tondo, come tutti i nomi della
+   carta (prima in corsivo: il corsivo era riservato ai nomi antichi) */
 .livello-nomi .geo-label { white-space: pre; } /* i nomi su più righe vanno a capo come nella cartina */
-.geo-label.regno { font: italic 700 calc(15px * var(--scala, 1))/1.05 "Alegreya Sans", Arial, sans-serif; letter-spacing: .04em; text-transform: uppercase; color: #fff7e8; }
-.geo-label .sotto { display: block; margin-top: 3px; font: italic 500 calc(11px * var(--scala, 1))/1.15 "Alegreya Sans", Arial, sans-serif; letter-spacing: 0; text-transform: none; }
-.geo-label.regione-antica { font: italic 500 calc(12px * var(--scala, 1))/1.1 "Alegreya Sans", Arial, sans-serif; letter-spacing: .2em; text-transform: uppercase; color: #f3dcc0; }
+.geo-label.regno { font: 700 calc(15px * var(--scala, 1))/1.05 "Alegreya Sans", Arial, sans-serif; letter-spacing: .04em; text-transform: uppercase; color: #fff7e8; }
+.geo-label .sotto { display: block; margin-top: 3px; font: 500 calc(11px * var(--scala, 1))/1.15 "Alegreya Sans", Arial, sans-serif; letter-spacing: 0; text-transform: none; }
+.geo-label.regione-antica { font: 500 calc(12px * var(--scala, 1))/1.1 "Alegreya Sans", Arial, sans-serif; letter-spacing: .2em; text-transform: uppercase; color: #f3dcc0; }
 .geo-label.capitale-antica, .geo-label.citta-antica { display: flex; align-items: center; gap: 5px; color: #fff3e0; }
-.geo-label.capitale-antica { font: italic 700 calc(12px * var(--scala, 1))/1 "Alegreya Sans", Arial, sans-serif; }
-.geo-label.citta-antica { font: italic 500 calc(11px * var(--scala, 1))/1 "Alegreya Sans", Arial, sans-serif; }
+.geo-label.capitale-antica { font: 700 calc(12px * var(--scala, 1))/1 "Alegreya Sans", Arial, sans-serif; }
+.geo-label.citta-antica { font: 500 calc(11px * var(--scala, 1))/1 "Alegreya Sans", Arial, sans-serif; }
 .geo-label.capitale-antica::before, .geo-label.citta-antica::before { content: ""; flex: none; box-sizing: border-box; border-radius: 50%; border: 1.2px solid #231f20; }
 .geo-label.capitale-antica::before { width: 8px; height: 8px; background: #ed1c24; }
 .geo-label.citta-antica::before { width: 7px; height: 7px; background: #ffffff; }
@@ -180,6 +192,48 @@ h1 { font-family: var(--display); font-weight: 700; font-size: 34px; line-height
 .geo-label.vetta { font: 500 calc(12px * var(--scala, 1))/1 "Alegreya Sans", Arial, sans-serif; color: #e6c792; }
 .geo-label.vetta::before { content: "▲"; flex: none; width: 7px; font: calc(8px * var(--scala, 1))/1 Arial, sans-serif; color: #e6c792; text-align: center; }
 .geo-label.vetta .quota { font: 400 calc(10px * var(--scala, 1))/1 "Alegreya Sans", Arial, sans-serif; font-style: normal; opacity: .85; }
+/* Tutti i nomi della carta, in ogni epoca, con il codice della carta del 1800 a.C. (dal 2026-11-13): scritte
+   scure e grandi su un alone crema, che si leggono sul satellite. Città e capitali nere (#141414) a 15 px, con il
+   pallino o il quadratino; Stati in prugna scuro (come i confini); acque blu; rilievi, deserti e regioni bruni. */
+:root { --alone-chiaro: 0 0 1px #fffaf0, 0 0 2px #fffaf0, 0 0 3px #fffaf0, 0 0 5px rgba(255,250,240,.95), 0 0 9px rgba(255,250,240,.8); }
+.geo-label.sea, .geo-label.river, .geo-label.region, .livello-nomi .geo-label { text-shadow: var(--alone-chiaro); }
+.geo-label.sea { font: 600 calc(17px * var(--scala, 1))/1.1 "Alegreya Sans", Arial, sans-serif; color: #0b2ee6; }
+.geo-label.river { font: 600 calc(16px * var(--scala, 1))/1 "Alegreya Sans", Arial, sans-serif; color: #0b2ee6; }
+.geo-label.region { font: 600 calc(17px * var(--scala, 1))/1 "Alegreya Sans", Arial, sans-serif; color: #6b3f12; }
+/* tutti gli Stati alla stessa grandezza, quella dei grandi (Egitto): i piccoli (Libano, Iraq) si leggevano male */
+.livello-nomi .geo-label.country, .livello-nomi .geo-label.country.c1, .livello-nomi .geo-label.country.c3 {
+  font: 700 calc(18px * var(--scala, 1))/1 "Alegreya Sans", Arial, sans-serif; letter-spacing: .16em; color: #4a1f45; }
+/* il filetto che lega il nome di uno Stato piccolo, scritto fuori, al suo territorio (vedi disponiFiletti) */
+.livello-nomi .filetto { position: absolute; left: 0; top: 0; height: 1.5px; margin-top: -.75px; background: #4a1f45;
+  transform-origin: 0 50%; box-shadow: 0 0 0 1px rgba(255,250,240,.85); will-change: transform; }
+.livello-nomi .filetto.nascosta { display: none; }
+.livello-nomi .geo-label.capitale { font: 700 calc(15px * var(--scala, 1))/1 "Alegreya Sans", Arial, sans-serif; color: #141414; }
+.livello-nomi .geo-label.citta { font: 600 calc(15px * var(--scala, 1))/1 "Alegreya Sans", Arial, sans-serif; color: #141414; }
+.livello-nomi .geo-label.capitale::before, .livello-nomi .geo-label.citta::before { width: 9px; height: 9px; background: #141414; border: 1.5px solid #fffaf0; }
+.livello-nomi .geo-label.capitale::before { width: 10px; height: 10px; }
+.livello-nomi .geo-label.solo-simbolo { font-size: 0; gap: 0; }
+.livello-nomi .geo-label.oceano { font-size: calc(19px * var(--scala, 1)); font-weight: 600; color: #0b2ee6; }
+.livello-nomi .geo-label.mare { font-size: calc(16px * var(--scala, 1)); font-weight: 600; color: #0b2ee6; }
+.livello-nomi .geo-label.continente { font-size: calc(19px * var(--scala, 1)); color: #6b3f12; }
+.livello-nomi .geo-label.rilievo { font-size: calc(14px * var(--scala, 1)); font-weight: 600; color: #6b3f12; }
+.livello-nomi .geo-label.regione-fisica, .livello-nomi .geo-label.isola { font-size: calc(15px * var(--scala, 1)); font-weight: 600; color: #6b3f12; }
+.livello-nomi .geo-label.vetta { font-size: calc(14px * var(--scala, 1)); font-weight: 600; color: #6b3f12; }
+.livello-nomi .geo-label.vetta::before { color: #6b3f12; }
+/* nomi della cartina storica: più grandi dei nomi di oggi, perché si leggano sopra le aree colorate */
+.livello-nomi .geo-label.antico { text-shadow: var(--alone-chiaro); }
+.geo-label.regno.antico { font-size: calc(20px * var(--scala, 1)); color: #ffffff; }
+.geo-label.regno.antico .sotto { font-size: calc(14px * var(--scala, 1)); }
+.geo-label.regione-antica.antico { font-size: calc(17px * var(--scala, 1)); font-weight: 700; color: #ffe7b8; letter-spacing: .16em; }
+.geo-label.citta-antica.antico, .geo-label.capitale-antica.antico { font-size: calc(15px * var(--scala, 1)); font-weight: 700; color: #ffffff; }
+.geo-label.citta-antica.antico::before { width: 9px; height: 9px; }
+.geo-label.capitale-antica.antico::before { width: 10px; height: 10px; }
+.geo-label.river.antico, .geo-label.mare.antico { font-size: calc(17px * var(--scala, 1)); font-weight: 600; color: #0b2ee6; }
+/* nell'epoca storica i nomi hanno il colore della carta, su un alone chiaro come il suo fondo crema;
+   così anche i mari scritti a mano */
+.ep-allora .livello-nomi .geo-label.antico { color: var(--colore, #141414); text-shadow: 0 0 1px #fffaf0, 0 0 2px #fffaf0, 0 0 3px #fffaf0, 0 0 5px rgba(255,250,240,.95), 0 0 9px rgba(255,250,240,.8); }
+.ep-allora .geo-label.citta-antica.antico::before { background: var(--colore, #141414); border-color: #fffaf0; }
+.ep-allora .geo-label.sea { color: #0b2ee6; font-weight: 600; text-shadow: 0 0 1px #fffaf0, 0 0 2px #fffaf0, 0 0 3px #fffaf0, 0 0 5px rgba(255,250,240,.95), 0 0 9px rgba(255,250,240,.8); }
+.geo-label.regione-fisica.antico, .geo-label.isola.antico, .geo-label.vetta.antico { font-size: calc(16px * var(--scala, 1)); font-weight: 600; }
 .far .geo-label:not(.mondo), .hide-labels .geo-label.sea, .hide-labels .geo-label.river, .hide-labels .geo-label.region { visibility: hidden; }
 
 /* Popup */
@@ -200,6 +254,21 @@ h1 { font-family: var(--display); font-weight: 700; font-size: 34px; line-height
   padding: 10px 12px; backdrop-filter: blur(6px); max-width: min(300px, calc(100% - 90px)); font-family: var(--body);
   display: flex; flex-direction: column; gap: 8px;
 }
+/* la legenda si sposta in un altro angolo quando coprirebbe una tappa o il suo fumetto (vedi sistemaLegenda) */
+.polbox.destra { left: auto; right: calc(12px + env(safe-area-inset-right, 0px)); }
+.polbox.basso { top: auto; bottom: 12px; }
+/* chi guarda la può trascinare dove vuole, per la maniglia in alto o per il fondo (vedi «Legenda mobile»):
+   da lì non si muove più da sola; doppio clic sulla maniglia la rimette nel suo angolo */
+.polbox.spostata { right: auto; bottom: auto; }
+.polbox { touch-action: none; cursor: grab; user-select: none; -webkit-user-select: none; }
+.polbox.trascinata { cursor: grabbing; box-shadow: 0 10px 30px rgba(0, 0, 0, .45); }
+.polbox button { cursor: pointer; }
+.polbox .maniglia { display: block; width: 44px; height: 14px; margin: -6px auto -2px; padding: 0; border: 0; border-radius: 999px;
+  background: transparent; color: rgba(238, 241, 244, .55); cursor: grab; touch-action: none; }
+.polbox .maniglia:hover, .polbox .maniglia:focus-visible { color: #f3eee4; background: rgba(255, 255, 255, .08); }
+.polbox .maniglia:focus-visible { outline: 2px solid #f3eee4; outline-offset: 1px; }
+.polbox.trascinata .maniglia { cursor: grabbing; }
+.polbox .maniglia svg { display: block; width: 24px; height: 8px; margin: 0 auto; fill: currentColor; }
 .seg { display: flex; gap: 2px; background: rgba(255,255,255,.08); border-radius: 999px; padding: 2px; }
 .seg button {
   flex: 1; border: 0; background: transparent; color: #dfe5ea; font: 700 13px/1 var(--body); padding: 7px 8px; border-radius: 999px; cursor: pointer; white-space: nowrap;
@@ -233,6 +302,8 @@ h1 { font-family: var(--display); font-weight: 700; font-size: 34px; line-height
    i nomi della cartina del volume (al suo posto, inclinati), e le regioni che la cartina non scrive
    (Mesopotamia, Deserto siriano) non compaiono */
 .ep-allora .geo-label.river:not(.mondo), .ep-allora .geo-label.region { visibility: hidden; }
+/* un mare scritto a mano che nell'epoca ha il suo nome antico (Golfo Persico → Mare Inferiore) */
+.geo-label.nome-antico-altrove { visibility: hidden; }
 
 @media (max-width: 760px) {
   .polbox { padding: 6px; gap: 6px; max-width: calc(100% - 24px); }
@@ -267,24 +338,77 @@ h1 { font-weight: 700; font-size: 36px; letter-spacing: .01em; }
 
 
 /* ---------- Scheda della tappa: finestra modale aperta dal clic su un nodo ---------- */
-.scheda { width: min(560px, calc(100vw - 32px)); max-height: calc(100vh - 48px); padding: 0; border: 1px solid var(--line); border-radius: 16px;
-  background: var(--panel); color: var(--ink); box-shadow: 0 20px 60px rgba(0, 0, 0, .55); overflow: auto; }
+/* Come la «Scopri» dell'Atlante d'arte, con i colori del pannello: finestra larga, in alto il titolo a tutta
+   larghezza, sotto a sinistra la galleria (una immagine alla volta, frecce, clic per il tutto schermo) e a
+   destra il testo, che scorre nella sua colonna, poi contatore, didascalia, crediti e miniature. Senza
+   immagini, una finestra stretta con il solo testo. I caratteri seguono --scala (accessibilità): i testi
+   sono in em, le misure della finestra no (con zoom la finestra uscirebbe dallo schermo). */
+.scheda { width: min(1180px, calc(100vw - 32px)); height: min(740px, calc(100dvh - 48px)); max-width: none; max-height: none;
+  padding: 0; border: 1px solid var(--line); border-radius: 16px; background: var(--panel); color: var(--ink);
+  box-shadow: 0 20px 60px rgba(0, 0, 0, .55); overflow: hidden; font-size: calc(16px * var(--scala, 1)); }
+.scheda[open] { display: grid; grid-template-rows: auto minmax(0, 1fr); }
+/* fit-content, non auto: una finestra modale ha top e bottom a 0, e con auto si allungherebbe fino in fondo */
+.scheda.solo-testo { width: min(660px, calc(100vw - 32px)); height: fit-content; max-height: calc(100dvh - 48px); overflow-y: auto; }
+.scheda.solo-testo[open] { display: block; }
 .scheda::backdrop { background: rgba(5, 10, 20, .6); backdrop-filter: blur(2px); }
-.scheda .corpo { padding: 22px 24px 24px; display: grid; gap: 10px; }
-.scheda .kicker { margin: 0; font-size: 13px; letter-spacing: .08em; text-transform: uppercase; color: #ffd166; font-weight: 700; }
-.scheda h2 { margin: 0; font-family: var(--display); font-weight: 600; font-size: 28px; line-height: 1.1; padding-right: 36px; }
-.scheda .where { margin: 0; color: var(--muted); font-size: 15px; }
-.scheda .testo { margin: 0; line-height: 1.6; white-space: pre-line; }
-.scheda .chiudi, .lente .chiudi { position: absolute; top: 10px; right: 10px; z-index: 2; width: 36px; height: 36px; border: 0; border-radius: 50%;
-  background: rgba(5, 10, 20, .65); color: #ffffff; font: 400 24px/1 var(--body); cursor: pointer; }
-.scheda .chiudi:focus-visible, .lente button:focus-visible, .scheda .ingrandisci:focus-visible { outline: 3px solid var(--accent); outline-offset: 2px; }
-.scheda figure { margin: 0; }
-.scheda .ingrandisci { display: block; position: relative; width: 100%; padding: 0; border: 0; background: #000; cursor: zoom-in; }
-.scheda .ingrandisci img { display: block; width: 100%; max-height: 320px; object-fit: cover; }
-.scheda .ingrandisci::after { content: "Ingrandisci"; position: absolute; right: 10px; bottom: 10px; padding: 5px 10px; border-radius: 999px;
-  background: rgba(5, 10, 20, .7); color: #ffffff; font: 600 12px/1 var(--body); }
-.scheda figcaption { padding: 8px 24px 0; font-size: 12px; color: var(--muted); }
-/* immagine a tutto schermo: rotella o pizzico per ingrandire, trascinamento per spostarsi */
+.scheda .intestazione { display: grid; gap: 6px; padding: 22px 80px 18px 28px; background: linear-gradient(160deg, #1f4a85, #10213a); border-bottom: 1px solid var(--line); }
+.scheda .kicker { margin: 0; font-size: .8125em; letter-spacing: .1em; text-transform: uppercase; color: #ffd166; font-weight: 700; }
+.scheda h2 { margin: 0; font-family: var(--display); font-weight: 600; font-size: 2em; line-height: 1.1; text-wrap: balance; }
+.scheda .where { margin: 0; color: var(--muted); font-size: .9375em; }
+.scheda .where:empty { display: none; }
+/* la colonna del testo cresce con i caratteri, ma non oltre metà circa: la foto deve restare grande */
+.scheda .contenuto { min-height: 0; display: grid; grid-template-columns: minmax(0, 1fr) minmax(min(18em, 40%), min(25em, 48%)); grid-template-rows: minmax(0, 1fr);
+  gap: 28px; padding: 22px 28px 26px; }
+.scheda.solo-testo .contenuto { display: block; }
+.scheda .palco { position: relative; min-height: 0; margin: 0; border-radius: 10px; overflow: hidden; background: #0a1628; }
+.scheda .apri { position: absolute; inset: 0; display: block; width: 100%; padding: 0; border: 0; background: none; cursor: zoom-in; }
+.scheda .apri img { display: block; width: 100%; height: 100%; object-fit: contain; }
+.scheda .apri img.compare { animation: compare .25s ease; }
+@keyframes compare { from { opacity: 0; } }
+.scheda .suggerimento { position: absolute; right: 12px; bottom: 12px; display: flex; align-items: center; gap: 6px; padding: 6px 11px 6px 9px;
+  border-radius: 999px; background: rgba(5, 10, 20, .75); color: #ffffff; font: 600 13px/1 var(--body); pointer-events: none; }
+.scheda svg, .lente svg { fill: none; stroke: currentColor; stroke-width: 2.2; stroke-linecap: round; stroke-linejoin: round; }
+.scheda .suggerimento svg { width: 15px; height: 15px; }
+.scheda .freccia, .lente .freccia { position: absolute; top: 50%; z-index: 1; transform: translateY(-50%); width: 46px; height: 46px; display: grid; place-items: center;
+  padding: 0; border: 0; border-radius: 50%; background: rgba(5, 10, 20, .72); color: #ffffff; cursor: pointer; }
+.scheda .freccia:hover, .lente .freccia:hover { background: rgba(5, 10, 20, .92); }
+.scheda .freccia svg, .lente .freccia svg { width: 24px; height: 24px; }
+.scheda .precedente, .lente .precedente { left: 12px; }
+.scheda .successiva, .lente .successiva { right: 12px; }
+.scheda .note { min-height: 0; display: grid; grid-template-rows: minmax(0, 1fr) auto; gap: 16px; }
+.scheda .testo { min-height: 0; overflow-y: auto; margin: 0; padding-right: 8px; font-size: 1.0625em; line-height: 1.6; white-space: pre-line; }
+.scheda.solo-testo .testo { overflow: visible; padding-right: 0; }
+.scheda .navigatore { display: grid; gap: 10px; padding-top: 14px; border-top: 1px solid var(--line); }
+.scheda .corrente { display: grid; gap: 4px; }
+.scheda .contatore { margin: 0; font-size: .8125em; font-weight: 700; letter-spacing: .14em; color: #ffd166; font-variant-numeric: tabular-nums; }
+.scheda .didascalia { margin: 0; font-weight: 600; line-height: 1.35; }
+.scheda .crediti { margin: 0; font-size: .75em; line-height: 1.4; color: var(--muted); }
+.scheda .contatore:empty, .scheda .didascalia:empty, .scheda .crediti:empty { display: none; }
+.scheda .miniature { list-style: none; margin: 0; padding: 0; display: grid; grid-template-columns: repeat(4, 1fr); gap: 8px; }
+.scheda .miniature button { display: block; width: 100%; aspect-ratio: 4 / 3; padding: 0; border: 0; border-radius: 6px; overflow: hidden;
+  background: #0a1628; cursor: pointer; opacity: .55; transition: opacity .2s ease; }
+.scheda .miniature button:hover { opacity: .9; }
+.scheda .miniature button[aria-current="true"] { opacity: 1; outline: 2px solid #ffd166; outline-offset: 2px; }
+.scheda .miniature img { display: block; width: 100%; height: 100%; object-fit: cover; }
+.scheda .chiudi, .lente .chiudi { position: absolute; top: 16px; right: 16px; z-index: 2; width: 42px; height: 42px; display: grid; place-items: center;
+  padding: 0; border: 0; border-radius: 50%; background: rgba(5, 10, 20, .65); color: #ffffff; cursor: pointer; }
+.scheda .chiudi svg, .lente .chiudi svg { width: 20px; height: 20px; }
+.scheda .chiudi:hover, .lente .chiudi:hover { background: rgba(5, 10, 20, .9); }
+.scheda button:focus-visible, .lente button:focus-visible { outline: 3px solid var(--accent); outline-offset: 2px; }
+.scheda .apri:focus-visible { outline-offset: -3px; }
+.scheda .testo:focus-visible { outline: 2px solid var(--muted); outline-offset: 4px; }
+/* schermi stretti o bassi: la finestra occupa tutto lo schermo e scorre, la galleria sta sopra il testo */
+@media (max-width: 860px), (max-height: 560px) {
+  .scheda, .scheda.solo-testo { width: 100vw; height: 100dvh; max-height: none; border: 0; border-radius: 0; overflow-y: auto; }
+  .scheda[open] { display: block; }
+  .scheda .intestazione { padding: 18px 68px 14px 18px; }
+  .scheda .contenuto { display: grid; grid-template-columns: 1fr; grid-template-rows: auto auto; gap: 16px; padding: 16px 18px 24px; }
+  .scheda .palco { height: min(56dvh, 26rem); }
+  .scheda .note { grid-template-rows: auto auto; }
+  .scheda .testo { overflow: visible; padding-right: 0; }
+  .scheda .chiudi { top: 12px; right: 12px; }
+}
+/* immagine a tutto schermo: rotella o pizzico per ingrandire, trascinamento per spostarsi, frecce per le altre */
 .lente { width: 100vw; height: 100vh; max-width: none; max-height: none; margin: 0; padding: 0; border: 0; background: rgba(3, 6, 12, .96); color: #ffffff; overflow: hidden; }
 .lente::backdrop { background: rgba(3, 6, 12, .96); }
 .lente .vista { position: absolute; inset: 0; display: grid; place-items: center; touch-action: none; cursor: grab; }
@@ -294,34 +418,83 @@ h1 { font-weight: 700; font-size: 36px; letter-spacing: .01em; }
   border-radius: 999px; background: rgba(16, 33, 58, .9); }
 .lente .comandi button { min-width: 38px; height: 38px; padding: 0 12px; border: 0; border-radius: 999px; background: rgba(255, 255, 255, .12); color: #ffffff; font: 700 16px/1 var(--body); cursor: pointer; }
 .lente .comandi .livello { min-width: 52px; text-align: center; font: 600 13px/1 var(--body); font-variant-numeric: tabular-nums; }
-.lente .crediti { position: absolute; left: 16px; top: 16px; max-width: calc(100% - 80px); margin: 0; font-size: 12px; color: #c9d6ea; }
+.lente .crediti { position: absolute; left: 16px; top: 16px; max-width: calc(100% - 90px); margin: 0; font-size: 13px; line-height: 1.4; color: #c9d6ea; }
+.lente .crediti strong { color: #ffffff; font-weight: 600; }
+.lente .crediti .numero { color: #ffd166; font-weight: 700; letter-spacing: .1em; margin-right: 8px; }
 
-/* ---------- Accessibilità: tendina sul bordo sinistro della mappa, si apre e si chiude ---------- */
-.accessibilita { position: absolute; left: 0; top: 50%; transform: translateY(-50%); z-index: 4; display: flex; align-items: center; }
-.accessibilita .linguetta { display: flex; flex-direction: column; align-items: center; gap: 8px; padding: 12px 7px; border: 1px solid var(--line); border-left: 0;
-  border-radius: 0 10px 10px 0; background: #10213a; color: var(--ink); font: 700 12px/1 var(--body); letter-spacing: .06em; cursor: pointer;
-  box-shadow: 2px 2px 10px rgba(0, 0, 0, .35); }
-.accessibilita .linguetta > span:last-child { writing-mode: vertical-rl; transform: rotate(180deg); text-transform: uppercase; }
-.accessibilita .linguetta .simbolo { display: grid; place-items: center; width: 24px; height: 24px; border-radius: 50%; background: #ffd166; color: #10213a; font-size: 11px; letter-spacing: 0; }
-.accessibilita .linguetta[aria-expanded="true"] { border-radius: 0 10px 10px 0; background: #1a3358; }
-.accessibilita .contenuto { display: grid; gap: 8px; width: 190px; padding: 14px; border: 1px solid var(--line); border-left: 0; background: #10213a;
-  box-shadow: 4px 4px 16px rgba(0, 0, 0, .45); }
-.accessibilita .contenuto[hidden] { display: none; }
-.accessibilita .etichetta { margin: 0 0 2px; font-size: 12px; letter-spacing: .08em; text-transform: uppercase; color: #ffd166; font-weight: 700; }
-.accessibilita .riga { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
-.accessibilita .contenuto button { height: 36px; padding: 0 10px; border: 1px solid var(--line); border-radius: 8px; background: transparent; color: var(--ink);
-  font: 700 13px/1 var(--body); cursor: pointer; text-align: left; }
-.accessibilita .riga button { text-align: center; font-size: 15px; }
-.accessibilita .contenuto button:hover { border-color: var(--muted); }
-.accessibilita .contenuto button[aria-pressed="true"] { background: #ffd166; border-color: #ffd166; color: #10213a; }
-.accessibilita .contenuto button:disabled { opacity: .4; cursor: default; }
-.accessibilita button:focus-visible { outline: 3px solid var(--accent); outline-offset: 2px; }
-/* caratteri più grandi: pannello, legenda sulla mappa e scheda delle tappe con lo zoom; i nomi sulla
-   carta, i pin e il fumetto della tappa moltiplicano le loro misure per la stessa --scala */
-.panel, .polbox, .scheda { zoom: var(--scala, 1); }
+/* ---------- Accessibilità: fascia in fondo al sito, come nell'Atlante d'arte (dal 2026-11-13) ---------- */
+/* A sinistra il pulsante «Accessibilità», che apre la finestra delle preferenze (grandezza dei caratteri,
+   tutto maiuscolo, alta leggibilità); prima, dal 2026-11-14, i comandi stavano tutti nella barra. */
+.piede { grid-column: 1 / -1; display: flex; align-items: center; justify-content: space-between; gap: 16px; min-height: 52px;
+  padding: 4px max(clamp(16px, 3.5vw, 56px), env(safe-area-inset-right, 0px)) calc(4px + env(safe-area-inset-bottom, 0px)) max(clamp(16px, 3.5vw, 56px), env(safe-area-inset-left, 0px));
+  background: #0b1830; border-top: 1px solid var(--line); color: #ffffff; font-family: var(--body); }
+.piede .comandi { display: flex; gap: 8px; }
+.piede button { display: flex; align-items: center; gap: 9px; min-height: 44px; padding: 0 12px; margin-left: -12px; border: 0; border-radius: 8px;
+  background: none; color: inherit; font: 700 14px/1 var(--body); letter-spacing: .08em; text-transform: uppercase; cursor: pointer; }
+.piede button + button { margin-left: 0; }
+.piede button:hover { background: rgba(255, 255, 255, .12); }
+.piede button:focus-visible { outline: 3px solid var(--accent); outline-offset: 2px; }
+.piede svg { width: 26px; height: 26px; fill: none; stroke: currentColor; stroke-width: 1.6; stroke-linecap: round; stroke-linejoin: round; }
+.piede svg .pieno { fill: currentColor; stroke: none; }
+/* la finestra delle preferenze: colori del pannello; i testi crescono con i caratteri scelti (em su 16px × --scala) */
+.preferenze { width: min(30em, calc(100vw - 32px)); max-height: calc(100dvh - 32px); padding: 1.5em 1.6em 1.3em; border: 1px solid var(--line);
+  border-top: 4px solid #ffd166; border-radius: 14px; background: var(--panel); color: var(--ink); box-shadow: 0 20px 60px rgba(0, 0, 0, .55);
+  font: 400 calc(16px * var(--scala, 1))/1.5 var(--body); overflow-y: auto; }
+.preferenze::backdrop { background: rgba(5, 10, 20, .6); backdrop-filter: blur(2px); }
+.preferenze h2 { margin: 0 0 .3em; font: 600 1.6em/1.1 var(--display); }
+.preferenze .intro { margin: 0 0 1.2em; color: var(--muted); font-size: .9375em; }
+.preferenze fieldset { margin: 0 0 .6em; padding: 0; border: 0; }
+.preferenze legend { padding: 0; margin-bottom: .5em; font-weight: 700; }
+.preferenze .scelte { display: grid; grid-template-columns: repeat(4, 1fr); border: 1px solid var(--line); border-radius: 10px; overflow: hidden; }
+.preferenze .scelte label { position: relative; display: grid; place-items: center; min-height: 52px; padding: .3em; text-align: center; line-height: 1.15; cursor: pointer; }
+.preferenze .scelte label + label { border-left: 1px solid var(--line); }
+.preferenze .scelte label:hover { background: rgba(255, 255, 255, .06); }
+.preferenze .scelte label.scelto { background: #ffd166; color: #10213a; font-weight: 700; }
+.preferenze .scelte input { position: absolute; inset: 0; margin: 0; opacity: 0; cursor: pointer; }
+.preferenze .scelte label:has(input:focus-visible) { outline: 3px solid var(--accent); outline-offset: 2px; }
+.preferenze .interruttori { list-style: none; margin: 0; padding: 0; }
+.preferenze .interruttori li { border-bottom: 1px solid var(--line); }
+.preferenze .interruttori label { display: flex; align-items: center; gap: 1em; padding: .8em 0; cursor: pointer; }
+.preferenze .testi { flex: 1; display: grid; gap: .1em; }
+.preferenze .nome { font-weight: 700; }
+.preferenze .nota { font-size: .875em; color: var(--muted); }
+/* interruttore disegnato sulla casella: resta una casella per la tastiera e per i lettori di schermo */
+.preferenze input[role="switch"] { appearance: none; flex: none; position: relative; width: 3em; height: 1.7em; margin: 0; border-radius: 999px;
+  background: rgba(255, 255, 255, .22); cursor: pointer; transition: background-color .2s ease; }
+.preferenze input[role="switch"]::after { content: ""; position: absolute; top: .2em; left: .2em; width: 1.3em; height: 1.3em; border-radius: 50%;
+  background: #f3eee4; box-shadow: 0 1px 2px rgba(0, 0, 0, .4); transition: transform .2s ease; }
+.preferenze input[role="switch"]:checked { background: #4f9a6e; }
+.preferenze input[role="switch"]:checked::after { transform: translateX(1.3em); }
+.preferenze input[role="switch"]:focus-visible { outline: 3px solid var(--accent); outline-offset: 2px; }
+.preferenze .azioni { display: flex; justify-content: flex-end; gap: .6em; margin-top: 1.3em; }
+.preferenze .azioni button { min-height: 44px; padding: .5em 1.2em; border-radius: 999px; font: 700 .9375em/1 var(--body); cursor: pointer; }
+.preferenze .azioni .secondario { border: 1px solid var(--line); background: transparent; color: var(--ink); }
+.preferenze .azioni .secondario:hover { border-color: var(--muted); }
+.preferenze .azioni .primario { border: 1px solid var(--accent); background: var(--accent); color: var(--accent-ink); }
+.preferenze .azioni button:focus-visible { outline: 3px solid var(--accent); outline-offset: 2px; }
+/* la guida («Aiuto»): stessa finestra, più larga, con i titoletti gialli come nel pannello */
+.preferenze.guida { width: min(38em, calc(100vw - 32px)); }
+.guida h3 { margin: 1.2em 0 .35em; font-size: .8125em; font-weight: 700; letter-spacing: .14em; text-transform: uppercase; color: #ffd166; }
+.guida p, .guida li { margin: 0; line-height: 1.55; color: #dfe6f0; }
+.guida ul { margin: 0; padding-left: 1.2em; display: grid; gap: .35em; }
+.guida strong { color: var(--ink); }
+.guida h2:focus { outline: none; }
+@media (max-width: 760px) {
+  .app { grid-template-rows: minmax(300px, 54%) minmax(0, 1fr) auto; }
+  .piede { min-height: 44px; }
+  .piede button { font-size: 12px; letter-spacing: .04em; gap: 6px; }
+  .piede svg { width: 22px; height: 22px; }
+  .preferenze .scelte { grid-template-columns: repeat(2, 1fr); }
+  .preferenze .scelte label:nth-child(3) { border-left: 0; }
+  .preferenze .scelte label:nth-child(n + 3) { border-top: 1px solid var(--line); }
+}
+/* caratteri più grandi: pannello e legenda sulla mappa con lo zoom; la scheda delle tappe ha i testi in em
+   su una base di 16px × --scala; i nomi sulla carta, i pin e il fumetto della tappa moltiplicano le loro
+   misure per la stessa --scala */
+.panel, .polbox { zoom: var(--scala, 1); }
 /* tutto in maiuscolo, anche i nomi sulla carta */
 body.maiuscolo .panel, body.maiuscolo .polbox, body.maiuscolo .scheda, body.maiuscolo .geo-label, body.maiuscolo .pin .pl,
-body.maiuscolo .stop-pop { text-transform: uppercase; }
+body.maiuscolo .stop-pop, body.maiuscolo .preferenze { text-transform: uppercase; }
 /* carattere ad alta leggibilità (Atkinson Hyperlegible), ovunque */
 body.leggibile { --display: "Atkinson Hyperlegible", Arial, sans-serif; --body: "Atkinson Hyperlegible", Arial, sans-serif; }
 body.leggibile .geo-label, body.leggibile .pin .pl, body.leggibile .pin .pn, body.leggibile .stop-pop h3 { font-family: "Atkinson Hyperlegible", Arial, sans-serif !important; }
@@ -364,48 +537,127 @@ body.leggibile .geo-label, body.leggibile .pin .pl, body.leggibile .pin .pn, bod
 
   <div class="mapwrap">
     <div id="map" class="hide-pins far" role="region" aria-label="Mappa del percorso"></div>
-    <!-- accessibilità: tendina laterale con dimensione dei caratteri, tutto maiuscolo, carattere ad alta leggibilità -->
-    <div class="accessibilita" id="accessibilita">
-      <div class="contenuto" id="acc-pannello" role="toolbar" aria-label="Accessibilità" aria-orientation="vertical" hidden>
-        <p class="etichetta">Accessibilità</p>
-        <div class="riga">
-          <button type="button" id="acc-meno" aria-label="Caratteri più piccoli">A−</button>
-          <button type="button" id="acc-piu" aria-label="Caratteri più grandi">A+</button>
-        </div>
-        <button type="button" id="acc-maiuscolo" aria-pressed="false">Tutto maiuscolo</button>
-        <button type="button" id="acc-leggibile" aria-pressed="false">Alta leggibilità</button>
-      </div>
-      <button class="linguetta" type="button" id="acc-apri" aria-expanded="false" aria-controls="acc-pannello">
-        <span class="simbolo" aria-hidden="true">Aa</span><span>Accessibilità</span>
-      </button>
-    </div>
     <div class="polbox" id="polbox">
+      <!-- maniglia per spostare la legenda (anche con le frecce della tastiera; doppio clic o Invio: torna al suo angolo) -->
+      <button class="maniglia" id="maniglia-legenda" type="button" aria-label="Sposta la legenda: frecce per spostarla, Invio per rimetterla al suo posto"
+        title="Trascina per spostare la legenda · doppio clic per rimetterla al suo posto"><svg viewBox="0 0 24 8" aria-hidden="true"><circle cx="4" cy="2" r="1.4"/><circle cx="9.3" cy="2" r="1.4"/><circle cx="14.7" cy="2" r="1.4"/><circle cx="20" cy="2" r="1.4"/><circle cx="4" cy="6" r="1.4"/><circle cx="9.3" cy="6" r="1.4"/><circle cx="14.7" cy="6" r="1.4"/><circle cx="20" cy="6" r="1.4"/></svg></button>
       <!-- un pulsante per epoca, dai dati del cammino: le epoche storiche in ordine di anno, poi «Oggi» -->
       <div class="seg" role="group" aria-label="Epoca della mappa"></div>
       <ul class="leg" id="leg"></ul>
     </div>
   </div>
+  <!-- fascia in fondo al sito, come nell'Atlante d'arte: «Accessibilità» apre la finestra delle preferenze -->
+  <footer class="piede">
+    <div class="comandi">
+      <button type="button" id="apri-accessibilita" aria-haspopup="dialog">
+        <svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="10"/><circle cx="12" cy="6.8" r="1.4" class="pieno"/><path d="M7 9.8l5 1 5-1M12 10.8v3.4l-2.6 4.6M12 14.2l2.6 4.6"/></svg>
+        Accessibilità
+      </button>
+      <button type="button" id="apri-aiuto" aria-haspopup="dialog">
+        <svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="10"/><path d="M9.3 9.2a2.8 2.8 0 1 1 3.9 2.6c-.8.4-1.2 1-1.2 1.8v.6"/><circle cx="12" cy="17.2" r=".9" class="pieno"/></svg>
+        Aiuto
+      </button>
+    </div>
+  </footer>
 </div>
 
-<!-- scheda della tappa, aperta dal clic su un nodo: immagine facoltativa, testo obbligatorio -->
+<!-- scheda della tappa, aperta dal clic su un nodo: in alto il titolo, sotto la galleria (facoltativa) a
+     sinistra e il testo (obbligatorio) a destra, con contatore, didascalia, crediti e miniature -->
 <dialog class="scheda" id="scheda" aria-labelledby="scheda-titolo">
-  <button class="chiudi" type="button" data-chiudi aria-label="Chiudi la scheda">×</button>
-  <figure id="scheda-figura" hidden>
-    <button class="ingrandisci" id="scheda-ingrandisci" type="button" aria-label="Ingrandisci l'immagine"><img id="scheda-img" alt=""></button>
-    <figcaption id="scheda-crediti"></figcaption>
-  </figure>
-  <div class="corpo">
+  <header class="intestazione">
     <p class="kicker" id="scheda-occhiello"></p>
     <h2 id="scheda-titolo"></h2>
     <p class="where" id="scheda-luogo"></p>
-    <p class="testo" id="scheda-testo"></p>
+  </header>
+  <div class="contenuto">
+    <figure class="palco" id="scheda-palco" aria-roledescription="galleria">
+      <button class="apri" id="scheda-ingrandisci" type="button"><img id="scheda-img" alt="">
+        <span class="suggerimento" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="M14 4h6v6M10 20H4v-6M20 4l-7 7M4 20l7-7"/></svg>Ingrandisci</span>
+      </button>
+      <button class="freccia precedente" id="scheda-prima" type="button" aria-label="Immagine precedente"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M15 5l-7 7 7 7"/></svg></button>
+      <button class="freccia successiva" id="scheda-dopo" type="button" aria-label="Immagine successiva"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M9 5l7 7-7 7"/></svg></button>
+    </figure>
+    <div class="note">
+      <p class="testo" id="scheda-testo" tabindex="0"></p>
+      <div class="navigatore" id="scheda-navigatore">
+        <div class="corrente" aria-live="polite">
+          <p class="contatore" id="scheda-contatore"></p>
+          <p class="didascalia" id="scheda-didascalia"></p>
+          <p class="crediti" id="scheda-crediti"></p>
+        </div>
+        <ul class="miniature" id="scheda-miniature" aria-label="Tutte le immagini"></ul>
+      </div>
+    </div>
+  </div>
+  <!-- autofocus: all'apertura il fuoco va qui, non sul testo che scorre -->
+  <button class="chiudi" type="button" data-chiudi aria-label="Chiudi la scheda" autofocus><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M6 6l12 12M18 6L6 18"/></svg></button>
+</dialog>
+<!-- preferenze di lettura, aperte da «Accessibilità» in fondo al sito: valgono subito e restano nel browser -->
+<dialog class="preferenze" id="preferenze" aria-labelledby="titolo-preferenze">
+  <h2 id="titolo-preferenze">Accessibilità</h2>
+  <p class="intro">Scegli come leggere il cammino. Le preferenze restano su questo dispositivo.</p>
+  <fieldset>
+    <legend>Grandezza dei caratteri</legend>
+    <div class="scelte" id="acc-scala"></div>
+  </fieldset>
+  <ul class="interruttori">
+    <li><label>
+      <span class="testi"><span class="nome">Tutto maiuscolo</span><span class="nota">Tutti i testi in maiuscolo, anche i nomi sulla carta.</span></span>
+      <input type="checkbox" role="switch" id="acc-maiuscolo">
+    </label></li>
+    <li><label>
+      <span class="testi"><span class="nome">Carattere ad alta leggibilità</span><span class="nota">Lettere più distinte tra loro, anche per chi ha difficoltà di lettura.</span></span>
+      <input type="checkbox" role="switch" id="acc-leggibile">
+    </label></li>
+  </ul>
+  <div class="azioni">
+    <button type="button" class="secondario" id="acc-ripristina">Ripristina</button>
+    <button type="button" class="primario" data-chiudi>Fatto</button>
   </div>
 </dialog>
-<!-- immagine della scheda a tutto schermo, con lo zoom -->
+<!-- guida all'uso, aperta da «Aiuto» in fondo al sito (come nell'Atlante d'arte); testi da far rivedere alla redazione -->
+<dialog class="preferenze guida" id="aiuto" aria-labelledby="titolo-aiuto">
+  <!-- il fuoco parte dal titolo, non dal pulsante in fondo: chi usa la tastiera legge la guida dall'inizio -->
+  <h2 id="titolo-aiuto" tabindex="-1" autofocus>Come si segue il cammino</h2>
+
+  <h3>Segui il racconto</h3>
+  <p>Dal globo, <strong>Visualizza il cammino</strong> porta sulla regione e mostra l’intero percorso. Con
+    <strong>Successiva</strong> e <strong>Precedente</strong>, sotto «Tappe», vai da una tappa all’altra: la carta si
+    sposta sul tratto e la linea continua mostra la strada già fatta. Puoi anche scegliere una tappa dall’elenco.
+    <strong>Torna al globo</strong> ricomincia da capo.</p>
+
+  <h3>Apri la scheda di una tappa</h3>
+  <p>Premi il segnaposto numerato sulla carta: si apre la scheda con il testo e le immagini. Sfoglia le immagini con
+    le frecce o con le miniature; un clic sull’immagine la apre a tutto schermo, dove puoi ingrandirla.</p>
+
+  <h3>Allora e oggi</h3>
+  <p>In alto sulla carta scegli l’epoca: quella del racconto, con la carta storica disegnata sopra il satellite, oppure
+    <strong>Oggi</strong>, con gli Stati attuali e in giallo quelli toccati dal cammino. In «Oggi» l’interruttore
+    <strong>Cartina muta</strong> toglie i nomi dalla carta, per mettersi alla prova.</p>
+
+  <h3>Muoviti sulla carta</h3>
+  <ul>
+    <li><strong>Avvicinarsi e allontanarsi</strong>: rotellina del mouse, due dita sullo schermo o i pulsanti + e −.</li>
+    <li><strong>Spostarsi</strong>: trascina la carta con il mouse o con un dito.</li>
+    <li><strong>Con la tastiera</strong>: seleziona la carta con Tab, poi frecce per spostarti, + e − per lo zoom.</li>
+    <li><strong>La legenda</strong> si sposta trascinandola dalla maniglia in alto; un doppio clic sulla maniglia la rimette al suo posto.</li>
+  </ul>
+
+  <h3>Leggi meglio</h3>
+  <p>Con il pulsante <strong>Accessibilità</strong>, in basso a sinistra, puoi ingrandire i caratteri, scrivere tutto in
+    maiuscolo e usare un carattere più leggibile.</p>
+
+  <div class="azioni">
+    <button type="button" class="primario" data-chiudi>Ho capito</button>
+  </div>
+</dialog>
+<!-- immagine della scheda a tutto schermo, con lo zoom e le frecce per le altre immagini della tappa -->
 <dialog class="lente" id="lente" aria-label="Immagine ingrandita">
   <p class="crediti" id="lente-crediti"></p>
-  <button class="chiudi" type="button" data-chiudi aria-label="Chiudi l'immagine ingrandita">×</button>
+  <button class="chiudi" type="button" data-chiudi aria-label="Chiudi l'immagine ingrandita"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M6 6l12 12M18 6L6 18"/></svg></button>
   <div class="vista" id="lente-vista"><img id="lente-img" alt=""></div>
+  <button class="freccia precedente" id="lente-prima" type="button" aria-label="Immagine precedente"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M15 5l-7 7 7 7"/></svg></button>
+  <button class="freccia successiva" id="lente-dopo" type="button" aria-label="Immagine successiva"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M9 5l7 7-7 7"/></svg></button>
   <div class="comandi">
     <button type="button" id="lente-meno" aria-label="Riduci">−</button>
     <span class="livello" id="lente-livello">100%</span>
@@ -459,9 +711,10 @@ $("sottotitolo-cammino").textContent = DATI.sottotitolo ?? "";
 // Le tappe, con i nomi che usa il resto della pagina. Il tracciato va dalla tappa precedente a
 // questa; se manca, è una linea dritta.
 const STOPS = DATI.tappe.map((t, i) => ({
-  name: t.nome, short: t.breve, at: t.coordinate, where: t.luogoAttuale ?? "", ref: t.riferimento ?? "",
+  // short: accanto al pin nelle epoche storiche; shortOggi: in «Oggi», il nome moderno del luogo (Harran, Nablus)
+  name: t.nome, short: t.breve, shortOggi: t.breveOggi ?? t.breve, at: t.coordinate, where: t.luogoAttuale ?? "", ref: t.riferimento ?? "",
   text: t.testo, approfondimento: t.approfondimento, secondaria: !!t.secondaria,
-  immagine: t.immagine && { ...t.immagine, src: new URL(t.immagine.src, CARTELLA).href },
+  immagini: (t.immagini ?? []).map(i => ({ ...i, src: new URL(i.src, CARTELLA).href, miniatura: new URL(i.miniatura ?? i.src, CARTELLA).href })),
   path: i === 0 ? null : t.tracciato?.length ? t.tracciato : [DATI.tappe[i - 1].coordinate, t.coordinate]
 }));
 // I passi prima delle tappe: il globo (sempre su "Oggi") e la panoramica del cammino.
@@ -531,6 +784,11 @@ const STORICHE = DATI.epoche.map((e, k) => ({ ...e, cartina: CARTINE[k], livelli
 
 /* ---------- Stile della mappa (tutto incorporato, nessuna risorsa esterna) ---------- */
 const SEA = "#0b1d3a";
+// in «Oggi» gli Stati attraversati dal cammino, tutti di questo colore (il giallo dell'Iraq nell'atlante politico);
+// gli altri Stati con i colori dell'atlante politico, tranne il giallo (k 1) e il sabbia (k 7), troppo simili:
+// al loro posto verde acqua e pervinca, uno per classe, così due Stati confinanti restano sempre diversi
+const COLORE_STATI_DEL_CAMMINO = "#f7d154";
+const COLORI_STATI = ["match", ["get", "k"], 1, "#7fdcc0", 2, "#9fd86b", 3, "#f59a74", 4, "#c39be6", 5, "#6fc6e3", 6, "#f5a3c7", "#93a8f0"];
 // colori del cammino, uguali in ogni epoca: linea rossa su bordo bianco, che si legge bene sul satellite
 const CAMMINO = "#c42a40", BORDO_CAMMINO = "#fffaf0";
 const style = {
@@ -541,6 +799,8 @@ const style = {
     // fiumi e confini di tutto il mondo, letti dalla cartella "dati" accanto alla pagina
     rivers: { type: "geojson", data: new URL("dati/fiumi.geojson", location.href).href },
     borders: { type: "geojson", data: new URL("dati/confini.geojson", location.href).href },
+    // gli Stati di oggi come aree (riempimento in "Oggi" e nomi dentro la parte visibile): li carica la pagina
+    stati: { type: "geojson", data: fc([]) },
     // il cammino, tappa per tappa, e le sue frecce (dal file del cammino)
     route: { type: "geojson", data: fc(routeFeatures) },
     frecce: { type: "geojson", data: fc(frecceFeatures) },
@@ -558,6 +818,14 @@ const style = {
   layers: [
     { id: "sea", type: "background", paint: { "background-color": SEA } },
     { id: "bmng", type: "raster", source: "bmng", paint: { "raster-fade-duration": 150 } },
+    // Gli Stati di oggi riempiti di colori tenui, come in un atlante politico: due Stati confinanti non hanno mai lo
+    // stesso colore (k = MAPCOLOR7 di Natural Earth). Dal 2026-11-13 gli Stati attraversati dal cammino sono tutti
+    // del giallo dell'Iraq (COLORE_STATI_DEL_CAMMINO, vedi statiDelCammino): il giallo e il sabbia (k 1 e 7) agli
+    // altri non toccano più, e diventano verde acqua e pervinca. Più leggeri da vicino, dove il satellite ha più
+    // dettaglio e il contorno semplificato (2 km) si noterebbe.
+    { id: "stati-fill", type: "fill", source: "stati", paint: {
+      "fill-color": COLORI_STATI,
+      "fill-opacity": ["interpolate", ["linear"], ["zoom"], 1, .34, 5, .3, 7, .2, 8, .14], "fill-antialias": false } },
     // ogni fiume compare dallo zoom indicato da Natural Earth (anticipato) e svanisce quando il satellite lo mostra da sé
     { id: "rivers", type: "line", source: "rivers", layout: { "line-join": "round", "line-cap": "round" }, paint: {
       "line-color": "#3fa9f5", // azzurro pieno: sul satellite quello più chiaro sembrava bianco
@@ -574,13 +842,14 @@ const style = {
         6, ["case", ["<=", ["get", "s"], 3], 1.8, ["<=", ["get", "s"], 6], 1.3, .9]] } },
     // confini di Stato: come negli atlanti, una fascia color prugna lungo il confine con un filo bianco
     // sopra. Sono le linee più spesse della carta, percorso a parte; nessun'altra linea ha la fascia.
+    // Dal 2026-11-13 più marcati, e gli Stati riempiti di colori tenui (sotto i fiumi, vedi "stati-fill")
     { id: "borders-band", type: "line", source: "borders", layout: { "line-join": "round", "line-cap": "round" },
-      paint: { "line-color": "#6f4a68", "line-width": ["interpolate", ["linear"], ["zoom"], 1, 3, 4, 6, 8, 10], "line-opacity": ["interpolate", ["linear"], ["zoom"], 1, .55, 4, .65, 8, .6], "line-blur": .5 } },
+      paint: { "line-color": "#6f4a68", "line-width": ["interpolate", ["linear"], ["zoom"], 1, 4, 4, 7.5, 8, 12], "line-opacity": ["interpolate", ["linear"], ["zoom"], 1, .7, 4, .82, 8, .75], "line-blur": .4 } },
     { id: "borders", type: "line", source: "borders", filter: ["==", ["get", "c"], 0], layout: { "line-join": "round" },
-      paint: { "line-color": "#ffffff", "line-width": ["interpolate", ["linear"], ["zoom"], 1, .8, 4, 1.4, 8, 2.2], "line-opacity": ["interpolate", ["linear"], ["zoom"], 1, .75, 3, .95] } },
+      paint: { "line-color": "#ffffff", "line-width": ["interpolate", ["linear"], ["zoom"], 1, 1, 4, 1.8, 8, 2.8], "line-opacity": ["interpolate", ["linear"], ["zoom"], 1, .85, 3, 1] } },
     // contesi o provvisori: stessa fascia, filo bianco a puntini
     { id: "borders-contested", type: "line", source: "borders", filter: ["==", ["get", "c"], 1], layout: { "line-cap": "round" },
-      paint: { "line-color": "#ffffff", "line-width": ["interpolate", ["linear"], ["zoom"], 1, 1, 4, 1.7, 8, 2.6], "line-opacity": ["interpolate", ["linear"], ["zoom"], 1, .75, 3, .95], "line-dasharray": [.1, 2.2] } },
+      paint: { "line-color": "#ffffff", "line-width": ["interpolate", ["linear"], ["zoom"], 1, 1.3, 4, 2.2, 8, 3.2], "line-opacity": ["interpolate", ["linear"], ["zoom"], 1, .85, 3, 1], "line-dasharray": [.1, 2] } },
     // le cartine storiche (regni, arco della Mezzaluna, costa di allora...), ognuna nella sua epoca
     ...STORICHE.flatMap(e => e.livelli),
     // Il cammino, uguale in ogni epoca: il tracciato e le punte di freccia della cartina del volume,
@@ -634,19 +903,23 @@ for (const e of STORICHE) EPOCHE[e.id] = {
   pulsante: e.pulsante, storica: true,
   livelli: e.livelli.map(l => l.id),
   nomi: [`cartina:${e.id}`],
-  legenda: [["cammino", DATI.nome], ...e.cartina.stili.filter(s => s.legenda).map(s => [s, s.legenda])],
+  // i simboli (come «Altre città dell'epoca») sempre in fondo, dopo aree e linee
+  legenda: [["cammino", DATI.nome], ...e.cartina.stili.filter(s => s.legenda).sort((a, b) => (a.tipo === "punto") - (b.tipo === "punto")).map(s => [s, s.legenda])],
   cartinaMuta: false
 };
 EPOCHE.oggi = {
   pulsante: "Oggi", storica: false,
-  livelli: ["borders-band", "borders", "borders-contested"],
+  livelli: ["stati-fill", "borders-band", "borders", "borders-contested"],
   nomi: ["moderni"],
-  legenda: [["cammino", DATI.nome]],
+  legenda: [["cammino", DATI.nome], ["stati", "Stati toccati dal cammino"]],
   cartinaMuta: true
 };
 const LIVELLI_DI_EPOCA = [...new Set(Object.values(EPOCHE).flatMap(e => e.livelli))];
 let epoca = STORICHE[0]?.id ?? "oggi";
 const polbox = document.getElementById("polbox");
+// legenda spostata a mano da chi guarda: { x, y }, angolo in alto a sinistra in pixel dall'angolo della carta
+// (null: sta nel suo angolo e si sposta da sola); trascinamento in corso (vedi «Legenda mobile»)
+let legendaSpostata = null, trascinamentoLegenda = null;
 // i pulsanti delle epoche: le storiche in ordine di anno, poi «Oggi»
 for (const [id, e] of Object.entries(EPOCHE)) {
   const b = document.createElement("button");
@@ -674,7 +947,7 @@ function punta() {
 function applicaLivelli() {
   LIVELLI_DI_EPOCA.forEach(l => map.setLayoutProperty(l, "visibility", EPOCHE[epoca].livelli.includes(l) ? "visible" : "none"));
   mapEl.classList.toggle("muta", mutaAttiva());
-  chiediDisposizione();
+  rifaiPostiStati();
 }
 
 function setEpoca(ep) {
@@ -683,6 +956,10 @@ function setEpoca(ep) {
   mapEl.classList.toggle("ep-allora", EPOCHE[ep].storica); // stile comune a tutte le epoche storiche
   mapEl.classList.toggle("ep-oggi", !EPOCHE[ep].storica);
   polbox.dataset.mode = EPOCHE[ep].storica ? "allora" : "oggi";
+  // i mari scritti a mano che in questa epoca hanno il nome antico della cartina (vedi LABELS)
+  altreEtichette.forEach(el => el.classList.toggle("nome-antico-altrove", (el.dataset.nonIn ?? "").split(" ").includes(ep)));
+  // accanto ai pin il nome dell'epoca: in «Oggi» quello moderno del luogo
+  pins.forEach((p, i) => { p.querySelector(".pl").textContent = EPOCHE[ep].storica ? STOPS[i].short : STOPS[i].shortOggi; });
   polbox.querySelectorAll(".seg button").forEach(b => b.setAttribute("aria-pressed", String(b.dataset.mode === ep)));
   legenda(ep);
   chiediDisposizione();
@@ -694,6 +971,8 @@ const SIMBOLI = {
   cammino: `<svg class="sw cammino" viewBox="0 0 28 10" aria-hidden="true">
     <path d="M3 5H25" stroke="${BORDO_CAMMINO}" stroke-width="7" stroke-linecap="round"/>
     <path d="M3 5H25" stroke="${CAMMINO}" stroke-width="3" stroke-dasharray="5 3"/></svg>`,
+  // gli Stati di oggi attraversati dal cammino: il loro giallo (vedi COLORE_STATI_DEL_CAMMINO)
+  stati: `<span class="sw area" style="background: ${COLORE_STATI_DEL_CAMMINO}; border-color: #c9a227"></span>`,
   muta: `<span class="sw muta">Aa</span>`
 };
 const colore = c => /^#[0-9a-f]{3,8}$/i.test(c ?? "") ? c : "#888888";
@@ -735,9 +1014,17 @@ polbox.querySelectorAll(".seg button").forEach(b => b.addEventListener("click", 
 // nomi scritti a mano sulla carta, dal file del cammino: [classe, testo, posizione]
 const LABELS = DATI.etichette.map(e => [{ mare: "sea", fiume: "river", regione: "region" }[e.tipo], e.testo, e.coordinate]);
 const altreEtichette = []; // ostacoli per i nomi del mondo
+// Un mare scritto a mano (con il nome di oggi) non compare nell'epoca storica la cui cartina dà un nome antico
+// alle stesse acque, cioè un mare solo «allora» a meno di 400 km: «Golfo Persico» e «Mare Inferiore» (2026-11-13).
+const kmTra = ([a, b], [c, d]) => {
+  const R = Math.PI / 180, s = Math.sin((d - b) * R / 2) ** 2 + Math.cos(b * R) * Math.cos(d * R) * Math.sin((c - a) * R / 2) ** 2;
+  return 12742 * Math.asin(Math.sqrt(s));
+};
 LABELS.forEach(([cls, txt, at]) => {
   const el = document.createElement("div");
   el.className = "geo-label " + cls; el.textContent = txt; el.setAttribute("aria-hidden", "true");
+  if (cls === "sea") el.dataset.nonIn = STORICHE.filter(e => e.cartina.nomi.some(([tipo, , lng, lat, , extra]) =>
+    tipo === "mare" && extra?.oggi === false && kmTra(at, [lng, lat]) < 400)).map(e => e.id).join(" ");
   new maplibregl.Marker({ element: el, anchor: "center" }).setLngLat(at).addTo(map);
   altreEtichette.push(el);
 });
@@ -773,6 +1060,8 @@ function voce([tipo, nome, lng, lat, z, extra], daCartina) {
     tipo, nome, at: [lng, lat], z, daCartina,
     quota: typeof extra === "number" ? extra : undefined,
     angolo: extra?.angolo, sotto: extra?.sotto,
+    // colore della scritta nella carta, corpo se diverso da quello del tipo, nome sempre visibile
+    colore: extra?.colore, corpo: extra?.corpo, sempre: !!extra?.sempre,
     gruppo: daCartina ? (fisico ? "fisici" : `cartina:${daCartina}`) : /^(stato\d|capitale|citta)$/.test(tipo) ? "moderni" : "fisici",
     conSimbolo: /^(capitale|citta|vetta|capitale-antica|citta-antica)$/.test(tipo)
   };
@@ -789,8 +1078,10 @@ map.getCanvasContainer().appendChild(livelloNomi);
 
 function creaNome(e) {
   e.el = document.createElement("div");
-  e.el.className = `geo-label mondo nascosta ${CLASSI_MONDO[e.tipo]}`;
+  e.el.className = `geo-label mondo nascosta ${CLASSI_MONDO[e.tipo]}${e.daCartina ? " antico" : ""}`;
   e.el.textContent = e.nome;
+  if (e.colore) e.el.style.setProperty("--colore", e.colore); // usato solo nell'epoca storica
+  if (e.corpo) e.el.style.fontSize = `calc(${e.corpo}px * var(--scala, 1))`;
   if (e.quota) { const q = document.createElement("span"); q.className = "quota"; q.textContent = `${e.quota} m`; e.el.appendChild(q); }
   if (e.sotto) { const s = document.createElement("span"); s.className = "sotto"; s.textContent = e.sotto; e.el.appendChild(s); }
   livelloNomi.appendChild(e.el);
@@ -802,9 +1093,194 @@ function creaNome(e) {
     return m;
   };
   e.forme = [misura("")];
-  if (e.tipo.startsWith("stato")) e.forme.push(misura("ridotto"));
   if (e.tipo === "capitale") e.forme.push(misura("solo-simbolo"));
+  // le città della cartina, se accanto al punto non c'è posto, si scrivono sopra o sotto il loro pallino (in colonna)
+  if (e.daCartina && e.conSimbolo) e.forme.push(misura("sopra"), misura("sotto"));
   [, e.w] = e.forme[0];
+}
+
+/* ---------- Gli Stati di oggi come aree ---------- */
+// dati/stati.geojson (da strumenti/prepara_confini_fiumi.py): il riempimento degli Stati in "Oggi" e, per i nomi,
+// la parte di ogni Stato che si vede. Il nome di uno Stato sta nel suo punto, come negli atlanti; se lì non si
+// vede (fuori dalla carta, sotto il pannello) o non c'è posto, si avvicina alla carta visibile restando dentro lo
+// Stato: così nella panoramica del cammino si legge anche «Arabia Saudita», il cui punto è molto più a sud.
+// Le posizioni si cercano quando la carta si ferma; mentre si muove, il nome la segue.
+const AREE_STATI = new Map(); // nome → anelli (contorni e buchi, semplificati) con il loro riquadro
+let postiDaRifare = true;
+const riquadroDi = punti => {
+  let x0 = Infinity, y0 = Infinity, x1 = -Infinity, y1 = -Infinity;
+  for (const [x, y] of punti) { if (x < x0) x0 = x; if (y < y0) y0 = y; if (x > x1) x1 = x; if (y > y1) y1 = y; }
+  return [x0, y0, x1, y1];
+};
+const siIncontrano = (a, b) => a[0] <= b[2] && a[2] >= b[0] && a[1] <= b[3] && a[3] >= b[1];
+// Douglas-Peucker: per cercare il posto dei nomi bastano contorni di qualche chilometro
+function semplificaAnello(punti, tolleranza) {
+  const tieni = new Uint8Array(punti.length); tieni[0] = tieni[punti.length - 1] = 1;
+  const pila = [[0, punti.length - 1]];
+  while (pila.length) {
+    const [i, j] = pila.pop(), [ax, ay] = punti[i], [bx, by] = punti[j], l = Math.hypot(bx - ax, by - ay);
+    let massimo = 0, k = -1;
+    for (let m = i + 1; m < j; m++) {
+      // in un anello chiuso il primo e l'ultimo punto coincidono: lì conta la distanza dal punto
+      const d = l < 1e-12 ? Math.hypot(punti[m][0] - ax, punti[m][1] - ay) : Math.abs((bx - ax) * (ay - punti[m][1]) - (ax - punti[m][0]) * (by - ay)) / l;
+      if (d > massimo) { massimo = d; k = m; }
+    }
+    if (massimo > tolleranza) { tieni[k] = 1; pila.push([i, k], [k, j]); }
+  }
+  return punti.filter((_, i) => tieni[i]);
+}
+// Sutherland-Hodgman: la parte di un anello dentro il riquadro [x0, y0, x1, y1]
+function ritaglia(punti, [x0, y0, x1, y1]) {
+  let fuori = punti;
+  for (const [k, limite, verso] of [[0, x0, 1], [0, x1, -1], [1, y0, 1], [1, y1, -1]]) {
+    const entra = q => (q[k] - limite) * verso >= 0, prima = fuori;
+    fuori = [];
+    for (let i = 0; i < prima.length; i++) {
+      const a = prima[i], b = prima[(i + 1) % prima.length];
+      if (entra(a)) fuori.push(a);
+      if (entra(a) !== entra(b)) { const t = (limite - a[k]) / (b[k] - a[k]); fuori.push([a[0] + (b[0] - a[0]) * t, a[1] + (b[1] - a[1]) * t]); }
+    }
+    if (!fuori.length) break;
+  }
+  return fuori;
+}
+// pari e dispari: un punto è dentro se attraversa un numero dispari di lati (così valgono anche i buchi)
+function dentro(x, y, anelli) {
+  let d = false;
+  for (const r of anelli) for (let i = 0, j = r.length - 1; i < r.length; j = i++) {
+    const [xi, yi] = r[i], [xj, yj] = r[j];
+    if ((yi > y) !== (yj > y) && x < (xj - xi) * (y - yi) / (yj - yi) + xi) d = !d;
+  }
+  return d;
+}
+// Gli Stati di oggi attraversati dal cammino: quelli che contengono una tappa o un pezzo dei tratti tra le tappe
+// (e del ritorno), controllati ogni 2 km circa. In «Oggi» sono tutti dello stesso giallo (COLORE_STATI_DEL_CAMMINO).
+// Abramo: Iraq, Turchia, Siria, Libano, Israele, Palestina, Egitto.
+function statiDelCammino(features) {
+  const stati = features.map(f => {
+    const poligoni = (f.geometry.type === "Polygon" ? [f.geometry.coordinates] : f.geometry.coordinates)
+      .map(anelli => ({ anelli, riquadro: riquadroDi(anelli[0]) }));
+    return { nome: f.properties.n, poligoni };
+  });
+  const trovati = new Set();
+  const controlla = (x, y) => {
+    for (const s of stati) {
+      if (!trovati.has(s.nome) && s.poligoni.some(p => siIncontrano(p.riquadro, [x, y, x, y]) && dentro(x, y, p.anelli))) { trovati.add(s.nome); return; }
+    }
+  };
+  const linee = [...STOPS.map(s => s.path ?? [s.at]), ...(RITORNO ? [RITORNO] : [])];
+  for (const linea of linee) {
+    controlla(...linea[0]);
+    for (let k = 1; k < linea.length; k++) {
+      const [ax, ay] = linea[k - 1], [bx, by] = linea[k], n = Math.max(1, Math.ceil(Math.hypot(bx - ax, by - ay) / .02));
+      for (let m = 1; m <= n; m++) controlla(ax + (bx - ax) * m / n, ay + (by - ay) * m / n);
+    }
+  }
+  return [...trovati];
+}
+leggiJSON(new URL("dati/stati.geojson", location.href)).then(dati => {
+  const attraversati = statiDelCammino(dati.features);
+  const metti = () => {
+    const sorgente = map.getSource("stati");
+    if (!sorgente) { map.once("styledata", metti); return; }
+    sorgente.setData(dati);
+    // gli Stati del cammino gialli e più coprenti degli altri, perché risaltino (anche loro più leggeri da vicino)
+    const delCammino = ["in", ["get", "n"], ["literal", attraversati]];
+    const colora = () => {
+      map.setPaintProperty("stati-fill", "fill-color", ["case", delCammino, COLORE_STATI_DEL_CAMMINO, COLORI_STATI]);
+      map.setPaintProperty("stati-fill", "fill-opacity", ["interpolate", ["linear"], ["zoom"],
+        1, ["case", delCammino, .62, .34], 5, ["case", delCammino, .55, .3], 7, ["case", delCammino, .4, .2], 8, ["case", delCammino, .32, .14]]);
+    };
+    try { colora(); } catch { map.once("load", colora); } // la carta non ha ancora finito di caricare lo stile
+  };
+  metti();
+  for (const f of dati.features) {
+    const g = f.geometry, poligoni = g.type === "Polygon" ? [g.coordinates] : g.coordinates;
+    AREE_STATI.set(f.properties.n, poligoni.flat().map(r => semplificaAnello(r, .03)).filter(r => r.length >= 4)
+      .map(punti => ({ punti, riquadro: riquadroDi(punti) })));
+  }
+  rifaiPostiStati();
+}).catch(errore => console.warn("Stati di oggi non caricati:", errore.message));
+function rifaiPostiStati() { postiDaRifare = true; chiediDisposizione(); }
+
+// Per ogni Stato che si vede, fino a quattro posti per il nome dentro la sua parte visibile, dal più vicino al
+// suo punto: il nome intero dentro lo Stato (con un po' di margine dal confine), nella carta e fuori
+// dall'interfaccia. Da lontano, sul globo, i nomi restano al loro punto.
+function aggiornaPostiStati(W, H, base) {
+  postiDaRifare = false;
+  const z = map.getZoom(), attivi = EPOCHE[epoca].nomi.includes("moderni") && !mutaAttiva();
+  const interfaccia = [...document.querySelectorAll(".panel, #polbox, .maplibregl-ctrl-bottom-right")].map(el => rettangolo(el, base, 8));
+  const b = map.getBounds(), vista = [b.getWest() - .5, b.getSouth() - .5, b.getEast() + .5, b.getNorth() + .5], centro = map.getCenter();
+  for (const e of mondo) {
+    if (!e.tipo.startsWith("stato")) continue;
+    e.posti = []; e.ancore = [];
+    if (!attivi || z < 3 || e.z > z || !AREE_STATI.has(e.nome)) continue;
+    const pezzi = [];
+    for (const a of AREE_STATI.get(e.nome)) {
+      if (!siIncontrano(a.riquadro, vista)) continue;
+      const geo = ritaglia(a.punti, vista);
+      if (geo.length < 3) continue;
+      const schermo = ritaglia(geo.map(q => { const s = map.project(q); return [s.x, s.y]; }), [0, 0, W, H]);
+      if (schermo.length >= 3) pezzi.push(schermo);
+    }
+    if (!pezzi.length) continue;
+    if (!e.el) creaNome(e);
+    const [bx0, by0, bx1, by1] = riquadroDi(pezzi.flat());
+    // ci si avvicina al punto del nome (o, se è sul retro del globo, al centro della parte visibile)
+    const meta = cosDistanza(e.at, centro) > .3 ? map.project(e.at) : { x: (bx0 + bx1) / 2, y: (by0 + by1) / 2 };
+    // dove attaccare il filetto, se il nome non entrerà nello Stato (vedi disponiFiletti): punti ben dentro lo Stato,
+    // dal più vicino al suo punto, distanti tra loro almeno 12 pixel. Solo per uno Stato che si vede tutto (piccolo):
+    // un grande Stato tagliato dal bordo della carta non ha bisogno del filetto
+    const tutto = riquadroDi(AREE_STATI.get(e.nome).flatMap(a => [a.riquadro.slice(0, 2), a.riquadro.slice(2)]));
+    if (tutto[0] >= b.getWest() && tutto[2] <= b.getEast() && tutto[1] >= b.getSouth() && tutto[3] <= b.getNorth()) {
+      const passo = Math.max(5, Math.sqrt((bx1 - bx0) * (by1 - by0) / 400)), punti = [];
+      for (let y = by0 + 3; y <= by1 - 3; y += passo) for (let x = bx0 + 3; x <= bx1 - 3; x += passo) punti.push([x, y, Math.hypot(x - meta.x, y - meta.y)]);
+      punti.sort((a, b) => a[2] - b[2]);
+      for (const [x, y] of punti) {
+        if (x < 6 || y < 6 || x > W - 6 || y > H - 6 || ![[0, 0], [-3, 0], [3, 0], [0, -3], [0, 3]].every(([dx, dy]) => dentro(x + dx, y + dy, pezzi))) continue;
+        if (interfaccia.some(q => x > q[0] && x < q[2] && y > q[1] && y < q[3]) || e.ancore.some(q => Math.hypot(q.x - x, q.y - y) < 12)) continue;
+        e.ancore.push({ x, y, lngLat: map.unproject([x, y]) });
+        if (e.ancore.length >= 12) break;
+      }
+    }
+    for (const [extra, w, h] of e.forme) { // prima a grandezza piena, poi più piccolo
+      const passo = Math.max(10, Math.sqrt((bx1 - bx0) * (by1 - by0) / 900)), griglia = [];
+      for (let y = by0 + h / 2; y <= by1 - h / 2; y += passo) for (let x = bx0 + w / 2; x <= bx1 - w / 2; x += passo) griglia.push([x, y, Math.hypot(x - meta.x, y - meta.y)]);
+      griglia.sort((a, b) => a[2] - b[2]);
+      const m = 4, colonne = Math.ceil((w + 2 * m) / 30);
+      for (const [x, y] of griglia) {
+        const r = [x - w / 2, y - h / 2, x + w / 2, y + h / 2];
+        if (r[0] < 6 || r[1] < 6 || r[2] > W - 6 || r[3] > H - 6 || !dentro(x, y, pezzi)) continue;
+        if (interfaccia.some(q => siToccano(r, q)) || e.posti.some(q => Math.hypot(q.x - x, q.y - y) < Math.max(w, 60))) continue;
+        let tutto = true;
+        for (let c = 0; c <= colonne && tutto; c++) {
+          const px = r[0] - m + (w + 2 * m) * c / colonne;
+          tutto = dentro(px, r[1] - m, pezzi) && dentro(px, y, pezzi) && dentro(px, r[3] + m, pezzi);
+        }
+        if (!tutto) continue;
+        e.posti.push({ x, y, extra, lngLat: map.unproject([x, y]) });
+        if (e.posti.length >= 4) break;
+      }
+      if (e.posti.length) break;
+    }
+  }
+}
+
+// Il nome, nel rettangolo [x, y, w, h] dello schermo, sta tutto dentro il suo Stato? Si guardano il centro, le
+// estremità della riga e il centro dei lati alto e basso, 2 pixel all'interno. Finché le aree non sono caricate, sì.
+function nomeNelloStato(e, x, y, w, h) {
+  const aree = AREE_STATI.get(e.nome);
+  if (!aree) return true;
+  return [[w / 2, h / 2], [2, h / 2], [w - 2, h / 2], [w / 2, 2], [w / 2, h - 2]].every(([dx, dy]) => {
+    const { lng, lat } = map.unproject([x + dx, y + dy]), qui = [lng, lat, lng, lat];
+    return dentro(lng, lat, aree.filter(a => siIncontrano(a.riquadro, qui)).map(a => a.punti));
+  });
+}
+// Il punto dello schermo cade nel mare (in nessuno Stato)? Lì un nome scritto fuori dal suo Stato non confonde.
+function nelMare(x, y) {
+  const { lng, lat } = map.unproject([x, y]), qui = [lng, lat, lng, lat];
+  for (const aree of AREE_STATI.values()) if (dentro(lng, lat, aree.filter(a => siIncontrano(a.riquadro, qui)).map(a => a.punti))) return false;
+  return true;
 }
 
 // Posizioni da provare per ogni forma, come negli atlanti: [x, y, nome a sinistra del simbolo].
@@ -814,20 +1290,48 @@ function posizioniPossibili(e, p) {
   // un nome inclinato come nella cartina sta solo al suo posto
   if (e.angolo != null) { const [extra, w, h] = e.forme[0]; return [[extra, w, h, p.x - w / 2, p.y - h / 2, false]]; }
   const elenco = [];
-  for (const [extra, w, h] of e.forme) {
+  e.riserva = null;
+  // p manca per uno Stato il cui punto non si vede: restano solo i posti nella sua parte visibile
+  for (const [extra, w, h] of p ? e.forme : []) {
     const y = p.y - h / 2;
     if (e.conSimbolo) {
+      // una città coperta da un segnaposto (Gerusalemme sotto Mòria, Menfi sotto l'Egitto) si scrive appena sopra
+      // di lui, o appena sotto, con poca aria; le altre città restano accanto al loro punto
+      const pin = cerchiPin.find(c => p.x > c[0] - 10 && p.x < c[2] + 10 && p.y > c[1] - 10 && p.y < c[3] + 10);
+      // forme in colonna (solo città della cartina): il nome sopra o sotto, e il pallino resta sul punto (prima
+      // si spostava tutto il nome, pallino compreso, e Biblo finiva in mare: 2026-11-13)
+      if (extra === "sopra" || extra === "sotto") {
+        if (!pin) elenco.push([extra, w, h, p.x - w / 2, extra === "sopra" ? p.y + 3.5 - h : p.y - 3.5, false]);
+        continue;
+      }
       elenco.push([extra, w, h, p.x - 4, y, false]);
       if (extra !== "solo-simbolo") elenco.push([extra, w, h, p.x - 4 - (w - 7), y, true]);
+      if (pin && extra !== "solo-simbolo") {
+        const cx = (pin[0] + pin[2]) / 2;
+        elenco.push([extra, w, h, cx - w / 2, pin[1] - 3 - h, false, true], [extra, w, h, cx - w / 2, pin[3] + 3, false, true]);
+      }
     } else {
-      const x = p.x - w / 2;
-      elenco.push([extra, w, h, x, y, false]);
+      const x = p.x - w / 2, scosti = [];
+      // uno Stato piccolo che si vede tutto (ha le ancore del filetto) tiene il nome nel suo punto solo se ci entra;
+      // se no il punto resta l'ultima risorsa, quando neanche il filetto trova posto (vedi disponiFiletti)
+      if (e.ancore?.length && !nomeNelloStato(e, x, y, w, h)) e.riserva = [extra, w, h, x, y, false];
+      else elenco.push([extra, w, h, x, y, false]);
       // i nomi della cartina del volume si scostano prima di poco, per restare accanto a ciò che indicano
-      if (e.daCartina) elenco.push([extra, w, h, x, y + h / 2, false], [extra, w, h, x, y - h / 2, false]);
-      elenco.push([extra, w, h, x, y - h - 5, false], [extra, w, h, x, y + h + 5, false]);
-      // uno Stato può anche scivolare un po' di lato, restando dentro il suo territorio
-      if (e.tipo.startsWith("stato")) elenco.push([extra, w, h, x - w * .6, y, false], [extra, w, h, x + w * .6, y, false]);
+      if (e.daCartina) scosti.push([extra, w, h, x, y + h / 2, false], [extra, w, h, x, y - h / 2, false]);
+      scosti.push([extra, w, h, x, y - h - 5, false], [extra, w, h, x, y + h + 5, false]);
+      // uno Stato può anche scivolare un po' di lato; scostato, il nome deve stare tutto dentro lo Stato (prima no:
+      // nella panoramica di Abramo ISRAELE, cacciato dal segnaposto del Negheb, finiva nel Sinai, e KUWAIT in Iraq:
+      // 2026-11-13). Se non entra da nessuna parte, si scrive fuori con un filetto (vedi disponiFiletti).
+      if (e.tipo.startsWith("stato")) {
+        scosti.push([extra, w, h, x - w * .6, y, false], [extra, w, h, x + w * .6, y, false]);
+        elenco.push(...scosti.filter(([, , , sx, sy]) => nomeNelloStato(e, sx, sy, w, h)));
+      } else elenco.push(...scosti);
     }
+  }
+  // poi i posti dentro la parte visibile dello Stato (vedi aggiornaPostiStati), nell'ordine di vicinanza
+  for (const q of e.posti ?? []) {
+    const s = map.project(q.lngLat), [extra, w, h] = e.forme.find(f => f[0] === q.extra) ?? e.forme[0];
+    elenco.push([extra, w, h, s.x - w / 2, s.y - h / 2, false]);
   }
   return elenco;
 }
@@ -874,12 +1378,14 @@ function angoloSulloSchermo(e, p) {
   return Math.atan2(q.y - p.y, q.x - p.x);
 }
 
-let caratteriPronti = false, disposizioneChiesta = false, mostrati = new Set();
+let caratteriPronti = false, disposizioneChiesta = false, mostrati = new Set(), filiMostrati = new Set();
+let cerchiPin = []; // i cerchi dei segnaposto sullo schermo (per le città che stanno sotto di loro)
 function disponiMondo() {
   disposizioneChiesta = false;
   if (!caratteriPronti) return;
   const z = map.getZoom(), centro = map.getCenter(), W = mapEl.clientWidth, H = mapEl.clientHeight;
   const base = mapEl.getBoundingClientRect();
+  if (postiDaRifare && AREE_STATI.size && !map.isMoving()) aggiornaPostiStati(W, H, base);
   // da vicino si scartano subito i nomi lontani, senza calcolarne la posizione sullo schermo
   const area = z > 3 ? map.getBounds() : null;
   // pixel per radiante sulla superficie del globo: un nome largo deve stare più lontano dal bordo
@@ -889,75 +1395,175 @@ function disponiMondo() {
   const presi = [];
   // un pin occupa il cerchio e il suo nome; se il nome è nascosto (tappe secondarie da lontano, cartina
   // muta) occupa solo il cerchio
+  cerchiPin = [];
   if (!mapEl.classList.contains("hide-pins")) pins.forEach(p => {
     const nomeVisibile = getComputedStyle(p.querySelector(".pl")).visibility === "visible";
     presi.push(rettangolo(nomeVisibile ? p : p.querySelector(".pn"), base));
+    cerchiPin.push(rettangolo(p.querySelector(".pn"), base));
   });
   altreEtichette.forEach(el => { if (getComputedStyle(el).visibility === "visible") presi.push(rettangolo(el, base)); });
   // la mappa continua sotto il pannello del racconto, la legenda e i pulsanti: lì un nome non si vedrebbe
-  document.querySelectorAll(".panel, #polbox, #accessibilita, .maplibregl-ctrl-bottom-right").forEach(el => presi.push(rettangolo(el, base, 0)));
+  document.querySelectorAll(".panel, #polbox, .maplibregl-ctrl-bottom-right").forEach(el => { const q = rettangolo(el, base, 0); q.interfaccia = true; presi.push(q); });
   // i nomi che possono comparire ora, con la loro posizione sullo schermo
   const candidati = [];
   for (const e of z < ZOOM_NOMI ? [] : mondo) {
-    if (e.z > z) continue; // compare più da vicino
+    if (e.z > z && !e.sempre) continue; // compare più da vicino (un nome «sempre visibile» no)
     // nomi di oggi e nomi antichi solo nella loro epoca (vedi EPOCHE); la geografia fisica sempre
     if (e.gruppo !== "fisici" && !EPOCHE[epoca].nomi.includes(e.gruppo)) continue;
     if (mutaAttiva()) continue; // cartina muta
-    const [lng, lat] = e.at;
-    if (area && (lat < area.getSouth() - 1 || lat > area.getNorth() + 1 || lng < area.getWest() - 2 || lng > area.getEast() + 2)) continue;
-    const cosD = cosDistanza(e.at, centro);
-    if (cosD < COS_BORDO) continue;
-    const p = map.project(e.at);
-    if (p.x < -200 || p.x > W + 200 || p.y < -50 || p.y > H + 50) continue;
-    if (!e.el) creaNome(e);
-    if (Math.acos(Math.min(1, cosD)) + (e.w / 2 + 6) / raggio > ANGOLO_BORDO) continue;
+    // il punto del nome sullo schermo, se si vede; uno Stato può comparire anche senza (vedi aggiornaPostiStati)
+    const p = (() => {
+      const [lng, lat] = e.at;
+      if (area && (lat < area.getSouth() - 1 || lat > area.getNorth() + 1 || lng < area.getWest() - 2 || lng > area.getEast() + 2)) return null;
+      const cosD = cosDistanza(e.at, centro);
+      if (cosD < COS_BORDO) return null;
+      const q = map.project(e.at);
+      if (q.x < -200 || q.x > W + 200 || q.y < -50 || q.y > H + 50) return null;
+      if (!e.el) creaNome(e);
+      return Math.acos(Math.min(1, cosD)) + (e.w / 2 + 6) / raggio > ANGOLO_BORDO ? null : q;
+    })();
+    if (!p && !e.posti?.length && !e.ancore?.length) continue;
     if (e.angolo != null) e.giro = angoloSulloSchermo(e, p);
     candidati.push([e, p]);
   }
   // Come negli atlanti, i simboli delle capitali (di oggi e di allora) si fissano per primi: gli altri
   // nomi si sistemano intorno. Ogni simbolo è un ostacolo per tutti tranne che per la sua capitale.
   for (const [e, p] of candidati) {
-    if (e.tipo !== "capitale" && e.tipo !== "capitale-antica") continue;
+    if ((e.tipo !== "capitale" && e.tipo !== "capitale-antica") || !p) continue;
     const q = [p.x - 5, p.y - 5, p.x + 5, p.y + 5];
     q.di = e;
     presi.push(q);
   }
-  const ora = new Map();
+  const ora = new Map(), daFilare = [];
+  // i nomi «sempre visibili» (Canaan) prendono il posto per primi e cedono solo all'interfaccia
+  candidati.sort((a, b) => b[0].sempre - a[0].sempre);
   for (const [e, p] of candidati) {
     const posti = posizioniPossibili(e, p), ordine = posti.map((_, i) => i);
-    // prima la posizione scelta l'ultima volta, se c'era: così i nomi non saltano mentre la carta si muove
-    if (e.scelta > 0) ordine.unshift(e.scelta);
-    for (const i of ordine) {
+    // prima la posizione scelta l'ultima volta, se c'era: così i nomi non saltano mentre la carta si muove.
+    // Non se era un ripiego (il solo quadratino di una capitale): appena c'è posto, torna il nome
+    // (i posti di uno Stato cambiano: l'indice può non esserci più)
+    if (e.scelta > 0 && e.scelta < posti.length && posti[e.scelta][0] !== "solo-simbolo") ordine.unshift(e.scelta);
+    // un nome «sempre visibile» cerca prima un posto libero; se non c'è, una seconda volta si sovrappone
+    // agli altri nomi e ai segnaposto (non all'interfaccia)
+    e.forzato = false;
+    for (const i of e.sempre ? [...ordine, -1, ...ordine] : ordine) {
+      if (i < 0) { if (ora.has(e)) break; e.forzato = true; continue; }
+      if (ora.has(e)) break;
       const posto = posti[i], [extra, w, h, x, y] = posto;
       // tra Stati basta meno aria, perché devono entrarci tutti; così tra i nomi della cartina del volume,
       // che sono fitti come li ha disposti il cartografo; il solo quadratino della capitale quasi nessuna
-      const [ax, ay] = extra === "solo-simbolo" ? [1, 1] : e.tipo.startsWith("stato") ? [5, 3] : e.daCartina ? [4, 2] : [ARIA_X, ARIA_Y];
+      const [ax, ay] = extra === "solo-simbolo" ? [1, 1] : posto[6] ? [3, 1] : e.tipo.startsWith("stato") ? [5, 3] : e.daCartina ? [4, 2] : [ARIA_X, ARIA_Y];
       const inclinato = e.angolo != null;
       const b = inclinato ? rettangoloInclinato(x + w / 2, y + h / 2, w / 2 + ax, h / 2 + ay, e.giro) : [x - ax, y - ay, x + w + ax, y + h + ay];
       // il nome deve stare tutto nella mappa (l'aria intorno può uscire dal bordo)
       const [x0, y0, x1, y1] = inclinato ? rettangoloInclinato(x + w / 2, y + h / 2, w / 2, h / 2, e.giro) : [x, y, x + w, y + h];
-      if (x0 < 0 || y0 < 0 || x1 > W || y1 > H || presi.some(q => q.di !== e && siToccano(b, q))) continue;
+      // il nome di uno Stato può accostarsi al quadratino di una capitale (che ha già il suo margine): così KUWAIT
+      // entra nel Kuwait accanto ad Al Kuwait
+      const stretto = e.tipo.startsWith("stato") ? [x - 1, y - 1, x + w + 1, y + h + 1] : b;
+      if (x0 < 0 || y0 < 0 || x1 > W || y1 > H || presi.some(q => q.di !== e && (!e.forzato || q.interfaccia) && siToccano(q.di ? stretto : b, q))) continue;
       presi.push(b);
       ora.set(e, posto);
       e.scelta = i;
       break;
     }
+    if (!ora.has(e) && e.ancore?.length) daFilare.push(e);
   }
+  // gli Stati rimasti senza posto si scrivono fuori, con il filetto, dopo tutti gli altri nomi
+  const fili = disponiFiletti(daFilare, presi, ora, W, H);
   mostrati.forEach(e => { if (!ora.has(e)) e.el.classList.add("nascosta"); });
   ora.forEach(([extra, , , x, y, sinistra], e) => {
     e.el.style.transform = `translate(${Math.round(x)}px, ${Math.round(y)}px)` + (e.angolo != null ? ` rotate(${e.giro.toFixed(3)}rad)` : "");
     e.el.classList.toggle("sinistra", sinistra);
     e.el.classList.toggle("ridotto", extra === "ridotto");
     e.el.classList.toggle("solo-simbolo", extra === "solo-simbolo");
+    e.el.classList.toggle("sopra", extra === "sopra");
+    e.el.classList.toggle("sotto", extra === "sotto");
     e.el.classList.remove("nascosta");
   });
   mostrati = new Set(ora.keys());
+  filiMostrati.forEach(e => { if (!fili.has(e)) e.filo.classList.add("nascosta"); });
+  fili.forEach(([ax, ay, px, py], e) => {
+    if (!e.filo) { e.filo = document.createElement("div"); e.filo.className = "filetto"; livelloNomi.appendChild(e.filo); }
+    e.filo.style.width = `${Math.hypot(px - ax, py - ay).toFixed(1)}px`;
+    e.filo.style.transform = `translate(${ax.toFixed(1)}px, ${ay.toFixed(1)}px) rotate(${Math.atan2(py - ay, px - ax).toFixed(3)}rad)`;
+    e.filo.classList.remove("nascosta");
+  });
+  filiMostrati = new Set(fili.keys());
+}
+
+// Come negli atlanti, il nome di uno Stato troppo piccolo per contenerlo si scrive accanto, fuori, legato da un
+// filetto a un punto ben dentro lo Stato (le «ancore» di aggiornaPostiStati, libere da segnaposto e nomi): prima
+// sul mare, poi altrove, il più vicino possibile, di lato prima che sopra o sotto. Il nome e il filetto non devono
+// toccare altri nomi, segnaposto o l'interfaccia. Prima si riprova la scelta precedente, perché non salti.
+const DIREZIONI_FILETTO = [180, 0, 210, 330, 150, 30, 240, 300, 120, 60, 270, 90].map(g => g * Math.PI / 180);
+const DISTANZE_FILETTO = [14, 32, 56, 86];
+function disponiFiletti(elenco, presi, ora, W, H) {
+  const fili = new Map();
+  const tocca = (r, q) => siToccano(r, q);
+  for (const e of elenco) {
+    const [extra, w, h] = e.forme[0];
+    const ancore = [];
+    for (const a of e.ancore) {
+      const { x, y } = map.project(a.lngLat);
+      if (x < 4 || y < 4 || x > W - 4 || y > H - 4 || presi.some(q => tocca([x - 3, y - 3, x + 3, y + 3], q))) continue;
+      ancore.push([x, y]);
+      if (ancore.length >= 3) break;
+    }
+    // il posto del nome per un'ancora, una distanza e una direzione, con il punto del nome a cui arriva il filetto
+    const prova = (ia, id, ig, soloMare) => {
+      const [ax, ay] = ancore[ia] ?? [], d = DISTANZE_FILETTO[id], g = DIREZIONI_FILETTO[ig];
+      if (ax == null || d == null || g == null) return null;
+      const dx = Math.cos(g), dy = Math.sin(g);
+      const t = Math.min(Math.abs(dx) > 1e-6 ? (w / 2 + d) / Math.abs(dx) : Infinity, Math.abs(dy) > 1e-6 ? (h / 2 + d) / Math.abs(dy) : Infinity);
+      const cx = ax + dx * t, cy = ay + dy * t, x = cx - w / 2, y = cy - h / 2;
+      if (x < 2 || y < 2 || x + w > W - 2 || y + h > H - 2) return null;
+      const b = [x - 5, y - 3, x + w + 5, y + h + 3], stretto = [x - 1, y - 1, x + w + 1, y + h + 1];
+      if (presi.some(q => tocca(q.di ? stretto : b, q))) return null;
+      if (soloMare && !nelMare(cx, cy)) return null;
+      // il filetto va dall'ancora al bordo del nome, fermandosi 2 pixel prima
+      let px = Math.min(Math.max(ax, x), x + w), py = Math.min(Math.max(ay, y), y + h);
+      const l = Math.hypot(px - ax, py - ay);
+      if (l < 6) return null;
+      px -= (px - ax) / l * 2; py -= (py - ay) / l * 2;
+      for (let s = 4; s < l - 2; s += 4) {
+        const sx = ax + (px - ax) * s / l, sy = ay + (py - ay) * s / l;
+        if (presi.some(q => tocca([sx - 1, sy - 1, sx + 1, sy + 1], q))) return null;
+      }
+      return { b, x, y, filo: [ax, ay, px, py], scelta: [ia, id, ig, soloMare] };
+    };
+    // prima sul mare, poi altrove; in ciascun giro si riprova per prima la scelta precedente, se era di quel giro
+    // (senza ancore libere non si prova niente e resta l'ultima risorsa)
+    let trovato = null;
+    for (const soloMare of [true, false]) {
+      if (!trovato && e.sceltaFilo?.[3] === soloMare) trovato = prova(...e.sceltaFilo);
+      for (let ia = 0; ia < ancore.length && !trovato; ia++)
+        for (let id = 0; id < DISTANZE_FILETTO.length && !trovato; id++)
+          for (let ig = 0; ig < DIREZIONI_FILETTO.length && !trovato; ig++) trovato = prova(ia, id, ig, soloMare);
+    }
+    if (!trovato) {
+      e.sceltaFilo = null;
+      // ultima risorsa: il nome nel suo punto, anche se esce dallo Stato
+      const r = e.riserva;
+      if (!r) continue;
+      const [, , , x, y] = r, b = [x - 5, y - 3, x + w + 5, y + h + 3], stretto = [x - 1, y - 1, x + w + 1, y + h + 1];
+      if (x < 0 || y < 0 || x + w > W || y + h > H || presi.some(q => tocca(q.di ? stretto : b, q))) continue;
+      presi.push(b);
+      ora.set(e, r);
+      continue;
+    }
+    presi.push(trovato.b);
+    ora.set(e, [extra, w, h, trovato.x, trovato.y, false]);
+    fili.set(e, trovato.filo);
+    e.sceltaFilo = trovato.scelta;
+  }
+  return fili;
 }
 function chiediDisposizione() {
   if (!disposizioneChiesta) { disposizioneChiesta = true; requestAnimationFrame(disponiMondo); }
 }
 map.on("move", chiediDisposizione);
-map.on("resize", chiediDisposizione);
+map.on("resize", () => rifaiPostiStati());
+map.on("moveend", () => rifaiPostiStati());
 // le misure dei nomi servono con i caratteri definitivi, non con quelli di riserva
 document.fonts.ready.then(() => { caratteriPronti = true; chiediDisposizione(); });
 
@@ -968,10 +1574,56 @@ const pins = STOPS.map((s, i) => {
   el.setAttribute("aria-label", `Tappa ${i + 1}: ${s.name}`);
   el.innerHTML = `<span class="pn">${i + 1}</span><span class="pl">${esc(s.short)}</span>`;
   el.addEventListener("click", e => { e.stopPropagation(); go(INTRO.length + i); apriScheda(i); });
-  new maplibregl.Marker({ element: el, anchor: "left", offset: [-13, 0] }).setLngLat(s.at).addTo(map);
+  const richiamo = document.createElement("span"); richiamo.className = "richiamo"; el.prepend(richiamo);
+  el.marker = new maplibregl.Marker({ element: el, anchor: "left", offset: [-13, 0] }).setLngLat(s.at).addTo(map);
   return el;
 });
+// Tappe vicine (in Canaan sono a 15-35 km l'una dall'altra): quando i segnaposto si sovrapporrebbero si
+// dispongono in colonna a destra del cammino, nell'ordine da nord a sud, ognuno con una linea di richiamo
+// verso il pallino sul suo luogo, come nella carta; avvicinandosi, appena c'è posto, tornano al loro luogo.
+const PASSO_PIN = 30;
+function distanziaPin() {
+  const pos = STOPS.map(s => map.project(s.at));
+  // si parte da un gruppo per segnaposto e si uniscono i gruppi le cui colonne si toccherebbero, finché
+  // non ce ne sono più (allargando un gruppo può toccare il vicino)
+  const media = (g, k) => g.reduce((t, i) => t + pos[i][k], 0) / g.length;
+  const estensione = g => [media(g, "y") - (g.length - 1) / 2 * PASSO_PIN, media(g, "y") + (g.length - 1) / 2 * PASSO_PIN];
+  let gruppi = pos.map((_, i) => [i]);
+  // sul globo, da molto lontano, una colonna di tutte le tappe non aiuterebbe: lì restano al loro posto
+  for (let unito = map.getZoom() >= 3.5; unito;) {
+    unito = false;
+    for (let a = 0; a < gruppi.length && !unito; a++) for (let b = a + 1; b < gruppi.length && !unito; b++) {
+      const [a0, a1] = estensione(gruppi[a]), [b0, b1] = estensione(gruppi[b]);
+      if (Math.abs(media(gruppi[a], "x") - media(gruppi[b], "x")) < 80 && b0 < a1 + PASSO_PIN && a0 < b1 + PASSO_PIN) {
+        gruppi[a] = [...gruppi[a], ...gruppi[b]].sort((i, j) => pos[i].y - pos[j].y);
+        gruppi.splice(b, 1);
+        unito = true;
+      }
+    }
+  }
+  for (const g of gruppi) {
+    // la colonna sta a destra del cammino, come nella carta: sul tracciato resta il pallino del luogo
+    const cx = Math.max(...g.map(i => pos[i].x)) + 34, cy = media(g, "y");
+    g.forEach((i, k) => {
+      const [dx, dy] = g.length > 1 ? [cx - pos[i].x, cy + (k - (g.length - 1) / 2) * PASSO_PIN - pos[i].y] : [0, 0];
+      pins[i].marker.setOffset([-13 + dx, dy]);      const r = pins[i].querySelector(".richiamo"), l = Math.hypot(dx, dy);
+      r.hidden = l < 14;
+      if (l >= 14) { r.style.width = `${l}px`; r.style.transform = `rotate(${Math.atan2(-dy, -dx)}rad)`; }
+    });
+  }
+}
+// le posizioni sullo schermo (con il globo) si possono chiedere solo a carta caricata
+let cartaPronta = false;
+map.on("load", () => { cartaPronta = true; distanziaPin(); });
+map.on("move", () => { if (cartaPronta) distanziaPin(); });
 const popup = new maplibregl.Popup({ className: "stop-pop", offset: 20, closeOnClick: false, maxWidth: "260px" });
+// Il fumetto della tappa ha una struttura fissa: il nome della tappa e sotto «Oggi» con il luogo attuale e lo
+// Stato, dai dati (luogoAttuale: «Tell el-Muqayyar, Iraq meridionale»). Senza luogo attuale, solo il nome.
+// Se la legenda lo coprirebbe, la legenda cambia angolo (sistemaLegenda).
+function apriFumetto(s) {
+  popup.setLngLat(s.at).setHTML(`<h3>${esc(s.name)}</h3>${s.where ? `<p>Oggi ${esc(s.where)}</p>` : ""}`).addTo(map);
+  sistemaLegenda();
+}
 
 
 /* ---------- Pannello ---------- */
@@ -986,23 +1638,64 @@ STOPS.forEach((s, i) => {
 let step = 0, anim = null, spin = true;
 
 /* ---------- Scheda della tappa e immagine a tutto schermo ---------- */
-// Ogni tappa ha un testo (obbligatorio: l'approfondimento o, in mancanza, il testo del pannello) e
-// facoltativamente un'immagine { src, alt, crediti }. Il clic sull'immagine la apre a tutto schermo.
+// Ogni tappa ha un testo (obbligatorio: l'approfondimento o, in mancanza, il testo del pannello) e una
+// galleria facoltativa di immagini { src, miniatura, alt, didascalia, crediti }, nell'ordine scelto nel
+// backoffice. Frecce, miniature e tasti ← → passano da un'immagine all'altra, anche a tutto schermo;
+// il clic sull'immagine la apre a tutto schermo. Senza immagini la finestra è stretta, con il solo testo.
 const scheda = $("scheda"), lente = $("lente");
+let galleria = [], indiceImmagine = 0;
 function apriScheda(i) {
   const s = STOPS[i];
   $("scheda-occhiello").textContent = `Tappa ${i + 1} di ${STOPS.length}`;
   $("scheda-titolo").textContent = s.name;
   $("scheda-luogo").textContent = [s.where, s.ref].filter(Boolean).join(" · ");
   $("scheda-testo").textContent = s.approfondimento ?? s.text;
-  $("scheda-figura").hidden = !s.immagine;
-  if (s.immagine) {
-    $("scheda-img").src = s.immagine.src; $("scheda-img").alt = s.immagine.alt;
-    $("scheda-crediti").textContent = s.immagine.crediti ?? "";
-  }
+  $("scheda-testo").scrollTop = 0;
+  galleria = s.immagini ?? [];
+  const piu = galleria.length > 1;
+  scheda.classList.toggle("solo-testo", !galleria.length);
+  $("scheda-palco").hidden = $("scheda-navigatore").hidden = !galleria.length;
+  for (const id of ["scheda-prima", "scheda-dopo", "lente-prima", "lente-dopo", "scheda-miniature"]) $(id).hidden = !piu;
+  const miniature = $("scheda-miniature");
+  miniature.innerHTML = "";
+  galleria.forEach((im, n) => {
+    const li = document.createElement("li");
+    li.innerHTML = `<button type="button" aria-label="Immagine ${n + 1}: ${esc(im.alt)}"><img src="${esc(im.miniatura)}" alt="" loading="lazy"></button>`;
+    li.firstChild.addEventListener("click", () => mostraImmagine(n));
+    miniature.appendChild(li);
+  });
+  mostraImmagine(0, false);
   popup.remove();
   if (!scheda.open) scheda.showModal();
+  scheda.scrollTop = 0;
 }
+// l'immagine n della galleria nella scheda (e a tutto schermo, se è aperto)
+function mostraImmagine(n, animata = true) {
+  if (!galleria.length) return;
+  indiceImmagine = (n + galleria.length) % galleria.length;
+  const im = galleria[indiceImmagine], piu = galleria.length > 1;
+  const img = $("scheda-img");
+  img.src = im.src;
+  if (animata) { img.classList.remove("compare"); void img.offsetWidth; img.classList.add("compare"); }
+  $("scheda-ingrandisci").setAttribute("aria-label", `Ingrandisci l'immagine: ${im.alt}`);
+  $("scheda-palco").setAttribute("aria-label", `Immagine ${indiceImmagine + 1} di ${galleria.length}`);
+  $("scheda-contatore").textContent = piu ? `${indiceImmagine + 1} / ${galleria.length}` : "";
+  $("scheda-didascalia").textContent = im.didascalia ?? "";
+  $("scheda-crediti").textContent = im.crediti ?? "";
+  $("scheda-miniature").querySelectorAll("button").forEach((b, k) =>
+    k === indiceImmagine ? b.setAttribute("aria-current", "true") : b.removeAttribute("aria-current"));
+  if (lente.open) caricaLente();
+}
+$("scheda-prima").addEventListener("click", () => mostraImmagine(indiceImmagine - 1));
+$("scheda-dopo").addEventListener("click", () => mostraImmagine(indiceImmagine + 1));
+$("lente-prima").addEventListener("click", () => mostraImmagine(indiceImmagine - 1));
+$("lente-dopo").addEventListener("click", () => mostraImmagine(indiceImmagine + 1));
+// ← → sfogliano le immagini, nella scheda e a tutto schermo
+for (const finestra of [scheda, lente]) finestra.addEventListener("keydown", e => {
+  if (galleria.length < 2 || !["ArrowLeft", "ArrowRight"].includes(e.key) || e.altKey || e.ctrlKey || e.metaKey) return;
+  e.preventDefault();
+  mostraImmagine(indiceImmagine + (e.key === "ArrowRight" ? 1 : -1));
+});
 document.querySelectorAll("dialog [data-chiudi]").forEach(b => b.addEventListener("click", () => b.closest("dialog").close()));
 // un clic fuori dalla finestra, sullo sfondo, la chiude
 scheda.addEventListener("click", e => { if (e.target === scheda) scheda.close(); });
@@ -1028,11 +1721,18 @@ function zoomVerso(nuovo, cx, cy) {
   applicaZoom();
 }
 const centroVista = () => { const r = vista.getBoundingClientRect(); return [r.left + r.width / 2, r.top + r.height / 2]; };
-function apriLente() {
-  const img = $("scheda-img");
-  immagineGrande.src = img.src; immagineGrande.alt = img.alt;
-  $("lente-crediti").textContent = $("scheda-crediti").textContent;
+// l'immagine scelta della galleria, adattata allo schermo, con numero, didascalia e crediti in alto
+function caricaLente() {
+  const im = galleria[indiceImmagine];
+  immagineGrande.src = im.src; immagineGrande.alt = im.alt;
+  $("lente-crediti").innerHTML = [
+    galleria.length > 1 ? `<span class="numero">${indiceImmagine + 1} / ${galleria.length}</span>` : "",
+    [im.didascalia && `<strong>${esc(im.didascalia)}</strong>`, esc(im.crediti ?? "")].filter(Boolean).join(" · "),
+  ].join("");
   livello = 1; sx = 0; sy = 0; applicaZoom();
+}
+function apriLente() {
+  caricaLente();
   lente.showModal();
 }
 $("scheda-ingrandisci").addEventListener("click", apriLente);
@@ -1069,17 +1769,21 @@ vista.addEventListener("pointerup", finePuntatore);
 vista.addEventListener("pointercancel", finePuntatore);
 
 /* ---------- Accessibilità ---------- */
-// Le scelte restano tra una visita e l'altra (nel browser di chi guarda), se il browser lo permette.
+// «Accessibilità», in fondo al sito, apre la finestra delle preferenze (come nell'Atlante d'arte): grandezza dei
+// caratteri, tutto maiuscolo, alta leggibilità. Valgono subito; le scelte restano tra una visita e l'altra (nel
+// browser di chi guarda), se il browser lo permette. La grandezza vale per pannello, legenda, scheda e carta.
 const ACCESSIBILITA = "cammini-accessibilita";
-const SCALE = [.9, 1, 1.15, 1.3, 1.5];
-let accessibilita = { scala: 1, maiuscolo: false, leggibile: false };
+const SCALE = [1, 1.15, 1.3, 1.5];
+const NOMI_SCALE = ["Normale", "Grande", "Più grande", "Molto grande"];
+const PREDEFINITE = { scala: 1, maiuscolo: false, leggibile: false };
+let accessibilita = { ...PREDEFINITE };
 try { Object.assign(accessibilita, JSON.parse(localStorage.getItem(ACCESSIBILITA)) ?? {}); } catch {}
 // i nomi sulla carta si misurano quando nascono: cambiando carattere o maiuscole vanno rifatti
 function rifaiNomiSullaCarta() {
   livelloNomi.innerHTML = "";
-  mondo.forEach(e => { e.el = null; e.forme = null; e.scelta = 0; });
-  mostrati = new Set();
-  chiediDisposizione();
+  mondo.forEach(e => { e.el = null; e.forme = null; e.scelta = 0; e.posti = null; e.ancore = null; e.filo = null; e.sceltaFilo = null; });
+  mostrati = new Set(); filiMostrati = new Set();
+  rifaiPostiStati();
 }
 async function applicaAccessibilita(nomiDaRifare) {
   document.documentElement.style.setProperty("--scala", accessibilita.scala);
@@ -1093,32 +1797,43 @@ async function applicaAccessibilita(nomiDaRifare) {
     await Promise.all(["400 16px", "700 16px"].map(p => document.fonts.load(`${p} "Atkinson Hyperlegible"`)));
   }
   document.body.classList.toggle("leggibile", accessibilita.leggibile);
-  $("acc-maiuscolo").setAttribute("aria-pressed", String(accessibilita.maiuscolo));
-  $("acc-leggibile").setAttribute("aria-pressed", String(accessibilita.leggibile));
-  const i = SCALE.indexOf(accessibilita.scala);
-  $("acc-meno").disabled = i <= 0; $("acc-piu").disabled = i >= SCALE.length - 1;
+  $("acc-maiuscolo").checked = accessibilita.maiuscolo;
+  $("acc-leggibile").checked = accessibilita.leggibile;
+  $("acc-scala").querySelectorAll("input").forEach(r => {
+    r.checked = Number(r.value) === accessibilita.scala;
+    r.parentElement.classList.toggle("scelto", r.checked);
+  });
   try { localStorage.setItem(ACCESSIBILITA, JSON.stringify(accessibilita)); } catch {}
   if (nomiDaRifare) rifaiNomiSullaCarta();
   chiediDisposizione(); // una legenda più grande occupa più carta: si rifà lo spazio per i nomi
 }
-function cambiaScala(passo) {
-  const i = Math.max(0, SCALE.indexOf(accessibilita.scala));
-  accessibilita.scala = SCALE[Math.min(SCALE.length - 1, Math.max(0, i + passo))];
-  applicaAccessibilita(true); // anche i nomi sulla carta cambiano misura: vanno rimisurati
+// i livelli dei caratteri, ognuno scritto nella sua grandezza (come nell'Atlante)
+SCALE.forEach((scala, i) => {
+  const etichetta = document.createElement("label");
+  // in pixel, non in em (la finestra stessa cresce con i caratteri scelti): ogni livello si scrive grande come
+  // sarà il testo della finestra con quel livello (16 px × livello)
+  etichetta.innerHTML = `<input type="radio" name="acc-scala" value="${scala}"><span style="font-size: ${Math.round(16 * scala)}px">${NOMI_SCALE[i]}</span>`;
+  // anche i nomi sulla carta cambiano misura: vanno rimisurati
+  etichetta.firstChild.addEventListener("change", () => { accessibilita.scala = scala; applicaAccessibilita(true); });
+  $("acc-scala").appendChild(etichetta);
+});
+$("acc-maiuscolo").addEventListener("change", e => { accessibilita.maiuscolo = e.target.checked; applicaAccessibilita(true); });
+$("acc-leggibile").addEventListener("change", e => { accessibilita.leggibile = e.target.checked; applicaAccessibilita(true); });
+$("acc-ripristina").addEventListener("click", () => {
+  const cambia = accessibilita.maiuscolo || accessibilita.leggibile || accessibilita.scala !== 1;
+  accessibilita = { ...PREDEFINITE };
+  applicaAccessibilita(cambia);
+});
+// «Accessibilità» e «Aiuto» in fondo al sito aprono le loro finestre; un clic sullo sfondo le chiude
+for (const [pulsante, finestra] of [["apri-accessibilita", "preferenze"], ["apri-aiuto", "aiuto"]]) {
+  const f = $(finestra);
+  $(pulsante).addEventListener("click", () => { f.showModal(); f.scrollTop = 0; });
+  f.addEventListener("click", e => { if (e.target === f) f.close(); });
 }
-// la tendina si apre e si chiude dalla linguetta; Esc la richiude
-function apriAccessibilita(aperta) {
-  $("acc-pannello").hidden = !aperta;
-  $("acc-apri").setAttribute("aria-expanded", String(aperta));
-  chiediDisposizione();
+// le scelte di prima con altri livelli (0,9: «caratteri più piccoli», tolto) vanno sul livello più vicino
+if (!SCALE.includes(accessibilita.scala)) {
+  accessibilita.scala = SCALE.reduce((a, s) => (Math.abs(s - accessibilita.scala) < Math.abs(a - accessibilita.scala) ? s : a), 1);
 }
-$("acc-apri").addEventListener("click", () => apriAccessibilita($("acc-pannello").hidden));
-document.addEventListener("keydown", e => { if (e.key === "Escape" && !$("acc-pannello").hidden) { apriAccessibilita(false); $("acc-apri").focus(); } });
-$("acc-meno").addEventListener("click", () => cambiaScala(-1));
-$("acc-piu").addEventListener("click", () => cambiaScala(1));
-$("acc-maiuscolo").addEventListener("click", () => { accessibilita.maiuscolo = !accessibilita.maiuscolo; applicaAccessibilita(true); });
-$("acc-leggibile").addEventListener("click", () => { accessibilita.leggibile = !accessibilita.leggibile; applicaAccessibilita(true); });
-if (!SCALE.includes(accessibilita.scala)) accessibilita.scala = 1;
 applicaAccessibilita(accessibilita.maiuscolo || accessibilita.leggibile || accessibilita.scala !== 1);
 
 function setCard(k, t, w, r, x) {
@@ -1135,18 +1850,129 @@ function inquadraCammino(durata) {
   const area = boundsOf(STOPS.flatMap(s => s.path ?? [s.at]));
   STORICHE.forEach(e => e.cartina.elementi.features.filter(f => /Polygon$/.test(f.geometry.type))
     .forEach(f => f.geometry.coordinates.flat(f.geometry.type === "MultiPolygon" ? 2 : 1).forEach(p => area.extend(p))));
+  const margine = isNarrow() ? 12 : 24;
+  map.flyTo({ ...cameraLiberaDallaLegenda(area, { top: margine, bottom: margine + 16, left: margine, right: margine }), bearing: 0, duration: reduce ? 0 : durata });
+}
+
+// L'inquadratura più ravvicinata di un'area che lascia libera la legenda: l'area sta sotto, accanto, sopra o
+// a sinistra della legenda. La legenda torna nel suo angolo (in alto a sinistra), a meno che chi guarda
+// non l'abbia spostata a mano: allora resta lì e l'inquadratura le gira intorno. zoomMassimo limita lo zoom.
+function cameraLiberaDallaLegenda(area, base, zoomMassimo = Infinity) {
+  if (!legendaSpostata) polbox.classList.remove("destra", "basso");
   const m = mapEl.getBoundingClientRect(), leg = polbox.getBoundingClientRect();
-  const margine = isNarrow() ? 12 : 24, base = { top: margine, bottom: margine + 16, left: margine, right: margine };
-  const sotto = { ...base, top: leg.bottom - m.top + 8 };
-  const accanto = { ...base, left: leg.right - m.left + 8 };
-  const camere = [sotto, accanto].map(padding => map.cameraForBounds(area, { padding })).filter(Boolean);
-  const migliore = camere.reduce((a, c) => (c.zoom > a.zoom ? c : a));
-  map.flyTo({ ...migliore, bearing: 0, duration: reduce ? 0 : durata });
+  const sotto = { ...base, top: Math.max(base.top, leg.bottom - m.top + 8) };
+  const accanto = { ...base, left: Math.max(base.left, leg.right - m.left + 8) };
+  const sopra = { ...base, bottom: Math.max(base.bottom, m.bottom - leg.top + 8) };
+  const prima = { ...base, right: Math.max(base.right, m.right - leg.left + 8) };
+  const libere = [sotto, accanto, sopra, prima].filter(p => p.top + p.bottom < m.height - 40 && p.left + p.right < m.width - 40);
+  const camere = libere.map(padding => map.cameraForBounds(area, { padding, maxZoom: zoomMassimo })).filter(Boolean);
+  return camere.length ? camere.reduce((a, c) => (c.zoom > a.zoom ? c : a)) : { center: area.getCenter() };
 }
 
 function padding() {
   return isNarrow() ? { top: 40, bottom: 30, left: 30, right: 30 } : { top: 70, bottom: 60, left: 70, right: 90 };
 }
+
+// Se, spostando o ingrandendo la carta, la legenda copre una tappa o il fumetto della tappa, va in un altro
+// angolo libero (in alto a destra, in basso a sinistra); resta dov'è finché non copre nulla. Quando la carta
+// si ferma e quando compare il fumetto. Se chi guarda l'ha spostata a mano, resta dove l'ha messa.
+const ANGOLI_LEGENDA = [[], ["destra"], ["basso"]];
+function sistemaLegenda() {
+  if (mapEl.classList.contains("hide-pins") || legendaSpostata || trascinamentoLegenda) return;
+  const tappe = pins.map(p => p.getBoundingClientRect()).filter(r => r.width);
+  if (popup.isOpen()) tappe.push(popup.getElement().getBoundingClientRect());
+  const copre = () => {
+    const l = polbox.getBoundingClientRect();
+    return tappe.filter(r => r.left < l.right + 6 && r.right > l.left - 6 && r.top < l.bottom + 6 && r.bottom > l.top - 6).length;
+  };
+  if (!copre()) return;
+  let migliore = null;
+  for (const angolo of ANGOLI_LEGENDA) {
+    polbox.classList.remove("destra", "basso");
+    polbox.classList.add(...angolo);
+    const n = copre();
+    if (!migliore || n < migliore.n) migliore = { angolo, n };
+    if (!n) break;
+  }
+  polbox.classList.remove("destra", "basso");
+  polbox.classList.add(...migliore.angolo); // se coprono tutti, l'angolo che copre meno tappe
+  rifaiPostiStati(); // la legenda è interfaccia: i nomi le girano intorno
+}
+map.on("moveend", sistemaLegenda);
+map.on("resize", () => { if (legendaSpostata) mettiLegenda(legendaSpostata.x, legendaSpostata.y); else sistemaLegenda(); });
+
+/* ---------- Legenda mobile ---------- */
+// La legenda si trascina per la maniglia in alto o per il fondo (non dai pulsanti), con il mouse o con un dito;
+// con la tastiera, frecce sulla maniglia (Maiuscolo: passi più lunghi). Resta dentro la carta. Doppio clic
+// sulla maniglia, Invio o Esc: torna al suo angolo e di nuovo si sposta da sola. Vale finché si resta sulla pagina.
+function mettiLegenda(x, y) {
+  const w = polbox.parentElement.getBoundingClientRect();
+  polbox.classList.remove("destra", "basso");
+  polbox.classList.add("spostata");
+  const r = polbox.getBoundingClientRect();
+  x = Math.round(Math.max(0, Math.min(x, w.width - r.width)));
+  y = Math.round(Math.max(0, Math.min(y, w.height - r.height)));
+  // la legenda ha lo zoom dei caratteri (--scala), che moltiplica anche left e top
+  const z = parseFloat(getComputedStyle(polbox).zoom) || 1;
+  polbox.style.left = x / z + "px"; polbox.style.top = y / z + "px";
+  legendaSpostata = { x, y };
+}
+function rimettiLegenda() {
+  legendaSpostata = null;
+  polbox.classList.remove("spostata");
+  polbox.style.left = polbox.style.top = "";
+  sistemaLegenda();
+  rifaiPostiStati(); // la legenda è interfaccia: i nomi le girano intorno
+}
+const posizioneLegenda = () => {
+  const w = polbox.parentElement.getBoundingClientRect(), r = polbox.getBoundingClientRect();
+  return { x: r.left - w.left, y: r.top - w.top };
+};
+// il movimento si segue su tutta la pagina: un gesto veloce esce subito dalla legenda
+polbox.addEventListener("pointerdown", e => {
+  if (e.button !== 0 || (e.target.closest("button, input, a") && !e.target.closest(".maniglia"))) return;
+  trascinamentoLegenda = { id: e.pointerId, x0: e.clientX, y0: e.clientY, ...posizioneLegenda(), mosso: false };
+  window.addEventListener("pointermove", muoviLegenda);
+  window.addEventListener("pointerup", fineTrascinamento);
+  window.addEventListener("pointercancel", fineTrascinamento);
+});
+function muoviLegenda(e) {
+  const t = trascinamentoLegenda;
+  if (!t || e.pointerId !== t.id) return;
+  const dx = e.clientX - t.x0, dy = e.clientY - t.y0;
+  if (!t.mosso) {
+    if (Math.hypot(dx, dy) < 4) return; // un clic non è uno spostamento
+    t.mosso = true;
+    polbox.classList.add("trascinata");
+  }
+  e.preventDefault();
+  mettiLegenda(t.x + dx, t.y + dy);
+}
+function fineTrascinamento(e) {
+  const t = trascinamentoLegenda;
+  if (!t || e.pointerId !== t.id) return;
+  trascinamentoLegenda = null;
+  window.removeEventListener("pointermove", muoviLegenda);
+  window.removeEventListener("pointerup", fineTrascinamento);
+  window.removeEventListener("pointercancel", fineTrascinamento);
+  polbox.classList.remove("trascinata");
+  if (t.mosso) rifaiPostiStati();
+}
+const maniglia = $("maniglia-legenda");
+maniglia.addEventListener("dblclick", rimettiLegenda);
+maniglia.addEventListener("keydown", e => {
+  const passo = e.shiftKey ? 60 : 16;
+  const d = { ArrowLeft: [-passo, 0], ArrowRight: [passo, 0], ArrowUp: [0, -passo], ArrowDown: [0, passo] }[e.key];
+  if (d) {
+    e.preventDefault();
+    const p = posizioneLegenda();
+    mettiLegenda(p.x + d[0], p.y + d[1]);
+    rifaiPostiStati();
+  } else if (e.key === "Enter" || e.key === "Escape") {
+    e.preventDefault();
+    rimettiLegenda();
+  }
+});
 
 function boundsOf(pts) {
   const b = new maplibregl.LngLatBounds(pts[0], pts[0]);
@@ -1155,10 +1981,12 @@ function boundsOf(pts) {
 
 function stopAnim() { if (anim) cancelAnimationFrame(anim); anim = null; map.getSource("anim").setData(fc([])); }
 
+// il segnaposto della tappa si colora (di blu) quando la linea continua del cammino lo raggiunge
+const arriva = si => pins[si]?.classList.add("arrivata");
 function drawStage(si, animate) {
   stopAnim();
   const done = ["<=", ["get", "i"], si];
-  if (!animate || reduce) { map.setFilter("route-done", done); map.setFilter("route-done-casing", done); return; }
+  if (!animate || reduce) { map.setFilter("route-done", done); map.setFilter("route-done-casing", done); arriva(si); return; }
   const before = ["<", ["get", "i"], si];
   map.setFilter("route-done", before); map.setFilter("route-done-casing", before);
   const path = STOPS[si].path, dur = 2400, t0 = performance.now();
@@ -1166,7 +1994,7 @@ function drawStage(si, animate) {
     const t = Math.min(1, (now - t0) / dur), e = t < .5 ? 2 * t * t : 1 - Math.pow(-2 * t + 2, 2) / 2;
     map.getSource("anim").setData(fc([{ type: "Feature", properties: {}, geometry: { type: "LineString", coordinates: partial(path, e) } }]));
     if (t < 1) anim = requestAnimationFrame(frame);
-    else { map.setFilter("route-done", done); map.setFilter("route-done-casing", done); stopAnim(); }
+    else { map.setFilter("route-done", done); map.setFilter("route-done-casing", done); stopAnim(); arriva(si); }
   };
   anim = requestAnimationFrame(frame);
 }
@@ -1183,6 +2011,7 @@ function go(n) {
 
   pins.forEach((p, i) => {
     p.classList.toggle("current", i === si);
+    p.classList.remove("arrivata");
     p.classList.toggle("visited", si >= 0 && i < si);
     p.classList.toggle("future", si < 0 || i > si);
   });
@@ -1202,17 +2031,19 @@ function go(n) {
   } else {
     const s = STOPS[si];
     setCard(`Tappa ${si + 1} di ${STOPS.length}`, s.name, s.where, s.ref, s.text);
+    // il tratto della tappa (o, per la prima, il suo luogo) inquadrato senza finire sotto la legenda
     if (s.path) {
       drawStage(si, prev === n - 1);
-      const cam = map.cameraForBounds(boundsOf(s.path), { padding: padding() });
-      map.flyTo({ center: cam.center, zoom: Math.min(cam.zoom, isNarrow() ? 6.4 : 7.2), bearing: 0, duration: 2400 });
+      const cam = cameraLiberaDallaLegenda(boundsOf(s.path), padding(), isNarrow() ? 6.4 : 7.2);
+      map.flyTo({ ...cam, bearing: 0, duration: 2400 });
     } else {
       drawStage(si, false);
-      map.flyTo({ center: [s.at[0] - 0.6, s.at[1] + 0.3], zoom: isNarrow() ? 5.6 : 6.4, duration: prev === 0 ? 4200 : 2400 });
+      const intorno = boundsOf([[s.at[0] - 1.6, s.at[1] - 1], [s.at[0] + 1.6, s.at[1] + 1]]);
+      map.flyTo({ ...cameraLiberaDallaLegenda(intorno, padding(), isNarrow() ? 5.6 : 6.4), bearing: 0, duration: prev === 0 ? 4200 : 2400 });
     }
     setTimeout(() => {
       if (step !== n || scheda.open) return; // con la scheda aperta il fumetto non serve
-      popup.setLngLat(s.at).setHTML(`<h3>${esc(s.name)}</h3><p>${esc(s.where)}</p>`).addTo(map);
+      apriFumetto(s);
     }, reduce ? 0 : 2300);
   }
 

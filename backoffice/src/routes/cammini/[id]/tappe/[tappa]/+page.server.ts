@@ -3,7 +3,7 @@ import { db } from '#lib/server/db.ts';
 import {
   aggiornaTappa, creaTappa, eliminaTappa, leggiCammino, leggiTappa, togliTracciato, validaTappa,
 } from '#lib/server/cammini.ts';
-import { leggiImmagine } from '#lib/server/immagini.ts';
+import { immaginiScelte } from '#lib/server/immagini.ts';
 import { elencaLuoghi } from '#lib/server/luoghi.ts';
 import type { Actions, PageServerLoad } from './$types';
 
@@ -21,11 +21,10 @@ function parametri(params: { id: string; tappa: string }) {
 export const load: PageServerLoad = ({ params }) => {
   const { cammino, tappaId } = parametri(params);
   const tappa = tappaId === null ? null : leggiTappa(db, tappaId)!;
-  const immagine = tappa?.immagineId ? leggiImmagine(db, tappa.immagineId) : undefined;
   return {
     cammino: { id: cammino.id, titolo: cammino.titolo },
     tappa,
-    immagine: immagine ? { id: immagine.id, alt: immagine.alt, crediti: immagine.crediti } : null,
+    immagini: immaginiScelte(db, tappa?.immagini ?? []),
     luoghi: elencaLuoghi(db).map((l) => ({ id: l.id, nome: l.nome, lat: l.lat, lng: l.lng, certezza: l.certezza })),
   };
 };

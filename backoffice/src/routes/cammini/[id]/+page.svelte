@@ -48,7 +48,7 @@
         {#each data.tappe as t, i (t.id)}
           <tr>
             <td class="numero">{i + 1}</td>
-            <td><a href="/cammini/{c.id}/tappe/{t.id}">{t.nome}</a>{#if t.immagine} <span class="etichetta">immagine</span>{/if}</td>
+            <td><a href="/cammini/{c.id}/tappe/{t.id}">{t.nome}</a>{#if t.immagini} <span class="etichetta">{t.immagini === 1 ? '1 immagine' : `${t.immagini} immagini`}</span>{/if}</td>
             <td>{t.luogo}</td>
             <td>{t.riferimento ?? '—'}</td>
             <td>{i === 0 ? 'partenza' : t.puntiTracciato ? `${t.puntiTracciato} punti` : 'linea dritta'}</td>

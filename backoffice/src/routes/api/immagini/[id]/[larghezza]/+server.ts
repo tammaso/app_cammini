@@ -5,7 +5,9 @@ import { CARTELLA_IMMAGINI, leggiImmagine, percorsoAnteprima } from '#lib/server
 import { LARGHEZZE_ANTEPRIMA, type LarghezzaAnteprima } from '#lib/immagini.ts';
 import type { RequestHandler } from './$types';
 
-// Gli originali non vengono mai sostituiti: un'anteprima per id e larghezza non cambia più.
+// Il browser tiene l'anteprima per un anno: l'indirizzo che si usa (urlAnteprima) porta l'impronta del file
+// (?v=…), così non può mai indicare un'altra immagine, anche se l'id torna libero o un altro programma
+// sulla stessa porta (il backoffice dell'Atlante) usa gli stessi indirizzi.
 export const GET: RequestHandler = async ({ params }) => {
   const larghezza = Number(params.larghezza) as LarghezzaAnteprima;
   if (!LARGHEZZE_ANTEPRIMA.includes(larghezza)) error(404, 'Larghezza non disponibile');

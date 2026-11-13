@@ -114,10 +114,11 @@ function proponiColori(db: DatabaseSync, k: DatiCartina, disegno: Disegno): Reco
 
 function proponiTesti(db: DatabaseSync, k: DatiCartina, gruppi: GruppoDiTesto[]): Record<string, UsoTesto> {
   const proposte: (UsoTesto | undefined)[] = new Array(gruppi.length);
-  const esistenti = db.prepare("SELECT categoria, testo, sotto, anche_oggi FROM nomi WHERE cartina_id = ? ORDER BY posizione, id").all(k.id)
+  const esistenti = db.prepare("SELECT categoria, testo, sotto, anche_oggi, corpo, sempre FROM nomi WHERE cartina_id = ? ORDER BY posizione, id").all(k.id)
     .map((n) => ({
       categoria: String(n.categoria) as CategoriaNome, testo: String(n.testo), sotto: n.sotto == null ? null : String(n.sotto),
       oggi: n.anche_oggi === 0 ? (false as const) : undefined,
+      corpo: n.corpo == null ? undefined : Number(n.corpo), sempre: n.sempre === 1 ? (true as const) : undefined,
     }));
   // Una sequenza di gruppi liberi consecutivi il cui testo, unito, è quello cercato. Prima si cercano
   // gruppi scritti come la categoria vuole (regni e regioni in maiuscolo, città no): la città e la regione
@@ -149,7 +150,8 @@ function proponiTesti(db: DatabaseSync, k: DatiCartina, gruppi: GruppoDiTesto[])
     const s = sequenza(n.testo, n.categoria);
     if (!s) continue;
     const testa = gruppi[s[0]].chiave;
-    distribuisci(n.testo, s, (t) => ({ uso: 'nome', categoria: n.categoria, testo: t, ...(n.oggi === false ? { oggi: false as const } : {}) }),
+    distribuisci(n.testo, s, (t) => ({ uso: 'nome', categoria: n.categoria, testo: t, ...(n.oggi === false ? { oggi: false as const } : {}),
+      ...(n.corpo ? { corpo: n.corpo } : {}), ...(n.sempre ? { sempre: true as const } : {}) }),
       (t) => ({ uso: 'riga', testo: t, di: testa }));
     if (n.sotto) {
       const ss = sequenza(n.sotto);
@@ -259,7 +261,13 @@ export function salvaClassificazione(db: DatabaseSync, id: number, modulo: FormD
       if (uso === 'nome' && CATEGORIE_NOMI.includes(categoria)) {
         // geografia fisica: la casella «anche in Oggi» tolta vuol dire un nome antico (Mare Inferiore)
         const soloAllora = NOMI_FISICI.includes(categoria) && modulo.has(`oggiMostrato:${g.chiave}`) && !modulo.has(`oggi:${g.chiave}`);
-        testi[g.chiave] = { uso: 'nome', categoria, testo: testo || g.testo, ...(soloAllora ? { oggi: false as const } : {}) };
+        // corpo in pixel (vuoto: quello della categoria) e «sempre visibile»
+        const corpo = Number(String(modulo.get(`corpo:${g.chiave}`) ?? '').replace(',', '.'));
+        const sempre = modulo.has(`sempre:${g.chiave}`);
+        testi[g.chiave] = {
+          uso: 'nome', categoria, testo: testo || g.testo, ...(soloAllora ? { oggi: false as const } : {}),
+          ...(corpo >= 6 && corpo <= 60 ? { corpo } : {}), ...(sempre ? { sempre: true as const } : {}),
+        };
         testa = g.chiave;
       } else if ((uso === 'riga' || uso === 'sotto') && testa) testi[g.chiave] = { uso, testo, di: testa };
       else testi[g.chiave] = { uso: 'ignora' };
@@ -284,7 +292,9 @@ export interface EsitoGenerazione {
   secondi: number;
 }
 
-type Nome = [string, string, number, number, number, { angolo?: number; sotto?: string; oggi?: false }?];
+// chiave: la scritta del disegno da cui viene il nome (non si pubblica: lega i nomi ritoccati a mano)
+type Extra = { angolo?: number; sotto?: string; oggi?: false; colore?: string; corpo?: number; sempre?: true; chiave?: string };
+type Nome = [string, string, number, number, number, Extra?];
 
 export async function generaCartina(db: DatabaseSync, id: number): Promise<EsitoGenerazione> {
   const inizio = Date.now();
@@ -392,6 +402,7 @@ export async function generaCartina(db: DatabaseSync, id: number): Promise<Esito
   }) : [];
 
   // 6. Nel database: si sostituiscono solo elementi e nomi importati
+  let mantenuti = 0;
   inTransazione(db, () => {
     db.prepare("DELETE FROM elementi WHERE cartina_id = ? AND origine = 'importato'").run(id);
     for (const e of elementi) {
@@ -400,11 +411,18 @@ export async function generaCartina(db: DatabaseSync, id: number): Promise<Esito
     }
     db.prepare("DELETE FROM nomi WHERE cartina_id = ? AND origine = 'importato'").run(id);
     const elencoLuoghi = luoghi(db);
+    // i nomi ritoccati a mano nella pagina «Ritocca» restano come li ha lasciati il redattore: non si
+    // ricreano (si riconoscono dalla scritta del disegno o, se manca, da categoria e testo)
+    const ritoccati = db.prepare("SELECT chiave, categoria, testo FROM nomi WHERE cartina_id = ? AND origine = 'modificato'").all(id);
+    const chiaviRitoccate = new Set(ritoccati.map((n) => n.chiave).filter((c) => c != null).map(String));
+    const testiRitoccati = new Set(ritoccati.map((n) => `${n.categoria}|${n.testo}`));
     nomi.forEach(([categoria, testo, lng, lat, zoom, extra], posizione) => {
+      if ((extra?.chiave && chiaviRitoccate.has(extra.chiave)) || testiRitoccati.has(`${categoria}|${testo}`)) { mantenuti++; return; }
       const luogo = NOMI_DI_LUOGHI.includes(categoria as CategoriaNome) ? trovaLuogo(elencoLuoghi, testo) : null;
-      db.prepare(`INSERT INTO nomi (cartina_id, posizione, categoria, testo, sotto, lng, lat, zoom, angolo, luogo_id, anche_oggi, origine)
-        VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, 'importato')`)
-        .run(id, posizione, categoria, testo, extra?.sotto ?? null, lng, lat, zoom, extra?.angolo ?? null, luogo?.id ?? null, extra?.oggi === false ? 0 : null);
+      db.prepare(`INSERT INTO nomi (cartina_id, posizione, categoria, testo, sotto, lng, lat, zoom, angolo, luogo_id, anche_oggi, colore, corpo, sempre, chiave, origine)
+        VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, 'importato')`)
+        .run(id, posizione, categoria, testo, extra?.sotto ?? null, lng, lat, zoom, extra?.angolo ?? null, luogo?.id ?? null, extra?.oggi === false ? 0 : null,
+          extra?.colore ?? null, extra?.corpo ?? null, extra?.sempre ? 1 : 0, extra?.chiave ?? null);
     });
     db.prepare('UPDATE cartine SET alone = ?, generata_il = ?, importata_il = ? WHERE id = ?')
       .run(JSON.stringify({ type: 'FeatureCollection', features: veli }), adesso(), adesso(), id);
@@ -414,10 +432,12 @@ export async function generaCartina(db: DatabaseSync, id: number): Promise<Esito
     db.prepare('UPDATE cammini SET modificato_il = ? WHERE id = ?').run(adesso(), k.camminoId);
     registraModifica(db, {
       azione: 'modifica', oggetto: 'cartina', oggettoId: id, camminoId: k.camminoId, titolo: k.pulsante,
-      descrizione: `Cartina generata dal disegno: ${elementi.length} elementi, ${nomi.length} nomi`
+      descrizione: `Cartina generata dal disegno: ${elementi.length} elementi, ${nomi.length - mantenuti} nomi`
+        + (mantenuti ? ` (${mantenuti} ritoccati a mano lasciati come sono)` : '')
         + (tracciati ? `, ${tracciati.filter(Boolean).length} tracciati, ${frecce!.length} frecce` : ''),
     });
   });
+  if (mantenuti) avvisi.push(`${mantenuti} nomi ritoccati a mano sono rimasti come li hai lasciati (pagina «Ritocca»).`);
   return {
     elementi: elementi.length, nomi: nomi.length, tracciati: tracciati?.filter(Boolean).length ?? 0, frecce: frecce?.length ?? 0,
     avvisi, secondi: Math.round((Date.now() - inizio) / 100) / 10,
@@ -454,14 +474,14 @@ function freccia(contorno: Punto[], T: (p: Punto) => Punto): { coordinate: Punto
 function componiNomi(db: DatabaseSync, k: DatiCartina, d: Disegno, testi: RigaTesto[], T: (p: Punto) => Punto, avvisi: string[]): Nome[] {
   const elencoLuoghi = luoghi(db);
   const simboli = d.forme.filter(eSimbolo).map((f): Punto => [(f.box[0] + f.box[2]) / 2, (f.box[1] + f.box[3]) / 2]);
-  const teste = new Map<string, { categoria: CategoriaNome; testo: string; pezzi: number[]; box: number[]; sotto: string[]; boxTotale: number[]; soloAllora: boolean }>();
+  const teste = new Map<string, { categoria: CategoriaNome; testo: string; pezzi: number[]; box: number[]; sotto: string[]; boxTotale: number[]; soloAllora: boolean; corpo?: number; sempre?: true }>();
   const unisci = (a: number[], b: number[]) => [Math.min(a[0], b[0]), Math.min(a[1], b[1]), Math.max(a[2], b[2]), Math.max(a[3], b[3])];
   for (const g of testi) {
     const u = g.uso;
     if (u.uso === 'nome') {
       teste.set(g.chiave, {
         categoria: u.categoria, testo: u.testo, pezzi: [...g.pezzi], box: [...g.box], sotto: [], boxTotale: [...g.box],
-        soloAllora: u.oggi === false && NOMI_FISICI.includes(u.categoria),
+        soloAllora: u.oggi === false && NOMI_FISICI.includes(u.categoria), corpo: u.corpo, sempre: u.sempre,
       });
     }
     else if (u.uso === 'riga' || u.uso === 'sotto') {
@@ -476,8 +496,13 @@ function componiNomi(db: DatabaseSync, k: DatiCartina, d: Disegno, testi: RigaTe
     }
   }
   const nomi: Nome[] = [];
-  for (const t of teste.values()) {
-    const extra: { angolo?: number; sotto?: string; oggi?: false } = {};
+  for (const [chiave, t] of teste) {
+    const extra: Extra = { chiave };
+    // il colore della scritta nel disegno, come nella carta
+    const colore = d.testi[t.pezzi[0]]?.colore;
+    if (colore && colore !== '#000000') extra.colore = colore;
+    if (t.corpo) extra.corpo = t.corpo;
+    if (t.sempre) extra.sempre = true;
     if (t.sotto.length) extra.sotto = t.sotto.join('\n');
     if (t.soloAllora) extra.oggi = false;
     let lng: number, lat: number;
@@ -514,9 +539,14 @@ function componiNomi(db: DatabaseSync, k: DatiCartina, d: Disegno, testi: RigaTe
     if (Object.keys(extra).length) voce.push(extra);
     nomi.push(voce);
   }
-  // l'ordine dei nomi già importati
-  const prima = db.prepare('SELECT categoria, testo FROM nomi WHERE cartina_id = ? ORDER BY posizione, id').all(k.id).map((n) => `${n.categoria}|${n.testo}`);
-  const posto = (n: Nome) => { const i = prima.indexOf(`${n[0]}|${n[1]}`); return i < 0 ? Infinity : i; };
+  // l'ordine dei nomi già importati: si riconoscono dalla scritta del disegno (anche se il testo è stato
+  // ritoccato) o, per quelli importati prima che la ricordassero, da categoria e testo
+  const perChiave = new Map<string, number>(), perTesto = new Map<string, number>();
+  db.prepare('SELECT categoria, testo, chiave FROM nomi WHERE cartina_id = ? ORDER BY posizione, id').all(k.id).forEach((n, i) => {
+    if (n.chiave != null && !perChiave.has(String(n.chiave))) perChiave.set(String(n.chiave), i);
+    if (!perTesto.has(`${n.categoria}|${n.testo}`)) perTesto.set(`${n.categoria}|${n.testo}`, i);
+  });
+  const posto = (n: Nome) => (n[5]?.chiave != null ? perChiave.get(n[5].chiave) : undefined) ?? perTesto.get(`${n[0]}|${n[1]}`) ?? Infinity;
   return nomi.map((n, i) => ({ n, i })).sort((a, b) => posto(a.n) - posto(b.n) || a.i - b.i).map(({ n }) => n);
 }
 

@@ -34,6 +34,7 @@ export interface UsoImmagine {
 // Un'immagine come la mostra il selettore dell'archivio.
 export interface ImmagineScelta {
   id: number;
+  sha256: string; // per l'indirizzo dell'anteprima
   alt: string;
   nomeOriginale: string | null;
   didascalia: string | null;
@@ -84,7 +85,12 @@ export const LICENZE_SUGGERITE = [
 export const LARGHEZZE_ANTEPRIMA = [320, 800, 1600] as const;
 export type LarghezzaAnteprima = (typeof LARGHEZZE_ANTEPRIMA)[number];
 
-export const urlAnteprima = (id: number, larghezza: LarghezzaAnteprima) => `/api/immagini/${id}/${larghezza}`;
+// L'indirizzo porta l'impronta del file (sha256): il browser tiene le anteprime per un anno senza
+// richiederle, quindi un indirizzo deve indicare sempre la stessa immagine. Con il solo id non era così:
+// il backoffice dell'Atlante, sulla stessa porta 5173, usa gli stessi indirizzi (al posto delle nostre
+// immagini 1 e 2 comparivano le sue), e un id liberato da un'eliminazione può tornare a una foto nuova.
+export const urlAnteprima = (immagine: { id: number; sha256: string }, larghezza: LarghezzaAnteprima) =>
+  `/api/immagini/${immagine.id}/${larghezza}?v=${immagine.sha256.slice(0, 16)}`;
 
 export const pesoLeggibile = (byte: number | null) =>
   byte === null ? '—'

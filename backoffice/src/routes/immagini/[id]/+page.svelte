@@ -41,8 +41,8 @@
 
 <div class="disposizione">
   <figure class="riquadro anteprima">
-    <a href={urlAnteprima(immagine.id, 1600)} target="_blank" rel="noopener">
-      <img src={urlAnteprima(immagine.id, 1600)} alt={immagine.alt} width={immagine.larghezza} height={immagine.altezza} />
+    <a href={urlAnteprima(immagine, 1600)} target="_blank" rel="noopener">
+      <img src={urlAnteprima(immagine, 1600)} alt={immagine.alt} width={immagine.larghezza} height={immagine.altezza} />
     </a>
     <figcaption>
       <dl>

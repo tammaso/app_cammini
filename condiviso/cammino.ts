@@ -43,15 +43,25 @@ export interface Cammino {
 export interface Tappa {
   nome: string; // nel pannello e nella scheda
   breve: string; // accanto al pin
+  breveOggi?: string; // accanto al pin nell'epoca «Oggi»: il nome moderno del luogo (se manca, breve)
   coordinate: Coordinate;
   luogoAttuale: string | null; // «Tell el-Muqayyar, Iraq meridionale»
   riferimento: string | null; // «Gen 11,27-31»
   testo: string; // nel pannello
   approfondimento: string | null; // nella scheda; null: il testo del pannello
-  immagine: { src: string; alt: string; crediti: string } | null; // src relativo alla cartella del cammino
+  immagini: ImmagineTappa[]; // galleria della scheda, nell'ordine (la prima all'apertura); vuota: solo il testo
   // Dalla tappa precedente a questa (null per la prima). null nelle altre: linea dritta.
   tracciato: Coordinate[] | null;
   secondaria?: true; // il nome accanto al pin compare solo da vicino (tappe fitte)
+}
+
+// Un'immagine della galleria della scheda. I percorsi sono relativi alla cartella del cammino.
+export interface ImmagineTappa {
+  src: string; // WebP fino a 2400 px di larghezza: nella scheda e a tutto schermo, con lo zoom
+  miniatura: string; // la stessa, piccola: nelle miniature della galleria
+  alt: string;
+  didascalia: string | null; // dall'archivio: sotto il testo della scheda, con il contatore
+  crediti: string;
 }
 
 export interface Freccia {
@@ -82,10 +92,12 @@ export interface Cartina {
   // Gli stili con "legenda" compaiono nella legenda dell'epoca, dopo il cammino.
   stili: Stile[];
   elementi: Raccolta<{ stile: string; nome: string | null; origine: "importato" | "disegnato" | "modificato" }>;
-  // [tipo, nome, lng, lat, zoom di comparsa, { angolo, sotto, oggi }?]. Tipi: regno, regione-antica,
+  // [tipo, nome, lng, lat, zoom di comparsa, { angolo, sotto, oggi, colore, corpo, sempre }?]. Tipi: regno, regione-antica,
   // capitale-antica, citta-antica, regione, mare, fiume, isola, vetta. Regione, mare e vetta sono
   // geografia fisica: compaiono in ogni epoca, salvo i nomi antichi (oggi: false, come «Mare Inferiore»).
-  nomi: [string, string, number, number, number, { angolo?: number; sotto?: string; oggi?: false }?][];
+  // colore: quello della scritta nella carta; corpo: grandezza in pixel, se diversa da quella del tipo;
+  // sempre: il nome compare sempre, anche dove si sovrappone ad altro.
+  nomi: [string, string, number, number, number, { angolo?: number; sotto?: string; oggi?: false; colore?: string; corpo?: number; sempre?: true }?][];
   alone: Raccolta<Record<string, never>>; // veli sovrapposti, ognuno con un buco più largo
 }
 

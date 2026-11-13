@@ -43,8 +43,11 @@ export interface TappaInElenco {
   luogo: string;
   riferimento: string | null;
   puntiTracciato: number; // 0: linea dritta dalla tappa precedente
-  immagine: boolean;
+  immagini: number; // quante immagini ha la galleria della scheda
 }
+
+// Immagini nella galleria della scheda di una tappa, al massimo.
+export const MAX_IMMAGINI_TAPPA = 12;
 
 export interface Tappa {
   id: number;
@@ -52,12 +55,13 @@ export interface Tappa {
   posizione: number;
   nome: string;
   breve: string;
+  breveOggi: string | null; // accanto al pin in «Oggi»: il nome moderno del luogo (vuoto: il nome breve)
   luogoId: number;
   luogoAttuale: string | null;
   riferimento: string | null;
   testo: string;
   approfondimento: string | null;
-  immagineId: number | null;
+  immagini: number[]; // galleria della scheda: immagini dell'archivio, nell'ordine (la prima compare all'apertura)
   tracciato: Coordinate[] | null;
   secondaria: boolean;
 }

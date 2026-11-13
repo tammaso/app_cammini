@@ -10,7 +10,7 @@ import type { DatabaseSync } from 'node:sqlite';
 import sharp from 'sharp';
 import {
   VERSIONE_FORMATO, type Cammino as CamminoPubblicato, type Cartina as CartinaPubblicata, type Coordinate, type Indice,
-  type Stile as StilePubblicato,
+  type ImmagineTappa, type Stile as StilePubblicato,
 } from '../../../../condiviso/cammino.ts';
 import { elencaCammini, leggiCammino } from './cammini.ts';
 import { CARTELLA_IMMAGINI } from './immagini.ts';
@@ -20,6 +20,7 @@ import { registraErrore, registraModifica } from './registro.ts';
 const RADICE = fileURLToPath(new URL('../../../../', import.meta.url));
 export const CARTELLA_PORTALE = process.env.CAMMINI_PORTALE ?? join(RADICE, 'prototipo', 'cammini');
 export const LARGHEZZA_IMMAGINI = 2400; // la scheda le apre anche a tutto schermo, con lo zoom
+export const LARGHEZZA_MINIATURE = 400; // le miniature della galleria della scheda
 const TOLLERANZA_KM = 5; // un tracciato deve partire e arrivare sulle tappe, a meno di qualche km
 
 const km = ([a, b]: Coordinate, [c, d]: Coordinate) => {
@@ -29,7 +30,8 @@ const km = ([a, b]: Coordinate, [c, d]: Coordinate) => {
 };
 const opz = (valore: unknown) => (valore == null ? null : String(valore));
 
-interface ImmagineDaPubblicare { originale: string; file: string } // file: relativo alla cartella del cammino
+// file: relativo alla cartella del cammino; larghezza: la massima del WebP pubblicato
+interface ImmagineDaPubblicare { originale: string; file: string; larghezza: number }
 
 export interface CamminoComposto {
   slug: string;
@@ -44,9 +46,13 @@ export function componiCammino(db: DatabaseSync, id: number, generatoIl = new Da
   if (!c) throw new Error(`Cammino ${id} non trovato`);
   const avvisi: string[] = [];
   const immagini: ImmagineDaPubblicare[] = [];
-  const righe = db.prepare(`SELECT t.*, l.lng, l.lat, i.sha256, i.file AS file_immagine, i.alt, i.crediti
-    FROM tappe t JOIN luoghi l ON l.id = t.luogo_id LEFT JOIN immagini i ON i.id = t.immagine_id
-    WHERE t.cammino_id = ? ORDER BY t.posizione`).all(id);
+  const righe = db.prepare(`SELECT t.*, l.lng, l.lat
+    FROM tappe t JOIN luoghi l ON l.id = t.luogo_id WHERE t.cammino_id = ? ORDER BY t.posizione`).all(id);
+  const galleria = db.prepare(`SELECT i.sha256, i.file, i.alt, i.didascalia, i.crediti FROM tappe_immagini ti
+    JOIN immagini i ON i.id = ti.immagine_id WHERE ti.tappa_id = ? ORDER BY ti.posizione`);
+  const daPubblicare = (originale: string, file: string, larghezza: number) => {
+    if (!immagini.some((i) => i.file === file)) immagini.push({ originale, file, larghezza });
+  };
   const tappe = righe.map((r, i): CamminoPubblicato['tappe'][number] => {
     const coordinate: Coordinate = [Number(r.lng), Number(r.lat)];
     let tracciato = r.tracciato == null ? null : (JSON.parse(String(r.tracciato)) as Coordinate[]);
@@ -59,18 +65,18 @@ export function componiCammino(db: DatabaseSync, id: number, generatoIl = new Da
         tracciato = null;
       }
     }
-    let immagine: CamminoPubblicato['tappe'][number]['immagine'] = null;
-    if (r.sha256 != null) {
-      const file = `immagini/${String(r.sha256).slice(0, 12)}.webp`;
-      immagini.push({ originale: String(r.file_immagine), file });
-      if (!String(r.alt).trim() || !String(r.crediti ?? '').trim()) {
-        avvisi.push(`Tappa ${i + 1} (${r.nome}): all'immagine mancano testo alternativo o crediti.`);
+    const galleriaTappa = galleria.all(Number(r.id)).map((g): ImmagineTappa => {
+      const nome = `immagini/${String(g.sha256).slice(0, 12)}`;
+      daPubblicare(String(g.file), `${nome}.webp`, LARGHEZZA_IMMAGINI);
+      daPubblicare(String(g.file), `${nome}-mini.webp`, LARGHEZZA_MINIATURE);
+      if (!String(g.alt).trim() || !String(g.crediti ?? '').trim()) {
+        avvisi.push(`Tappa ${i + 1} (${r.nome}): all'immagine «${String(g.alt).trim() || g.file}» mancano testo alternativo o crediti.`);
       }
-      immagine = { src: file, alt: String(r.alt), crediti: String(r.crediti ?? '') };
-    }
+      return { src: `${nome}.webp`, miniatura: `${nome}-mini.webp`, alt: String(g.alt), didascalia: opz(g.didascalia), crediti: String(g.crediti ?? '') };
+    });
     return {
-      nome: String(r.nome), breve: String(r.breve), coordinate, luogoAttuale: opz(r.luogo_attuale), riferimento: opz(r.riferimento),
-      testo: String(r.testo), approfondimento: opz(r.approfondimento), immagine, tracciato,
+      nome: String(r.nome), breve: String(r.breve), ...(r.breve_oggi ? { breveOggi: String(r.breve_oggi) } : {}), coordinate, luogoAttuale: opz(r.luogo_attuale), riferimento: opz(r.riferimento),
+      testo: String(r.testo), approfondimento: opz(r.approfondimento), immagini: galleriaTappa, tracciato,
       ...(r.secondaria ? { secondaria: true as const } : {}),
     };
   });
@@ -137,6 +143,8 @@ export function componiCartina(db: DatabaseSync, id: number): CartinaPubblicata 
       const extra = {
         ...(n.angolo != null ? { angolo: Number(n.angolo) } : {}), ...(n.sotto != null ? { sotto: String(n.sotto) } : {}),
         ...(n.anche_oggi === 0 ? { oggi: false as const } : {}),
+        ...(n.colore != null ? { colore: String(n.colore) } : {}), ...(n.corpo != null ? { corpo: Number(n.corpo) } : {}),
+        ...(n.sempre === 1 ? { sempre: true as const } : {}),
       };
       const voce: CartinaPubblicata['nomi'][number] = [String(n.categoria), String(n.testo), Number(n.lng), Number(n.lat), Number(n.zoom)];
       if (Object.keys(extra).length) voce.push(extra);
@@ -182,7 +190,7 @@ export async function pubblicaPortale(
         const uscita = join(cartella, i.file);
         if (await esiste(uscita)) continue;
         await sharp(join(cartellaImmagini, i.originale)).rotate()
-          .resize({ width: LARGHEZZA_IMMAGINI, withoutEnlargement: true }).webp({ quality: 82 }).toFile(uscita);
+          .resize({ width: i.larghezza, withoutEnlargement: true }).webp({ quality: 82 }).toFile(uscita);
         immaginiGenerate++;
       }
       // Nella cartella del cammino restano solo i file appena pubblicati
@@ -228,7 +236,7 @@ export async function pubblicaPortale(
 // Si aggiorna prima il portale di prova, così la demo è uguale a quello che si vede sul PC.
 export const CARTELLA_DEMO = process.env.CAMMINI_DEMO ?? join(RADICE, 'pubblicazione');
 const SATELLITE = join(RADICE, 'bmng', 'bmng.pmtiles');
-const DATI_COMUNI = ['mondo.js', 'confini.geojson', 'fiumi.geojson']; // «Oggi»: uguali per tutti i cammini
+const DATI_COMUNI = ['mondo.js', 'confini.geojson', 'stati.geojson', 'fiumi.geojson']; // «Oggi»: uguali per tutti i cammini
 
 const LEGGIMI = `Cammini: demo del portale
 =========================

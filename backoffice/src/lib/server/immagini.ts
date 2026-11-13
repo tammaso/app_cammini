@@ -6,7 +6,9 @@ import { join } from 'node:path';
 import { fileURLToPath } from 'node:url';
 import type { DatabaseSync } from 'node:sqlite';
 import sharp, { type Metadata } from 'sharp';
-import { LARGHEZZE_ANTEPRIMA, type Immagine, type LarghezzaAnteprima, type MetadatiImmagine, type UsoImmagine } from '../immagini.ts';
+import {
+  campiMancanti, LARGHEZZE_ANTEPRIMA, type Immagine, type ImmagineScelta, type LarghezzaAnteprima, type MetadatiImmagine, type UsoImmagine,
+} from '../immagini.ts';
 import { registraModifica } from './registro.ts';
 
 // Nel registro l'immagine si riconosce dal testo alternativo o, finché manca, dal nome del file.
@@ -85,7 +87,7 @@ export async function caricaImmagine(
   }
 }
 
-const CONTEGGIO_USI = `(SELECT count(*) FROM tappe u WHERE u.immagine_id = i.id)`;
+const CONTEGGIO_USI = `(SELECT count(*) FROM tappe_immagini u WHERE u.immagine_id = i.id)`;
 
 function comeImmagine(riga: Record<string, unknown>): Immagine {
   const testo = (valore: unknown) => (valore == null ? null : String(valore));
@@ -121,8 +123,8 @@ export function immaginiIncomplete(db: DatabaseSync, ids: number[]): string[] {
 }
 
 export function usataInCamminiPubblicati(db: DatabaseSync, immagineId: number): boolean {
-  return Boolean(db.prepare(`SELECT 1 FROM tappe t JOIN cammini c ON c.id = t.cammino_id
-    WHERE c.stato = 'pubblicato' AND t.immagine_id = ?`).get(immagineId));
+  return Boolean(db.prepare(`SELECT 1 FROM tappe_immagini ti JOIN tappe t ON t.id = ti.tappa_id JOIN cammini c ON c.id = t.cammino_id
+    WHERE c.stato = 'pubblicato' AND ti.immagine_id = ?`).get(immagineId));
 }
 
 export interface FiltriImmagini {
@@ -153,11 +155,25 @@ export function leggiImmagine(db: DatabaseSync, id: number): (Immagine & { elenc
   const riga = db.prepare(`SELECT i.*, ${CONTEGGIO_USI} AS usi FROM immagini i WHERE i.id = ?`).get(id);
   if (!riga) return undefined;
   const elencoUsi = db
-    .prepare(`SELECT c.id AS cammino_id, c.titolo, t.id AS tappa_id, t.nome AS tappa FROM tappe t
-      JOIN cammini c ON c.id = t.cammino_id WHERE t.immagine_id = ? ORDER BY c.titolo, t.posizione`)
+    .prepare(`SELECT c.id AS cammino_id, c.titolo, t.id AS tappa_id, t.nome AS tappa FROM tappe_immagini ti
+      JOIN tappe t ON t.id = ti.tappa_id JOIN cammini c ON c.id = t.cammino_id WHERE ti.immagine_id = ? ORDER BY c.titolo, t.posizione`)
     .all(id)
     .map((u) => ({ camminoId: Number(u.cammino_id), tappaId: Number(u.tappa_id), titolo: String(u.titolo), tappa: String(u.tappa) }));
   return { ...comeImmagine(riga), elencoUsi };
+}
+
+// Un'immagine come la mostra il selettore (e la galleria della tappa).
+export const comeScelta = (i: Immagine): ImmagineScelta => ({
+  id: i.id, sha256: i.sha256, alt: i.alt, nomeOriginale: i.nomeOriginale, didascalia: i.didascalia, crediti: i.crediti,
+  larghezza: i.larghezza, altezza: i.altezza, completa: campiMancanti(i).length === 0,
+});
+
+// Le immagini indicate, nello stesso ordine (quelle non più nell'archivio si saltano).
+export function immaginiScelte(db: DatabaseSync, ids: number[]): ImmagineScelta[] {
+  return ids.flatMap((id) => {
+    const riga = db.prepare('SELECT i.*, 0 AS usi FROM immagini i WHERE i.id = ?').get(id);
+    return riga ? [comeScelta(comeImmagine(riga))] : [];
+  });
 }
 
 const LUNGHEZZE_MASSIME: Record<keyof MetadatiImmagine, number> = { alt: 300, didascalia: 1000, crediti: 300, licenza: 200 };

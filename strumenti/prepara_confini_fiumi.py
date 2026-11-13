@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 """
-Rigenera prototipo/dati/confini.geojson e prototipo/dati/fiumi.geojson da Natural Earth.
+Rigenera prototipo/dati/confini.geojson, stati.geojson e fiumi.geojson da Natural Earth.
 
 Confini
 - Sorgente: ne_10m_admin_0_countries_ita (Stati secondo il punto di vista ufficiale italiano).
@@ -13,6 +13,14 @@ Confini
 - Gerusalemme: Natural Earth (in tutti i punti di vista europei) segue il confine municipale israeliano e
   mette Gerusalemme Est in Israele; per la posizione italiana il riferimento è la linea del 1949, che Natural
   Earth ha solo nel file del punto di vista palestinese: lì, e solo lì, si usa quella, puntinata.
+
+Stati (2026-11-13)
+- Sorgente: ne_10m_admin_0_countries_ita, semplificata a 0,02° (circa 2 km: il riempimento è leggero e lungo
+  i confini lo copre la fascia), coordinate a 3 decimali. Le terre che il punto di vista italiano non assegna
+  a nessuno Stato restano senza riempimento.
+- Proprietà: n = nome italiano dello Stato, lo stesso dei nomi sulla carta (prepara_etichette_mondo.py), che
+  la pagina usa per tenere il nome dentro la parte visibile dello Stato; k = colore (MAPCOLOR7 di Natural
+  Earth, da 1 a 7: due Stati confinanti non hanno mai lo stesso).
 
 Fiumi
 - Sorgente: ne_10m_rivers_lake_centerlines, solo featurecla = "River" (le linee dentro i laghi sono escluse,
@@ -103,6 +111,24 @@ def confini():
     print("confini.geojson scritto")
 
 
+def stati():
+    # stessi nomi e stesse esclusioni dei nomi degli Stati (import qui: quel modulo importa questo)
+    from prepara_etichette_mondo import NOMI_STATI, STATI_ESCLUSI
+    out = []
+    for f in scarica("ne_10m_admin_0_countries_ita"):
+        p = f["properties"]
+        if p["ADM0_A3"] in STATI_ESCLUSI:
+            continue
+        g = shape(f["geometry"]).simplify(0.02, preserve_topology=True)
+        if g.is_empty:
+            continue
+        out.append({"type": "Feature", "properties": {"n": NOMI_STATI.get(p["ADM0_A3"], p["NAME_IT"]), "k": p["MAPCOLOR7"]},
+                    "geometry": arrotonda(g, 3)})
+    fc = {"type": "FeatureCollection", "features": out}
+    (USCITA / "stati.geojson").write_text(json.dumps(fc, ensure_ascii=False, separators=(",", ":")), encoding="utf-8")
+    print(f"stati.geojson scritto ({len(out)} Stati)")
+
+
 def fiumi():
     out = []
     for f in scarica("ne_10m_rivers_lake_centerlines"):
@@ -120,4 +146,5 @@ def fiumi():
 if __name__ == "__main__":
     USCITA.mkdir(parents=True, exist_ok=True)
     confini()
+    stati()
     fiumi()

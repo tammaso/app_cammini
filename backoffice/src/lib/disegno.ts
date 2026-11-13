@@ -146,7 +146,9 @@ export const NOMI_FISICI: readonly CategoriaNome[] = ['regione', 'mare', 'vetta'
 
 export type UsoTesto =
   | { uso: 'ignora' }
-  | { uso: 'nome'; categoria: CategoriaNome; testo: string; oggi?: false } // testo: come si scrive nel portale
+  // testo: come si scrive nel portale; corpo: grandezza in pixel se diversa da quella della categoria;
+  // sempre: compare sempre, anche dove si sovrappone ad altro
+  | { uso: 'nome'; categoria: CategoriaNome; testo: string; oggi?: false; corpo?: number; sempre?: true }
   | { uso: 'riga'; testo: string; di: string } // riga successiva del nome `di` (la chiave del suo gruppo)
   | { uso: 'sotto'; testo: string; di: string }; // sottotitolo (o sua riga successiva) del nome `di`
 

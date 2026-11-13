@@ -108,7 +108,7 @@
       {@const mancanti = campiMancanti(immagine)}
       <li class="riquadro">
         <a href="/immagini/{immagine.id}">
-          <img src={urlAnteprima(immagine.id, 320)} alt={immagine.alt} loading="lazy" width={immagine.larghezza} height={immagine.altezza} />
+          <img src={urlAnteprima(immagine, 320)} alt={immagine.alt} loading="lazy" width={immagine.larghezza} height={immagine.altezza} />
           <span class="titolo">{immagine.alt || immagine.nomeOriginale || 'Senza titolo'}</span>
         </a>
         <span class="dettagli">

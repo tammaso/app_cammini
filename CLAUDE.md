@@ -16,25 +16,56 @@ Lingua di lavoro: italiano, anche per testi dell'interfaccia, commenti nel codic
   cammino, solo testo, tutte le tappe bianche), poi le tappe. «Visualizza il cammino» porta sempre
   alla panoramica; da lì «Successiva» va alla prima tappa (rossa, con il fumetto). L'epoca non cambia
   mai da sola passando da un passo all'altro (solo il globo torna su "Oggi"): la sceglie chi guarda.
-- Accessibilità in una tendina laterale (linguetta sul bordo sinistro della mappa, si apre e si
-  chiude, Esc la chiude): caratteri più piccoli/grandi, tutto maiuscolo e carattere ad alta
-  leggibilità (Atkinson Hyperlegible). Tutti e tre valgono ovunque: pannello, legenda, scheda e anche
+- Accessibilità **come nell'Atlante d'arte** (dal 2026-11-13): fascia in fondo al sito, sotto pannello e mappa,
+  con il pulsante «Accessibilità» (simbolo della persona nel cerchio) che apre una finestra con le preferenze, nei
+  colori del pannello: grandezza dei caratteri (Normale, Grande, Più grande, Molto grande = `--scala` 1, 1,15,
+  1,3, 1,5; ogni livello scritto nella sua grandezza), «Tutto maiuscolo» e «Carattere ad alta leggibilità»
+  (Atkinson Hyperlegible) come interruttori, «Ripristina» e «Fatto». Valgono subito. Accanto, «Aiuto» (punto di
+  domanda nel cerchio) apre la guida «Come si segue il cammino»: segui il racconto, apri la scheda di una tappa,
+  allora e oggi, muoviti sulla carta (anche la legenda), leggi meglio; «Ho capito». Testi della guida scritti da
+  noi: da far rivedere alla redazione. Niente marchio a destra (nell'Atlante c'è quello SEI; qui da decidere). Prima (dal 2026-11-14) i comandi stavano tutti nella barra, e ancora prima in una
+  tendina sul bordo sinistro della mappa; il livello «più piccolo» (0,9) è stato tolto. Tutti e tre valgono ovunque: pannello, legenda, scheda e anche
   nomi sulla carta, pin e fumetto della tappa (dal 2026-11-08 anche la dimensione: i caratteri della
   carta moltiplicano le misure per `--scala`, e a caratteri grandi compaiono meno nomi insieme finché
   non ci si avvicina). Le scelte restano nel browser di chi guarda.
 - Niente «Stai guardando: …» sulla legenda e niente note in fondo al pannello (tolte il 2026-11-06):
   le fonti restano nel riquadro delle attribuzioni in basso a destra della mappa. La nota «tracciato
   indicativo» e quella sul satellite di oggi andranno ripensate (per esempio in una pagina «Fonti»).
-- Scheda della tappa: il clic su un nodo porta alla tappa e apre una finestra modale con immagine
-  facoltativa (`immagine: { src, alt, crediti }` nei dati della tappa) e testo obbligatorio
-  (`approfondimento`, o in mancanza il testo del pannello). Il clic sull'immagine la apre a tutto
-  schermo con lo zoom (rotella, pizzico, doppio clic, pulsanti −/+/Adatta, trascinamento).
+- Scheda della tappa: il clic su un nodo porta alla tappa e apre una finestra modale. **Dal 2026-11-13 ha la
+  forma della «Scopri» dell'Atlante d'arte, con i colori del pannello (blu notte, occhiello giallo)**: finestra
+  larga (fino a 1180 × 740 px), in alto occhiello «Tappa N di M», titolo e luogo · riferimento a tutta
+  larghezza (con la sfumatura dell'intestazione del pannello), sotto due colonne: a sinistra la galleria
+  (un'immagine alla volta, intera, frecce ‹ › se sono più d'una), a destra il testo obbligatorio
+  (`approfondimento`, o in mancanza il testo del pannello), che scorre nella sua colonna, e sotto una linea
+  contatore «1 / 3», didascalia e crediti dell'immagine e le miniature. Tasti ← → sfogliano le immagini.
+  Senza immagini: finestra stretta (660 px) con il solo testo. Sotto 860 px di larghezza (o 560 di altezza):
+  tutto schermo, galleria sopra il testo, la finestra scorre. I testi sono in em su 16 px × `--scala`
+  (niente `zoom`: la finestra uscirebbe dallo schermo); la colonna del testo non supera il 48%.
+  Dati: `immagini: [{ src, miniatura, alt, didascalia, crediti }]` nella tappa (vuoto: solo testo).
+  Il clic sull'immagine la apre a tutto schermo con lo zoom (rotella, pizzico, doppio clic, pulsanti
+  −/+/Adatta, trascinamento) e le frecce per le altre immagini; in alto numero, didascalia e crediti.
   Per ora solo Ur ha un'immagine, di prova: ritaglio del satellite NASA (pubblico dominio), da
-  sostituire con le immagini della redazione. Sta nell'archivio immagini del backoffice e si pubblica
-  in WebP in `prototipo/cammini/abramo/immagini/`.
+  sostituire con le immagini della redazione. Sta nell'archivio immagini del backoffice (didascalia «La
+  bassa Mesopotamia intorno a Ur vista dal satellite», crediti NASA) e si pubblica in WebP in
+  `prototipo/cammini/abramo/immagini/`: `<sha>.webp` fino a 2400 px e `<sha>-mini.webp` a 400 px.
   Inquadratura del cammino (`inquadraCammino`): la più ravvicinata che contiene tutte le tappe con
   i tratti e tutte le aree della cartina storica, lasciando libero l'angolo della legenda; si adatta
   da sola alla dimensione dello schermo.
+  **La legenda non copre mai le tappe** (2026-11-14): anche l'inquadratura di ogni tappa lascia libero il suo
+  angolo (`cameraLiberaDallaLegenda`); se, spostando la carta a mano, la legenda coprirebbe un segnaposto, quando
+  la carta si ferma passa in un angolo libero (in alto a destra, poi in basso a sinistra: `sistemaLegenda`).
+  Dal 2026-11-13 conta anche il fumetto della tappa: quando compare, se la legenda lo coprirebbe cambia angolo.
+  **Legenda mobile** (2026-11-13): chi guarda la trascina dove vuole, per la maniglia a puntini in alto o per il
+  fondo (non dai pulsanti), con il mouse o con un dito, restando dentro la carta; con la tastiera, frecce sulla
+  maniglia (Maiuscolo: passi lunghi). Spostata a mano non cambia più angolo da sola e le inquadrature delle tappe
+  le girano intorno (sotto, accanto, sopra o a sinistra della legenda); doppio clic sulla maniglia, Invio o Esc la
+  rimettono nel suo angolo. La posizione vale finché si resta sulla pagina (non si salva).
+  **Fumetto della tappa** (2026-11-13, struttura fissa): il nome della tappa e sotto «Oggi» con il luogo attuale
+  (`luogoAttuale`, «Dove si trova oggi» nel backoffice: nome attuale e Stato, «Tell el-Muqayyar, Iraq
+  meridionale» → «Oggi Tell el-Muqayyar, Iraq meridionale»); senza luogo attuale, solo il nome (`apriFumetto`).
+  Abramo nel formato dal 2026-11-13: Sichem «Tell Balata (Nablus), Cisgiordania», Egitto «Mit Rahina (Menfi),
+  presso il Cairo, Egitto»; Mòria resta «Gerusalemme, secondo la tradizione», senza Stato (da decidere con la
+  redazione, come le capitali).
 - **Dati del portale separati dalla pagina** (2026-11-08): `cammino.html` è una pagina sola per tutti
   i cammini e legge `prototipo/cammini/indice.json` e la cartella del cammino scelto
   (`cammino.html?cammino=abramo`; senza, il primo dell'indice): `cammino.json` (titoli, testi del globo
@@ -49,8 +80,12 @@ Lingua di lavoro: italiano, anche per testi dell'interfaccia, commenti nel codic
   SvelteKit 3 + Svelte 5, SQLite con `node:sqlite` (`backoffice/dati/cammini.db`, non versionato),
   migrazioni SQL numerate. Il nucleo (connessione e migrazioni, registro delle modifiche e degli errori,
   backup, archivio immagini con sharp e relative pagine, selettore di immagini, stile) è copiato
-  dall'Atlante e adattato: i due progetti restano separati. Pagine: Cammini (testi, tappe con ordine
-  ↑↓, cartine), tappa (luogo dall'anagrafe, testi, immagine dall'archivio, tracciato), Luoghi
+  dall'Atlante e adattato: i due progetti restano separati. Attenzione: i due backoffice usano spesso la stessa porta
+  (5173) e gli stessi indirizzi; le anteprime delle immagini restano un anno nella cache del browser, quindi dal
+  2026-11-13 il loro indirizzo porta l'impronta del file (`/api/immagini/<id>/<larghezza>?v=<sha256>`, `urlAnteprima`):
+  prima, al posto delle immagini 1 e 2 dei cammini comparivano quelle dell'Atlante. Pagine: Cammini (testi, tappe con ordine
+  ↑↓, cartine), tappa (luogo dall'anagrafe, testi, «Nome breve in Oggi», galleria di immagini dall'archivio
+  con ordine ← → o trascinamento, al massimo 12, tracciato), Luoghi
   (anagrafe con ricerca e «dove è usato»; dal 2026-11-12 la scheda ha una mappa sul satellite con la posizione
   dell'anagrafe, che si trascina o si sceglie con un clic, e gli spilli delle cartine legati al luogo, con la
   distanza e il collegamento ad Allinea: `src/lib/components/MappaLuogo.svelte`), cartina (pulsante e anno, stili modificabili: colori,
@@ -67,11 +102,29 @@ Lingua di lavoro: italiano, anche per testi dell'interfaccia, commenti nel codic
   (`cammini.ritorno_tappa_id`, tracciato in `ritorno_tracciato` dalla generazione; nel portale il ritorno
   compare percorso all'ultima tappa); nella classificazione, per regioni, mari e vette, la casella «anche in
   Oggi» (tolta = nome antico, solo nell'epoca storica: `nomi.anche_oggi = 0`, `{ oggi: false }` nel file).
-  Mancano: il disegno di aree e tracciati nel backoffice, lo spostamento dei singoli nomi, l'IA per i
-  nomi non in anagrafe, il ripristino dal registro, la pubblicazione vera su un server.
+  **Ritocca la cartina** (2026-11-13, `/cartine/[id]/ritocca`, pulsante «Ritocca» nella pagina della cartina;
+  `src/lib/server/ritocchi.ts`): la carta generata sul satellite con aree, linee e cammino; i nomi della cartina e
+  le tappe si trascinano. Clic su un nome: scheda sopra la carta (testo, sottotitolo, corpo, inclinazione, zoom di
+  comparsa con «Da qui», colore, sempre visibile; «Com'è nel disegno» per i ritoccati, «Elimina» per gli aggiunti,
+  «Sposta qui il luogo dell'anagrafe» per città e vette); i nomi più chiari a quello zoom nel portale non compaiono
+  ancora; «Aggiorna il portale». Le aree non cambiano: dipendono solo dagli spilli. Un nome importato spostato o
+  modificato diventa «modificato» e la generazione non lo ricrea: lo riconosce dalla scritta del disegno
+  (`nomi.chiave`, migrazione 005, es. «MARI@592,312») o da categoria e testo; dalla chiave ricostruisce anche
+  l'ordine dei nomi (la priorità quando si contendono lo spazio). «Com'è nel disegno» rimette il nome «importato» e
+  rigenera. Spostare una tappa sposta il suo luogo nell'anagrafe (gli spilli no: hanno coordinate proprie) e
+  rigenera, così i tratti si riagganciano; si sposta tutto ciò che usa quel luogo (la tappa Egitto usa Menfi: si
+  sposta anche la città Menfi della cartina), e la conferma lo elenca. Prova in `db/db.test.ts`.
+  **Nomi delle tappe in «Oggi»** (2026-11-14): accanto ai pin, in «Oggi», il nome moderno del luogo
+  (`tappe.breve_oggi`, migrazione 006; «Nome breve in Oggi» nella scheda della tappa; `breveOggi` nel file; vuoto:
+  il nome breve di sempre). Abramo, dalla cartina attuale della redazione: Tell el-Muqayyar, Harran, Nablus, Negev,
+  Hebron, Be'er Sheva; «tra Betel e Ai», «Egitto» e «Mòria» restano come sono (la cartina non dà un nome moderno).
+  Mancano: il disegno di aree e tracciati nel backoffice, l'aggiunta di nomi nuovi e lo spostamento delle frecce
+  nella pagina «Ritocca», l'IA per i nomi non in anagrafe, il ripristino dal registro, la pubblicazione vera su un
+  server.
   Schema logico (discusso il 2026-11-08 a partire da `er-cammino.docx` di Tommaso): cammini; tappe
   (del solo loro cammino, con ordine, nome breve per il pin, riferimento, luogo attuale, testi di
-  pannello e scheda, immagine, `tracciato` GeoJSON dalla tappa precedente: vuoto = linea dritta);
+  pannello e scheda, galleria di immagini in `tappe_immagini` con la posizione (migrazione 007, 2026-11-13:
+  prima una sola immagine in `tappe.immagine_id`), `tracciato` GeoJSON dalla tappa precedente: vuoto = linea dritta);
   anagrafe dei luoghi (nome, nome antico, nome attuale, coordinate: usata da tappe, città delle
   cartine e punti di controllo; in futuro comune con l'Atlante); immagini come nell'Atlante.
   «Oggi» non sta nel database (satellite, confini e nomi attuali sono file comuni a tutti).
@@ -133,6 +186,29 @@ Lingua di lavoro: italiano, anche per testi dell'interfaccia, commenti nel codic
   ovale dell'Egitto ricalcati dalla PNG; ovale del Negheb a sud di Bersabea come nel riquadro «Ingrandimento
   delle tappe» della PNG (quello della carta grande, dove Canaan è «a scala diversa» e il Mare Salato sta
   persino a ovest delle tappe, deformato cadrebbe in Giordania); scritte e Larsa dove sono nella PNG.
+  Dal 2026-11-13, su richiesta della redazione: l'ovale dell'Egitto ha la forma e la grandezza di quello del
+  Negheb (la stessa ellisse sul globo, semiassi 0,5° × 0,27°, intorno a Menfi); Canaan #f7c948 più coprente;
+  ovali arancio #f59f3a con il contorno tratteggiato #c2410c (non più viola); Mezzaluna #57f031 scelta dalla
+  redazione nel backoffice. I nomi della cartina storica nel portale hanno la classe `antico`: più grandi
+  (regni 20 px, regioni antiche 17, fiumi e mari 17, città 15). Nell'epoca storica hanno il colore della
+  scritta nella carta (campionato dalla PNG e messo nella 09b: `nomi.colore`, dal disegno a ogni
+  generazione; fiumi e mari disegnati a mano #0b2ee6) su un alone chiaro come il fondo crema della carta;
+  in «Oggi» restano come gli altri nomi. Per nome, nella classificazione: corpo in pixel (`nomi.corpo`:
+  MEZZALUNA FERTILE 21, più in alto nella 09b per staccarla da MESOPOTAMIA, subito a destra di Carran; CANAAN
+  spostata tra Biblo e Sichem, non sotto i nomi delle tappe) e «sempre visibile»
+  (`nomi.sempre`: MEZZALUNA FERTILE e Canaan compaiono sempre e cedono solo all'interfaccia; migrazione 004).
+  Segnaposto delle tappe: quando si sovrapporrebbero (Canaan, da lontano) si dispongono in colonna da nord a
+  sud, a 30 px, a destra del cammino, con una linea di richiamo verso il pallino sul luogo vero, come nella PNG
+  (`distanziaPin`, da zoom 3,5; i segnaposto non devono avere `position` nel CSS, o si accodano); tutte le
+  tappe hanno il nome visibile (nessuna più «secondaria»); nome breve della tappa 4 «tra Betel e Ai».
+  Dal 2026-11-13 (sera): ovali senza contorno tratteggiato (stile tolto); legenda «Mezzaluna fertile»,
+  «Canaan», «Tappa in un'area non precisata», «Altre città dell'epoca» (pallino nero; i simboli vanno sempre in
+  fondo alla legenda); aggiunti Rushalimum (Gerusalemme, città antica) e Alashiya (Cipro, scritta a mano
+  sull'isola vera: nel disegno cadrebbe in mare); Assur, Menfi e Rushalimum «sempre visibili». Un nome
+  «sempre visibile» cerca prima un posto libero e solo se non c'è si sovrappone a nomi e segnaposto.
+  Una città coperta da un segnaposto si scrive appena sopra di lui, o appena sotto (Menfi sopra la tappa dell'Egitto; dal 2026-11-14 vale anche per le città di oggi: Gerusalemme sotto il segnaposto di Mòria, che sta a meno di 3 km).
+  MEZZALUNA FERTILE tra Carran, Assur e MESOPOTAMIA (09b: x 557, y 157). Segnaposto: la tappa si colora di
+  blu (#1f5fbf) solo quando la linea continua la raggiunge (classe `arrivata`); blu anche le tappe percorse.
   Epoca «1800 a.C.» (`1800ac`, anno -1800). Stili: Mezzaluna fertile (verde #dff092, velo, in legenda),
   Canaan (#fbe39a), Area non precisata (ovali #fde2ad; in legenda «Tappa in un'area non precisata», come
   nella PNG) con il contorno tratteggiato arancio come stile di linea, «Altre città dell'epoca» (punto, solo
@@ -146,7 +222,8 @@ Lingua di lavoro: italiano, anche per testi dell'interfaccia, commenti nel codic
   Tappe (9, numerazione della carta): Ur dei Caldei, Carran, Sichem, Tra Betel e Ai (luogo Betel), Negheb
   (luogo nuovo, ipotetico, dove la carta mette la tappa: 30,52° N 34,70° E), Egitto (luogo Menfi, non più
   Zoan), Mamre presso Ebron, Bersabea, Mòria (luogo nuovo, ipotetico, a Gerusalemme secondo la tradizione);
-  dopo Mòria il ritorno a Bersabea. La tappa 7 passa per Negheb e Betel (ritorno dall'Egitto). Testi di
+  dopo Mòria il cammino finisce (il ritorno a Bersabea è stato tolto il 2026-11-13 su richiesta della
+  redazione; si rimette nella pagina del cammino). La tappa 7 passa per Negheb e Betel (ritorno dall'Egitto). Testi di
   Negheb e Mòria e ritocchi di Sichem, Egitto e panoramica: bozze da far rivedere alla redazione. Spilli:
   i 13 pallini del disegno (Ur, Carran, Sichem, Betel, Gerusalemme, Mamre, Bersabea, Assur, Mari, Biblo,
   Babilonia, Larsa, Menfi) e 3 punti della costa di Canaan (Netanya, Ashdod, Rafah): la carta è schematica,
@@ -227,8 +304,8 @@ Lingua di lavoro: italiano, anche per testi dell'interfaccia, commenti nel codic
   con la carta nuova (2026-11-12) «Mezzaluna fertile» e «Area non precisata», come nella legenda della carta
   (con la cartina del volume la Mezzaluna non era in legenda: deciso il 2026-11-08). Il nome «Mezzaluna
   fertile» ora viene dalla carta, inclinato come lì. In "Oggi"
-  poi l'interruttore "Cartina muta", che toglie tutti i nomi dalla carta, anche quelli delle tappe
-  (restano i numeri), e vale solo in "Oggi". Niente altre voci.
+  poi «Stati toccati dal cammino» con il loro giallo (dal 2026-11-13) e l'interruttore "Cartina muta", che toglie
+  tutti i nomi dalla carta, anche quelli delle tappe (restano i numeri), e vale solo in "Oggi". Niente altre voci.
   Niente di moderno nell'epoca storica, niente di antico in "Oggi". Per un itinerario con un'altra
   epoca (per esempio 1500 a.C.) cambiano solo il pulsante, il titolo e i dati dei regni.
   - **Solo caratteri a bastoni, nessun graziato**: pannello con titoli in Josefin Sans e testo in
@@ -236,12 +313,27 @@ Lingua di lavoro: italiano, anche per testi dell'interfaccia, commenti nel codic
   - **Pannello "Notte"**: blu profondo (#10213a) come il cielo intorno al globo, intestazione
     sfumata, accento corallo (#ff6b57) per i pulsanti, giallo (#ffd166) per occhielli e titoletti.
     Uguale con il tema chiaro o scuro del sistema.
-  - *1700 a.C.*: solo regni antichi, nomi in *corsivo*. **Il corsivo è riservato ai nomi antichi**:
-    la geografia fisica (mari, fiumi, rilievi, deserti) è in tondo colorato, azzurro per le acque e
-    beige per rilievi e regioni, e vale in ogni epoca.
+  - **Niente corsivi sulla carta** (dal 2026-11-13, richiesta di Tommaso): anche i nomi antichi (regni,
+    regioni antiche, capitali e città dell'epoca) sono in tondo; prima erano in corsivo, riservato a loro.
+  - *Epoca storica*: solo regni antichi.
+    La geografia fisica (mari, fiumi, rilievi, deserti) è in tondo colorato, blu per le acque e
+    bruno per rilievi e regioni, e vale in ogni epoca.
+  - **Tutti i nomi della carta, in ogni epoca, con il codice della carta del 1800 a.C.** (2026-11-13, richiesta
+    della redazione): scritte scure e grandi su un alone crema (`--alone-chiaro`). Città e capitali di oggi a
+    15 px nere (#141414) con il pallino o il quadratino (capitali); Stati tutti a 18 px (come l'Egitto: i piccoli, come Libano e Iraq, si leggevano male; niente forma ridotta) in prugna scuro (#4a1f45);
+    acque #0b2ee6 (mari 16-17, fiumi 16, oceani 19); rilievi, deserti e regioni #6b3f12.
   - *Oggi*: solo Stati attuali, nomi in MAIUSCOLO spaziato (Alegreya Sans). Confini come negli
-    atlanti: fascia color prugna semitrasparente (#6f4a68) con filo bianco sopra, a puntini se contesi;
-    nessun'altra linea ha la fascia (fiumi azzurri semplici, percorso rosso).
+    atlanti: fascia color prugna (#6f4a68) con filo bianco sopra, a puntini se contesi; nessun'altra linea ha
+    la fascia (fiumi azzurri semplici, percorso rosso). Dal 2026-11-13 confini più marcati e Stati riempiti con
+    sette colori tenui, come in un atlante politico (`stati-fill`, da `dati/stati.geojson`: due Stati
+    confinanti non hanno mai lo stesso colore, `MAPCOLOR7` di Natural Earth), più leggeri da vicino.
+    Dal 2026-11-13 (richiesta di Tommaso) gli **Stati attraversati dal cammino** sono tutti del giallo dell'Iraq
+    (#f7d154, `COLORE_STATI_DEL_CAMMINO`): la pagina li calcola dal cammino (tappe, tratti e ritorno, un controllo
+    ogni 2 km: `statiDelCammino`); per Abramo Iraq, Turchia, Siria, Libano, Israele, Palestina, Egitto (non la
+    Giordania). Gli altri Stati tengono i colori dell'atlante politico, ma il giallo (k 1) e il sabbia (k 7),
+    troppo simili, diventano verde acqua (#7fdcc0) e pervinca (#93a8f0): due confinanti restano sempre diversi.
+    Il giallo degli Stati del cammino è più coprente degli altri (opacità ,62 a zoom 1, ,55 a 5, ,40 a 7, ,32 a 8,
+    contro ,34 / ,30 / ,20 / ,14), perché risalti; in legenda «Stati toccati dal cammino».
   - Il satellite è sempre quello di oggi (dichiararlo).
 - **Regni storici come poligoni, non come immagini**: le cartine del volume si georeferenziano e se
   ne estraggono le aree colorate (`strumenti/estrai_regni_da_cartina.py`). Stesso colore per lo
@@ -273,19 +365,20 @@ app_cammini/
 │   ├── src/lib/server/       cammini, luoghi, cartine, importazione-svg (classificazione e generazione),
 │   │                         geometria (jsts, terre emerse), percorso, pubblicazione, immagini, registro, backup
 │   ├── src/routes/           cammini, cammini/[id]/tappe/[tappa], cammini/[id]/cartine/nuova, luoghi,
-│   │                         cartine/[id] (+ importa, allinea), immagini, pubblicazione, backup, registro,
+│   │                         cartine/[id] (+ importa, allinea, ritocca), immagini, pubblicazione, backup, registro,
 │   │                         api (immagini, satellite.pmtiles, fiumi.geojson, cartine/[id]/svg)
 │   └── dati/                 cammini.db, archivio immagini, cartine/ (i file SVG) (locale, non versionato)
 ├── prototipo/
 │   ├── cammino.html          il portale: una pagina per tutti i cammini (sorgente leggibile, librerie da CDN)
 │   ├── cammini/              SCRITTO DAL BACKOFFICE: indice.json e una cartella per cammino
-│   │   └── abramo/           cammino.json, 1800ac.json (la cartina), immagini/ (WebP)
+│   │   └── abramo/           cammino.json, 1800ac.json (la cartina), immagini/ (WebP grandi e miniature -mini)
 │   ├── allinea.html          prima prova della georeferenziazione assistita (superata dal backoffice)
 │   ├── cartine/mezzaluna_1700ac.svg  la cartina del volume in SVG (da cartina_in_svg.py, per le prove)
 │   ├── cartine/mezzaluna_1700ac.punti.json  gli spilli con cui è generata la cartina del portale (da allinea.html)
 │   └── dati/                 dati comuni a tutti i cammini («Oggi»)
 │       ├── base.js           GEO: vecchie aree tematiche (non più caricato dalla pagina)
 │       ├── confini.geojson   confini mondiali, punto di vista italiano (c: 0 normale, 1 conteso)
+│       ├── stati.geojson     Stati come aree (n: nome come sulla carta, k: colore 1-7), semplificati a 0,02°
 │       ├── fiumi.geojson     fiumi mondiali (s: importanza, da: zoom di comparsa)
 │       ├── luoghi.js         LUOGHI: anagrafe di prova (nome, altri nomi, coordinate, certezza, nota),
 │       │                     in JSON dopo «const LUOGHI =», così la legge anche Python
@@ -301,7 +394,7 @@ app_cammini/
 │   ├── server.py             server locale con richieste Range (necessario per .pmtiles); chiede al
 │   │                         browser di ricontrollare pagina e dati a ogni caricamento (no-cache);
 │   │                         lascia leggere i file al backoffice; non riceve più gli spilli di allinea.html
-│   ├── prepara_confini_fiumi.py  rigenera confini.geojson e fiumi.geojson (per i soli confini:
+│   ├── prepara_confini_fiumi.py  rigenera confini.geojson, stati.geojson e fiumi.geojson (per i soli confini:
 │   │                         py -c "import sys; sys.path.insert(0,'strumenti'); import prepara_confini_fiumi as p; p.confini()")
 │   ├── natural_earth/        copie dei file di Natural Earth usati dagli script (non versionate)
 │   ├── prepara_etichette_mondo.py rigenera mondo.js e capitali_da_validare.csv (scelte e correzioni nel codice)
@@ -352,10 +445,22 @@ da file://): usare sempre il server.
   «riferimenti intorno al 1800 a.C.»); testi di Negheb e Mòria e ritocchi di Sichem, Egitto e panoramica
   (bozze); fascia, Canaan e ovali sono ricalcati da noi dalla PNG: meglio un SVG del cartografo fedele alla
   PNG; la PNG distingue «Verso l'Egitto» (rosso) e «Ritorno e tappe successive» (viola) e segna la tappa 4
-  come «Localizzazione indicativa»: il portale per ora no (da decidere se aggiungerlo); nell'epoca storica
-  compare anche l'etichetta scritta a mano «Golfo Persico»
-  accanto a «Mare Inferiore» (le etichette dei mari valgono in ogni epoca); in anagrafe restano luoghi della
-  cartina vecchia non più usati (Palmira, Damasco, Zoan, Ninive, Susa, Sidone, Monte Ararat, Monte Sinai).
+  come «Localizzazione indicativa»: il portale per ora no (da decidere se aggiungerlo); in anagrafe restano
+  luoghi della cartina vecchia non più usati (Palmira, Damasco, Zoan, Ninive, Susa, Sidone, Monte Ararat, Monte Sinai).
+  Risolto il 2026-11-13: un mare scritto a mano (nome di oggi) non compare nell'epoca storica la cui cartina dà un
+  nome antico alle stesse acque (un mare solo «allora» a meno di 400 km): «Golfo Persico» sparisce nel 1800 a.C.,
+  dove c'è «Mare Inferiore» (`nome-antico-altrove` in `cammino.html`).
+- **Controllo dei luoghi delle due carte** (2026-11-13), confrontati con i siti reali: tappe, città della cartina
+  (Assur, Mari, Biblo, Babilonia, Menfi), mari, isole e regioni giusti. Corretti: Rushalimum, spostato a mano
+  (pagina «Ritocca», 13/11 alle 10:23) 30 km a nord-ovest di Gerusalemme, è tornato com'è nel disegno, cioè su
+  Gerusalemme (nel portale si scrive appena sotto il segnaposto di Mòria); «Mare Salato», spostato a mano sulla
+  terraferma 75 km a sud del Mar Morto, è tornato sulle acque (35,49° E 31,5° N); Larsa nell'anagrafe era 5,5 km
+  a sud del sito vero (ora 31,2858° N 45,8536° E, Tell as-Senkereh). Biblo ha le coordinate giuste (Jbeil, sulla
+  costa), ma finiva in mare per un difetto della pagina: quando accanto al punto non c'era posto (la scritta CANAAN),
+  il nome di una città della cartina si spostava sopra il punto con tutto il pallino. Ora le città della cartina
+  hanno due forme in colonna (`sopra`, `sotto`): si sposta solo il nome, il pallino resta sul punto. Lasciati come sono: Mamre è sul centro di Hebron (Ramat el-Khalil è 2 km più a
+  nord: «presso Ebron» va bene); le scritte a mano dei fiumi in «Oggi» (Tigri, Nilo, Giordano, Eufrate) stanno a
+  30-50 km dal fiume, cioè accanto a lui nella vista d'insieme (5-8 pixel), più lontane da vicino.
 - (Cartina vecchia, superata il 2026-11-12) Regni del 1700 a.C.: **dalla cartina vettoriale** `Mezzal-e-perc-Abramo_mod.ai`. La cartina si discosta dal vero in media ~35 km (è il disegno); con la
   thin plate spline le città coincidono esattamente e lo scarto resta tra una città e l'altra.
   Nel file: l'Assiria non è un'area a sé ma la parte nord dell'Impero babilonese; Egitto e Canaan
@@ -385,7 +490,17 @@ da file://): usare sempre il server.
   iniziale è in epoca "Oggi" ma senza nomi: compaiono da zoom 1,8 (`ZOOM_NOMI`). Densità scelta
   dalla redazione: capitali e grandi città (limiti `LIMITE_*` nello script, spazio `ARIA_X/Y`
   nella pagina). Ogni Stato ha il nome da zoom 1,8 (`ZOOM_STATI`; i microstati sotto 3.000 km²
-  più da vicino) e, se manca spazio, lo prova più piccolo o spostato; le capitali compaiono tutte da
+  più da vicino) e, se manca spazio, lo prova spostato di poco, sopra, sotto o di lato, ma solo **tutto dentro lo
+  Stato** (`nomeNelloStato`, dal 2026-11-13: prima ISRAELE finiva nel Sinai e KUWAIT in Iraq). **Filetti** (2026-11-13,
+  come negli atlanti): uno Stato piccolo che si vede intero e il cui nome non entra (né nel punto né scostato) si
+  scrive fuori, prima sul mare, legato da un filetto prugna a un punto ben dentro lo Stato libero da segnaposto e nomi
+  (`disponiFiletti`, dopo tutti gli altri nomi; ancore in `aggiornaPostiStati`); se neanche il filetto trova posto, il
+  nome torna nel suo punto. Nella panoramica di Abramo: Israele, Palestina, Libano (e Cipro su schermi piccoli). Il
+  punto di KUWAIT è a 47,52° E 29,18° N (in `base.js` e `mondo.js`): da zoom 5,6 il nome ci sta tutto, più da lontano
+  va sul Golfo con il filetto. Il nome di uno Stato può accostarsi al quadratino di una capitale; se il suo punto non si vede (fuori dalla
+  carta, sotto il pannello) o non ha posto, da zoom 3 il nome si avvicina alla parte visibile restando dentro lo
+  Stato (`aggiornaPostiStati`, ricalcolato quando la carta si ferma: nella panoramica del cammino si legge anche
+  «Arabia Saudita», il cui punto è molto più a sud); le capitali compaiono tutte da
   zoom 2,6 (`ZOOM_CAPITALI`) e il loro quadratino si fissa per primo. Pannello, legenda e
   pulsanti contano come spazio occupato. Restano fuori da questo sistema le etichette scritte a
   mano nella pagina (`LABELS`: Deserto siriano, Mesopotamia, Eufrate…), che possono coprire i pin.

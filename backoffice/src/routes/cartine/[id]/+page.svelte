@@ -25,6 +25,7 @@
   <div class="azioni">
     <a class="pulsante" href="/cartine/{k.id}/importa">Importa e classifica</a>
     <a class="pulsante secondario" href="/cartine/{k.id}/allinea">Allinea</a>
+    <a class="pulsante secondario" href="/cartine/{k.id}/ritocca">Ritocca</a>
   </div>
 </header>
 
