@@ -2,6 +2,8 @@
 *.tif
 *.tiff
 *.pmtiles
+# ...ma non la pagina del backoffice che serve il satellite alle sue mappe (è una cartella con quel nome)
+!backoffice/src/routes/api/satellite.pmtiles/
 quadranti mondo NASA Blue Marble Next Generation/
 bmng-tile/
 tile/
@@ -25,8 +27,15 @@ desktop.ini
 
 # Backoffice: database, archivio immagini, copie di lavoro
 backoffice/dati/
-# Cartine preparate da strumenti/importa_cartina_ai.py per il backoffice
-strumenti/importazioni/
+# Strumenti e dati superati, tenuti in locale (su GitHub restano nella storia)
+superati/
 
 # Demo del portale da caricare su un server (npm run prepara-demo)
 /pubblicazione/
+
+# Anteprima del portale preparata dal backoffice prima di pubblicare
+/anteprima/
+
+# Prove del portale (Playwright): rapporto e risultati dell'ultima esecuzione
+prove-portale/rapporto/
+prove-portale/risultati/

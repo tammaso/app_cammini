@@ -1,6 +1,6 @@
 // Georeferenziazione di una cartina con i punti di controllo («spilli»): dal foglio (coordinate dell'SVG)
 // alla carta (longitudine, latitudine). Thin plate spline in longitudine e latitudine di Mercatore,
-// la stessa della prova prototipo/allinea.html. Usata dalla pagina di allineamento (dal vivo) e dal
+// la stessa della prima prova, allinea.html (ora in superati/prototipo/). Usata dalla pagina di allineamento (dal vivo) e dal
 // server (generazione della cartina): danno lo stesso risultato.
 import type { Punto, Riquadro } from './disegno.ts';
 

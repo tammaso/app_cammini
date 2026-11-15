@@ -57,7 +57,6 @@ if __name__ == "__main__":
     porta = int(sys.argv[1]) if len(sys.argv) > 1 else 8000
     cartella = Path(__file__).resolve().parent
     gestore = partial(GestoreConRange, directory=str(cartella))
-    print(f"Prototipo del cammino: http://localhost:{porta}/cammino.html")
     print(f"Anteprima delle tile:  http://localhost:{porta}/anteprima.html")
     print("Ctrl+C per fermare il server")
     http.server.ThreadingHTTPServer(("", porta), gestore).serve_forever()

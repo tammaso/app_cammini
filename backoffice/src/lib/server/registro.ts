@@ -6,7 +6,7 @@ export const GIORNI_REGISTRO_MODIFICHE = 365;
 export const GIORNI_REGISTRO_ERRORI = 90;
 
 export type Azione = 'creazione' | 'modifica' | 'eliminazione' | 'ripristino';
-export type Oggetto = 'cammino' | 'tappa' | 'luogo' | 'cartina' | 'stile' | 'immagine' | 'pubblicazione';
+export type Oggetto = 'cammino' | 'tappa' | 'luogo' | 'cartina' | 'stile' | 'immagine' | 'pubblicazione' | 'database';
 
 export interface Modifica {
   azione: Azione;

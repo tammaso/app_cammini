@@ -3,6 +3,7 @@ import type { DatabaseSync } from 'node:sqlite';
 import type { Coordinate, Etichetta } from '../../../../condiviso/cammino.ts';
 import { inTransazione } from '../../../db/connessione.ts';
 import { MAX_IMMAGINI_TAPPA, type Cammino, type CamminoInElenco, type Errori, type Stato, type Tappa, type TappaInElenco } from '../cammini.ts';
+import { aggiornaLuogo, creaLuogo, leggiLuogo } from './luoghi.ts';
 import { adesso, facoltativo, intero, testo, valoriDi } from './moduli.ts';
 import { registraModifica } from './registro.ts';
 
@@ -52,7 +53,8 @@ export function etichetteDaTesto(righe: string): { etichette: Etichetta[]; error
   return { etichette, errore: null };
 }
 
-const CAMPI_CAMMINO = ['slug', 'titolo', 'nome', 'sottotitolo', 'globoLuogo', 'globoTesto', 'panoramicaTesto', 'etichette', 'ordine', 'stato'] as const;
+// «conferma»: l'indirizzo riscritto da chi rimette in bozza un cammino pubblicato (vedi aggiornaCammino)
+const CAMPI_CAMMINO = ['slug', 'titolo', 'nome', 'sottotitolo', 'globoLuogo', 'globoTesto', 'panoramicaTesto', 'etichette', 'ordine', 'stato', 'conferma'] as const;
 export type CampoCammino = (typeof CAMPI_CAMMINO)[number];
 export type DatiCammino = Omit<Cammino, 'id' | 'frecce' | 'ritornoTappaId' | 'modificatoIl'>;
 
@@ -96,18 +98,34 @@ export function creaCammino(db: DatabaseSync, d: DatiCammino): { ok: true; id: n
   return { ok: true, id };
 }
 
-export function aggiornaCammino(db: DatabaseSync, id: number, d: DatiCammino): void {
+// L'indirizzo di un cammino (lo slug: cammino.html?cammino=abramo) si sceglie alla creazione e non si cambia più.
+// Quando il cammino è pubblicato quell'indirizzo finisce nel QR stampato sul libro: se il cammino sparisse dal
+// portale, i libri già stampati porterebbero a una pagina d'errore. Perciò un cammino pubblicato non si elimina,
+// e torna in bozza (la pubblicazione vera conterrà solo i pubblicati) solo riscrivendo l'indirizzo per conferma.
+export function aggiornaCammino(db: DatabaseSync, id: number, d: DatiCammino, conferma = ''):
+  { ok: true } | { ok: false; errori: Errori<CampoCammino> } {
+  const prima = leggiCammino(db, id)!;
+  if (prima.stato === 'pubblicato' && d.stato === 'bozza' && conferma.trim() !== prima.slug) {
+    return { ok: false, errori: { conferma: `Per rimetterlo in bozza scrivi l'indirizzo del cammino: «${prima.slug}».` } };
+  }
   db.prepare(`UPDATE cammini SET titolo = ?, nome = ?, sottotitolo = ?, globo_luogo = ?, globo_testo = ?, panoramica_testo = ?,
       etichette = ?, ordine = ?, stato = ?, modificato_il = ? WHERE id = ?`)
     .run(d.titolo, d.nome, d.sottotitolo, d.globoLuogo, d.globoTesto, d.panoramicaTesto, JSON.stringify(d.etichette), d.ordine,
       d.stato, adesso(), id);
-  registraModifica(db, { azione: 'modifica', oggetto: 'cammino', oggettoId: id, camminoId: id, titolo: d.titolo, descrizione: 'Testi o impostazioni del cammino modificati' });
+  const descrizione = prima.stato === d.stato ? 'Testi o impostazioni del cammino modificati'
+    : d.stato === 'pubblicato' ? 'Cammino pubblicato: da ora il suo indirizzo è protetto' : 'Cammino rimesso in bozza (indirizzo confermato)';
+  registraModifica(db, { azione: 'modifica', oggetto: 'cammino', oggettoId: id, camminoId: id, titolo: d.titolo, descrizione });
+  return { ok: true };
 }
 
+export const NON_ELIMINABILE = "Il cammino è pubblicato: il suo indirizzo è nel QR stampato sul libro. Per eliminarlo, rimettilo prima in bozza.";
+
 // Si elimina il cammino con tutte le sue tappe e cartine; nel registro restano i dati, per sapere che cosa c'era.
-export function eliminaCammino(db: DatabaseSync, id: number): void {
+// Un cammino pubblicato no (vedi aggiornaCammino).
+export function eliminaCammino(db: DatabaseSync, id: number): { ok: true } | { ok: false; messaggio: string } {
   const cammino = leggiCammino(db, id);
-  if (!cammino) return;
+  if (!cammino) return { ok: true };
+  if (cammino.stato === 'pubblicato') return { ok: false, messaggio: NON_ELIMINABILE };
   inTransazione(db, () => {
     const tappe = elencaTappe(db, id).map((t) => leggiTappa(db, t.id));
     db.prepare('DELETE FROM cammini WHERE id = ?').run(id);
@@ -116,6 +134,7 @@ export function eliminaCammino(db: DatabaseSync, id: number): void {
       descrizione: 'Cammino eliminato, con tappe e cartine', datiPrecedenti: { cammino, tappe },
     });
   });
+  return { ok: true };
 }
 
 // Dopo l'ultima tappa il cammino può tornare a una tappa precedente (null: finisce all'ultima). Il tracciato
@@ -228,6 +247,53 @@ export function aggiornaTappa(db: DatabaseSync, id: number, d: DatiTappa): void 
     toccaCammino(db, tappa.camminoId);
     registraModifica(db, { azione: 'modifica', oggetto: 'tappa', oggettoId: id, camminoId: tappa.camminoId, titolo: d.nome, descrizione: 'Tappa modificata' });
   });
+}
+
+// Il modulo della pagina della tappa, con il luogo scelto da lì: «luogoNuovo» (nome) aggiunge un luogo all'anagrafe
+// nel punto «luogoLat»/«luogoLng» scelto sulla mappa; altrimenti quel punto, se diverso, sposta il luogo scelto (e con
+// lui tutto ciò che lo usa). Tutto in una transazione: se la tappa non è valida non resta niente, nemmeno il luogo nuovo.
+class ErroreModulo extends Error {
+  errori: Errori<CampoTappa>;
+  constructor(errori: Errori<CampoTappa>) { super('modulo non valido'); this.errori = errori; }
+}
+
+export function salvaTappaDalModulo(db: DatabaseSync, camminoId: number, tappaId: number | null, modulo: FormData):
+  { ok: true; id: number; spostato: boolean } | { ok: false; errori: Errori<CampoTappa> } {
+  const nuovo = String(modulo.get('luogoNuovo') ?? '').trim();
+  const lat = Number(String(modulo.get('luogoLat') ?? '').replace(',', '.'));
+  const lng = Number(String(modulo.get('luogoLng') ?? '').replace(',', '.'));
+  const posizione = modulo.get('luogoLat') && modulo.get('luogoLng') && Number.isFinite(lat) && Number.isFinite(lng)
+    && Math.abs(lat) <= 90 && Math.abs(lng) <= 180 ? { lat, lng } : null;
+  let spostato = false;
+  try {
+    const id = inTransazione(db, () => {
+      if (nuovo) {
+        if (!posizione) throw new ErroreModulo({ luogoId: 'Clicca sulla mappa dove si trova il nuovo luogo.' });
+        const creato = creaLuogo(db, {
+          nome: nuovo, nomeAntico: null, nomeAttuale: String(modulo.get('luogoAttuale') ?? '').trim() || null, altriNomi: [],
+          lat: posizione.lat, lng: posizione.lng, tipo: 'citta', certezza: 'probabile',
+          nota: `Aggiunto dalla tappa «${String(modulo.get('nome') ?? '').trim()}»`,
+        });
+        if (!creato.ok) throw new ErroreModulo({ luogoId: creato.errori.nome ?? 'Il luogo nuovo non è valido.' });
+        modulo.set('luogoId', String(creato.id));
+      }
+      const esito = validaTappa(db, modulo);
+      if (!esito.ok) throw new ErroreModulo(esito.errori);
+      const luogo = leggiLuogo(db, esito.dati.luogoId)!;
+      if (!nuovo && posizione && (luogo.lat !== posizione.lat || luogo.lng !== posizione.lng)) {
+        const aggiornato = aggiornaLuogo(db, luogo.id, { ...luogo, lat: posizione.lat, lng: posizione.lng });
+        if (!aggiornato.ok) throw new ErroreModulo({ luogoId: Object.values(aggiornato.errori).join(' ') });
+        spostato = true;
+      }
+      if (tappaId === null) return creaTappa(db, camminoId, esito.dati);
+      aggiornaTappa(db, tappaId, esito.dati);
+      return tappaId;
+    });
+    return { ok: true, id, spostato };
+  } catch (errore) {
+    if (errore instanceof ErroreModulo) return { ok: false, errori: errore.errori };
+    throw errore;
+  }
 }
 
 // Il tracciato dalla tappa precedente torna una linea dritta (per esempio dopo aver spostato le tappe).

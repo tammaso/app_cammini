@@ -234,7 +234,7 @@
       if (esito.type === 'success') {
         const avvisi = (esito.data?.avvisi as string[] | undefined) ?? [];
         stato = { tipo: 'ok', testo: [ok, ...avvisi].join(' ') };
-        if (azione !== 'pubblica') daPubblicare = true;
+        if (azione !== 'anteprima') daPubblicare = true;
         return esito.data ?? {};
       }
       stato = { tipo: 'errore', testo: esito.type === 'failure' ? String(esito.data?.errore ?? 'Non riuscito.') : 'Non riuscito.' };
@@ -284,8 +284,11 @@
     if (await invia('luogo', { nome: n.id }, `Luogo «${n.luogo}» spostato nell'anagrafe.`)) await invalidateAll();
   }
 
-  async function pubblica() {
-    if (await invia('pubblica', {}, 'Portale aggiornato.')) daPubblicare = false;
+  // i ritocchi si guardano nell'anteprima del portale; si pubblicano dalla pagina «Pubblicazione»
+  let anteprima = $state<string | null>(null);
+  async function preparaAnteprima() {
+    const esito = await invia('anteprima', {}, 'Anteprima pronta.');
+    if (esito) { anteprima = String(esito.anteprima); daPubblicare = false; }
   }
 </script>
 
@@ -301,8 +304,11 @@
 
     <div class="barra-stato" role="status">
       {#if stato}<p class={stato.tipo}>{stato.testo}</p>{/if}
-      <button class="pulsante" type="button" onclick={pubblica} disabled={stato?.tipo === 'lavoro'}>Aggiorna il portale</button>
-      {#if daPubblicare}<span class="nota">Ci sono ritocchi non ancora nel portale.</span>{/if}
+      <button class="pulsante" type="button" onclick={preparaAnteprima} disabled={stato?.tipo === 'lavoro'}>Prepara l'anteprima</button>
+      {#if anteprima && !daPubblicare}
+        <span class="nota"><a href="{anteprima}?cammino={data.cartina.camminoSlug}" target="_blank" rel="noopener">Apri l'anteprima ↗</a>
+          · per metterla nel portale: <a href="/pubblicazione">Pubblicazione</a></span>
+      {:else if daPubblicare}<span class="nota">Ci sono ritocchi non ancora nell'anteprima.</span>{/if}
     </div>
 
 

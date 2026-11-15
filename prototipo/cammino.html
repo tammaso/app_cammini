@@ -436,6 +436,36 @@ h1 { font-weight: 700; font-size: 36px; letter-spacing: .01em; }
 .piede button:focus-visible { outline: 3px solid var(--accent); outline-offset: 2px; }
 .piede svg { width: 26px; height: 26px; fill: none; stroke: currentColor; stroke-width: 1.6; stroke-linecap: round; stroke-linejoin: round; }
 .piede svg .pieno { fill: currentColor; stroke: none; }
+/* «Disegna» e i suoi strumenti (2026-11-14): acceso, il pulsante è giallo come le scelte delle preferenze */
+.piede button[aria-pressed="true"] { background: #ffd166; color: #10213a; }
+.piede button[aria-pressed="true"]:hover { background: #ffdc85; }
+.piede svg .sottile { stroke-width: 1.2; opacity: .7; }
+.piede svg .spesso { stroke-width: 3.2; opacity: .55; }
+.piede .strumenti { display: flex; align-items: center; gap: 6px 14px; flex-wrap: wrap; justify-content: flex-end; }
+.piede .strumenti[hidden] { display: none; }
+.piede .gruppo { display: flex; align-items: center; gap: 4px; }
+.piede .gruppo + .gruppo { padding-left: 14px; border-left: 1px solid var(--line); }
+.piede .strumenti button { margin: 0; padding: 0 10px; gap: 7px; font-size: 13px; letter-spacing: .06em; }
+.piede .colori button { width: 44px; justify-content: center; padding: 0; }
+.piede .colori .campione { width: 24px; height: 24px; border-radius: 50%; background: var(--colore); box-shadow: 0 0 0 2px #0b1830, 0 0 0 3.5px rgba(255, 255, 255, .55); }
+.piede .colori button[aria-pressed="true"] { background: rgba(255, 255, 255, .16); }
+.piede .colori button[aria-pressed="true"] .campione { box-shadow: 0 0 0 2px #0b1830, 0 0 0 4.5px #ffd166; }
+/* mentre si disegna la carta è una lavagna: la si trascina solo per disegnare, e segnaposto, nomi e fumetto non
+   prendono il tocco (la scheda si apre dall'elenco delle tappe) */
+#map.disegno .maplibregl-canvas-container { cursor: crosshair; }
+#map.disegno .maplibregl-marker, #map.disegno .maplibregl-popup { pointer-events: none; }
+/* i nomi degli strumenti solo sugli schermi larghi (le LIM sono di solito 1920 px): sotto, le icone con il nome al passaggio */
+@media (max-width: 1560px) { .piede .strumenti .testo { display: none; } }
+/* sul telefono gli strumenti vanno su una riga loro, sotto i comandi, tutti insieme */
+@media (max-width: 760px) {
+  .piede { flex-wrap: wrap; row-gap: 0; }
+  .piede .strumenti { width: 100%; flex-wrap: nowrap; justify-content: space-between; column-gap: 8px; padding-bottom: 2px; }
+  .piede .gruppo + .gruppo { padding-left: 6px; }
+  .piede .gruppo { gap: 2px; }
+  .piede .strumenti button { padding: 0 6px; }
+  .piede .colori button { width: 30px; }
+  .piede .colori .campione { width: 20px; height: 20px; }
+}
 /* la finestra delle preferenze: colori del pannello; i testi crescono con i caratteri scelti (em su 16px × --scala) */
 .preferenze { width: min(30em, calc(100vw - 32px)); max-height: calc(100dvh - 32px); padding: 1.5em 1.6em 1.3em; border: 1px solid var(--line);
   border-top: 4px solid #ffd166; border-radius: 14px; background: var(--panel); color: var(--ink); box-shadow: 0 20px 60px rgba(0, 0, 0, .55);
@@ -557,6 +587,34 @@ body.leggibile .geo-label, body.leggibile .pin .pl, body.leggibile .pin .pn, bod
         <svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="10"/><path d="M9.3 9.2a2.8 2.8 0 1 1 3.9 2.6c-.8.4-1.2 1-1.2 1.8v.6"/><circle cx="12" cy="17.2" r=".9" class="pieno"/></svg>
         Aiuto
       </button>
+      <!-- la carta come lavagna, per la lezione alla LIM (2026-11-14): vedi «Disegno sulla carta» nello script -->
+      <button type="button" id="disegna" aria-pressed="false" aria-controls="strumenti-disegno">
+        <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 20l1.2-4.6L15.6 5a2.1 2.1 0 0 1 3 3L8.2 18.4z"/><path d="M13.8 6.8l3 3"/><path d="M4 20h16" class="sottile"/></svg>
+        Disegna
+      </button>
+    </div>
+    <!-- gli strumenti, solo mentre si disegna: penna, evidenziatore, freccia, colore, annulla, cancella tutto -->
+    <div class="strumenti" id="strumenti-disegno" role="toolbar" aria-label="Strumenti di disegno" hidden>
+      <div class="gruppo" role="group" aria-label="Strumento">
+        <button type="button" data-strumento="penna" aria-pressed="true" aria-label="Penna" title="Penna">
+          <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 20c3-1 4-4 7-7s5-6 7-8"/><path d="M15 4.5l4.5 4.5"/></svg><span class="testo">Penna</span>
+        </button>
+        <button type="button" data-strumento="evidenziatore" aria-pressed="false" aria-label="Evidenziatore" title="Evidenziatore">
+          <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M8.5 13.5l7-7 3 3-7 7z"/><path d="M8.5 13.5L6 19h5l.5-2.5"/><path d="M3 21h18" class="spesso"/></svg><span class="testo">Evidenziatore</span>
+        </button>
+        <button type="button" data-strumento="freccia" aria-pressed="false" aria-label="Freccia" title="Freccia">
+          <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M5 19L19 5"/><path d="M10 5h9v9"/></svg><span class="testo">Freccia</span>
+        </button>
+      </div>
+      <div class="gruppo colori" role="group" aria-label="Colore"></div>
+      <div class="gruppo" role="group" aria-label="Correzioni">
+        <button type="button" id="disegno-annulla" aria-label="Annulla" aria-keyshortcuts="Control+Z" title="Annulla l'ultimo segno (Ctrl+Z)">
+          <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M9 14L4 9l5-5"/><path d="M4 9h10.5a5.5 5.5 0 0 1 0 11H11"/></svg><span class="testo">Annulla</span>
+        </button>
+        <button type="button" id="disegno-cancella" aria-label="Cancella tutto" title="Cancella tutti i segni">
+          <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 7h16"/><path d="M9.5 7V4.5h5V7"/><path d="M6.5 7l1 13h9l1-13"/><path d="M10.5 11v5.5M13.5 11v5.5"/></svg><span class="testo">Cancella tutto</span>
+        </button>
+      </div>
     </div>
   </footer>
 </div>
@@ -642,6 +700,13 @@ body.leggibile .geo-label, body.leggibile .pin .pl, body.leggibile .pin .pn, bod
     <li><strong>Con la tastiera</strong>: seleziona la carta con Tab, poi frecce per spostarti, + e − per lo zoom.</li>
     <li><strong>La legenda</strong> si sposta trascinandola dalla maniglia in alto; un doppio clic sulla maniglia la rimette al suo posto.</li>
   </ul>
+
+  <h3>Disegna sulla carta</h3>
+  <p>Con <strong>Disegna</strong>, in basso, la carta diventa una lavagna: scegli penna, evidenziatore o freccia e un
+    colore, poi disegna con il mouse, con la penna della LIM o con un dito. I segni restano sui luoghi anche quando la
+    carta si sposta o cambi tappa. <strong>Annulla</strong> toglie l’ultimo segno, <strong>Cancella tutto</strong> li
+    toglie tutti. Premi di nuovo <strong>Disegna</strong> (o Esc) per tornare a muovere la carta: i segni restano finché
+    non li cancelli o ricarichi la pagina.</p>
 
   <h3>Leggi meglio</h3>
   <p>Con il pulsante <strong>Accessibilità</strong>, in basso a sinistra, puoi ingrandire i caratteri, scrivere tutto in
@@ -813,7 +878,9 @@ const style = {
     // satellite mondiale NASA, letto da bmng/bmng.pmtiles (generato con bmng/genera_tile_bmng.py)
     bmng: { type: "raster", url: "pmtiles://" + new URL("../bmng/bmng.pmtiles", location.href).href, tileSize: 512,
       attribution: "Immagini: NASA Earth Observatory, Blue Marble Next Generation" },
-    anim: { type: "geojson", data: fc([]) }
+    anim: { type: "geojson", data: fc([]) },
+    // i segni disegnati da chi guarda (vedi «Disegno sulla carta»)
+    disegni: { type: "geojson", data: fc([]) }
   },
   layers: [
     { id: "sea", type: "background", paint: { "background-color": SEA } },
@@ -869,7 +936,15 @@ const style = {
     // le punte di freccia della cartina, nel verso del viaggio (ruotano con la carta)
     { id: "frecce", type: "symbol", source: "frecce", layout: { visibility: "none", "icon-image": "freccia", "icon-rotate": ["get", "rotazione"],
       "icon-rotation-alignment": "map", "icon-allow-overlap": true, "icon-ignore-placement": true,
-      "icon-size": ["interpolate", ["linear"], ["zoom"], 3, .65, 8, 1.1] } }
+      "icon-size": ["interpolate", ["linear"], ["zoom"], 3, .65, 8, 1.1] } },
+    // i segni di chi guarda, sopra tutto il resto della carta (i nomi e i segnaposto, che sono nella pagina, restano
+    // sopra): l'evidenziatore largo e trasparente, penna e frecce piene con un bordo scuro che le stacca dal satellite
+    { id: "disegni-evidenziatore", type: "line", source: "disegni", filter: ["==", ["get", "strumento"], "evidenziatore"],
+      layout: { "line-cap": "round", "line-join": "round" }, paint: { "line-color": ["get", "colore"], "line-width": 22, "line-opacity": .42 } },
+    { id: "disegni-bordo", type: "line", source: "disegni", filter: ["!=", ["get", "strumento"], "evidenziatore"],
+      layout: { "line-cap": "round", "line-join": "round" }, paint: { "line-color": "#0a0e14", "line-width": 8, "line-opacity": .55 } },
+    { id: "disegni-penna", type: "line", source: "disegni", filter: ["!=", ["get", "strumento"], "evidenziatore"],
+      layout: { "line-cap": "round", "line-join": "round" }, paint: { "line-color": ["get", "colore"], "line-width": 4.5 } }
   ]
 };
 
@@ -1582,8 +1657,26 @@ const pins = STOPS.map((s, i) => {
 // dispongono in colonna a destra del cammino, nell'ordine da nord a sud, ognuno con una linea di richiamo
 // verso il pallino sul suo luogo, come nella carta; avvicinandosi, appena c'è posto, tornano al loro luogo.
 const PASSO_PIN = 30;
+// Le attribuzioni della carta in basso a destra, come [x0, y0, x1, y1] dentro la carta (null se non ci sono). Sul
+// telefono MapLibre le mostra aperte, larghe quasi quanto la carta, finché chi guarda non la trascina.
+function riquadroAttribuzioni() {
+  const a = mapEl.querySelector(".maplibregl-ctrl-attrib"), r = a?.getBoundingClientRect();
+  if (!r?.width) return null;
+  const m = mapEl.getBoundingClientRect();
+  return [r.left - m.left, r.top - m.top, r.right - m.left, r.bottom - m.top];
+}
+// Il margine in basso delle inquadrature: se le attribuzioni sono larghe (telefono), una tappa in fondo finirebbe sotto
+// di loro; si lascia il loro spazio più il mezzo segnaposto (16 px dal punto al bordo del cerchio) (2026-11-14).
+function margineSotto(minimo) {
+  const a = riquadroAttribuzioni();
+  return a && a[2] - a[0] > mapEl.clientWidth / 2 ? Math.max(minimo, mapEl.clientHeight - a[1] + 20) : minimo;
+}
+const MARGINE_COLONNA = 8;
 function distanziaPin() {
   const pos = STOPS.map(s => map.project(s.at));
+  const W = mapEl.clientWidth, H = mapEl.clientHeight;
+  // prima si legge (larghezze dei segnaposto, attribuzioni), poi si scrive: una sola rilettura della pagina
+  const larghezze = pins.map(p => p.offsetWidth), attribuzioni = riquadroAttribuzioni();
   // si parte da un gruppo per segnaposto e si uniscono i gruppi le cui colonne si toccherebbero, finché
   // non ce ne sono più (allargando un gruppo può toccare il vicino)
   const media = (g, k) => g.reduce((t, i) => t + pos[i][k], 0) / g.length;
@@ -1603,14 +1696,42 @@ function distanziaPin() {
   }
   for (const g of gruppi) {
     // la colonna sta a destra del cammino, come nella carta: sul tracciato resta il pallino del luogo
-    const cx = Math.max(...g.map(i => pos[i].x)) + 34, cy = media(g, "y");
+    let cx = Math.max(...g.map(i => pos[i].x)) + 34, cy = media(g, "y");
+    // Se qualche tappa della colonna si vede, la colonna resta dentro la carta (2026-11-14): non esce dal bordo destro
+    // e non scende sotto il fondo o sotto le attribuzioni. Prima, sul telefono, si centrava anche sulle tappe fuori
+    // dallo schermo e Sichem finiva sotto le attribuzioni, Mamre oltre il bordo. Le colonne tutte fuori restano dove sono.
+    if (g.length > 1 && g.some(i => pos[i].x >= 0 && pos[i].x <= W && pos[i].y >= 0 && pos[i].y <= H)) {
+      const largo = Math.max(...g.map(i => larghezze[i])) - 13; // dal centro del cerchio alla fine del nome più lungo
+      cx = Math.max(13 + MARGINE_COLONNA, Math.min(cx, W - MARGINE_COLONNA - largo));
+      const mezza = (g.length - 1) / 2 * PASSO_PIN + 16; // dal centro della colonna al bordo dell'ultimo cerchio
+      const sottoLeAttribuzioni = attribuzioni && attribuzioni[0] < cx + largo && attribuzioni[2] > cx - 13;
+      const fondo = (sottoLeAttribuzioni ? attribuzioni[1] : H) - MARGINE_COLONNA;
+      cy = Math.max(mezza + MARGINE_COLONNA, Math.min(cy, fondo - mezza));
+    }
     g.forEach((i, k) => {
       const [dx, dy] = g.length > 1 ? [cx - pos[i].x, cy + (k - (g.length - 1) / 2) * PASSO_PIN - pos[i].y] : [0, 0];
-      pins[i].marker.setOffset([-13 + dx, dy]);      const r = pins[i].querySelector(".richiamo"), l = Math.hypot(dx, dy);
+      pins[i].marker.setOffset([-13 + dx, dy]);
+      spostamentoPin[i] = [Math.round(dx), Math.round(dy)];
+      const r = pins[i].querySelector(".richiamo"), l = Math.hypot(dx, dy);
       r.hidden = l < 14;
       if (l >= 14) { r.style.width = `${l}px`; r.style.transform = `rotate(${Math.atan2(-dy, -dx)}rad)`; }
     });
   }
+  spostaFumetto();
+}
+// di quanto ogni segnaposto è spostato dal suo luogo (in colonna), in pixel
+const spostamentoPin = STOPS.map(() => [0, 0]);
+// Il fumetto indica il segnaposto della sua tappa dove è disegnato: se il segnaposto sta in colonna (Canaan), il
+// fumetto si sposta con lui e non lo copre (2026-11-14: prima indicava il luogo vero, e sul telefono copriva Mamre).
+// Le distanze dal segnaposto sono quelle del fumetto di MapLibre con offset 20 (14 in diagonale).
+let fumettoDi = -1, spostamentoFumetto = "";
+function spostaFumetto() {
+  if (fumettoDi < 0 || !popup.isOpen()) return;
+  const [dx, dy] = spostamentoPin[fumettoDi], c = 14;
+  if (`${dx},${dy}` === spostamentoFumetto) return;
+  spostamentoFumetto = `${dx},${dy}`;
+  popup.setOffset({ center: [dx, dy], top: [dx, dy + 20], bottom: [dx, dy - 20], left: [dx + 20, dy], right: [dx - 20, dy],
+    "top-left": [dx + c, dy + c], "top-right": [dx - c, dy + c], "bottom-left": [dx + c, dy - c], "bottom-right": [dx - c, dy - c] });
 }
 // le posizioni sullo schermo (con il globo) si possono chiedere solo a carta caricata
 let cartaPronta = false;
@@ -1622,6 +1743,8 @@ const popup = new maplibregl.Popup({ className: "stop-pop", offset: 20, closeOnC
 // Se la legenda lo coprirebbe, la legenda cambia angolo (sistemaLegenda).
 function apriFumetto(s) {
   popup.setLngLat(s.at).setHTML(`<h3>${esc(s.name)}</h3>${s.where ? `<p>Oggi ${esc(s.where)}</p>` : ""}`).addTo(map);
+  fumettoDi = STOPS.indexOf(s); spostamentoFumetto = "";
+  spostaFumetto();
   sistemaLegenda();
 }
 
@@ -1851,7 +1974,7 @@ function inquadraCammino(durata) {
   STORICHE.forEach(e => e.cartina.elementi.features.filter(f => /Polygon$/.test(f.geometry.type))
     .forEach(f => f.geometry.coordinates.flat(f.geometry.type === "MultiPolygon" ? 2 : 1).forEach(p => area.extend(p))));
   const margine = isNarrow() ? 12 : 24;
-  map.flyTo({ ...cameraLiberaDallaLegenda(area, { top: margine, bottom: margine + 16, left: margine, right: margine }), bearing: 0, duration: reduce ? 0 : durata });
+  map.flyTo({ ...cameraLiberaDallaLegenda(area, { top: margine, bottom: margineSotto(margine + 16), left: margine, right: margine }), bearing: 0, duration: reduce ? 0 : durata });
 }
 
 // L'inquadratura più ravvicinata di un'area che lascia libera la legenda: l'area sta sotto, accanto, sopra o
@@ -1870,7 +1993,9 @@ function cameraLiberaDallaLegenda(area, base, zoomMassimo = Infinity) {
 }
 
 function padding() {
-  return isNarrow() ? { top: 40, bottom: 30, left: 30, right: 30 } : { top: 70, bottom: 60, left: 70, right: 90 };
+  const p = isNarrow() ? { top: 40, bottom: 30, left: 30, right: 30 } : { top: 70, bottom: 60, left: 70, right: 90 };
+  p.bottom = margineSotto(p.bottom);
+  return p;
 }
 
 // Se, spostando o ingrandendo la carta, la legenda copre una tappa o il fumetto della tappa, va in un altro
@@ -2063,10 +2188,153 @@ $("vedi").addEventListener("click", vediCammino);
 $("prev").addEventListener("click", () => go(step - 1));
 $("next").addEventListener("click", () => go(step + 1));
 $("globe").addEventListener("click", () => go(0));
+// ← → passano da una tappa all'altra, ma non quando le frecce servono ad altro: sulla carta selezionata la spostano,
+// sulla maniglia spostano la legenda (che lo segnala con preventDefault), nei campi e nelle finestre aperte (2026-11-14:
+// prima cambiavano tappa anche lì). Con Alt, Ctrl o Cmd sono comandi del browser (Alt+← torna indietro).
 document.addEventListener("keydown", e => {
-  if (e.target.closest("input") || document.querySelector("dialog[open]")) return;
+  if (e.defaultPrevented || e.altKey || e.ctrlKey || e.metaKey) return;
+  if (e.target.closest("input, textarea, select, .maplibregl-canvas") || document.querySelector("dialog[open]")) return;
   if (e.key === "ArrowRight") go(step + 1);
   if (e.key === "ArrowLeft") go(step - 1);
+});
+
+/* ---------- Disegno sulla carta ---------- */
+// «Disegna», in fondo al sito, fa della carta una lavagna per la lezione alla LIM (2026-11-14): penna, evidenziatore e
+// freccia, quattro colori, «Annulla» (anche Ctrl+Z) e «Cancella tutto» (che si può annullare). I segni stanno sui luoghi,
+// non sullo schermo: restano dove sono spostando la carta, cambiando tappa o epoca. Mentre si disegna la carta non si
+// trascina (la rotellina e due dita la ingrandiscono ancora), e segnaposto, nomi e fumetto non prendono il tocco; Esc o
+// di nuovo «Disegna» tornano alla carta di sempre, con i segni. I segni non si salvano: spariscono ricaricando la pagina.
+const COLORI_DISEGNO = [["Magenta", "#ff3dbd"], ["Giallo", "#ffd60a"], ["Azzurro", "#38bdf8"], ["Bianco", "#ffffff"]];
+const INTERAZIONI_SOSPESE = ["dragPan", "dragRotate", "doubleClickZoom", "boxZoom"];
+const disegno = {
+  attivo: false, strumento: "penna", colore: COLORI_DISEGNO[0][1],
+  tratti: [], storia: [], // i segni finiti e, per «Annulla», gli elenchi di prima di ogni cambiamento
+  // il segno che si sta disegnando: { strumento, colore, luoghi ([lng, lat] di ogni punto, presi mentre si disegna, così
+  // un colpo di rotellina a metà non lo deforma), ultimo (l'ultimo punto sullo schermo), puntatore }
+  corrente: null,
+  sospese: []             // le interazioni della carta spente mentre si disegna
+};
+const pulsanteDisegna = $("disegna"), strumentiDisegno = $("strumenti-disegno");
+COLORI_DISEGNO.forEach(([nome, valore], i) => {
+  const b = document.createElement("button");
+  b.type = "button"; b.dataset.colore = valore; b.title = nome;
+  b.setAttribute("aria-label", `Colore ${nome.toLowerCase()}`); b.setAttribute("aria-pressed", String(i === 0));
+  b.innerHTML = `<span class="campione" style="--colore: ${valore}"></span>`;
+  strumentiDisegno.querySelector(".colori").appendChild(b);
+});
+const scegli = (gruppo, attributo, valore) => gruppo.querySelectorAll(`[data-${attributo}]`)
+  .forEach(b => b.setAttribute("aria-pressed", String(b.dataset[attributo] === valore)));
+strumentiDisegno.querySelectorAll("[data-strumento]").forEach(b => b.addEventListener("click", () => {
+  disegno.strumento = b.dataset.strumento; scegli(strumentiDisegno, "strumento", disegno.strumento);
+}));
+strumentiDisegno.querySelectorAll("[data-colore]").forEach(b => b.addEventListener("click", () => {
+  disegno.colore = b.dataset.colore; scegli(strumentiDisegno, "colore", disegno.colore);
+}));
+
+function attivaDisegno(si) {
+  if (si === disegno.attivo) return;
+  disegno.attivo = si;
+  if (si) {
+    spin = false; // il globo smette di girare
+    disegno.sospese = INTERAZIONI_SOSPESE.filter(n => map[n].isEnabled());
+    disegno.sospese.forEach(n => map[n].disable());
+  } else {
+    annullaCorrente();
+    disegno.sospese.forEach(n => map[n].enable());
+  }
+  mapEl.classList.toggle("disegno", si);
+  pulsanteDisegna.setAttribute("aria-pressed", String(si));
+  strumentiDisegno.hidden = !si;
+  aggiornaPulsantiDisegno();
+}
+pulsanteDisegna.addEventListener("click", () => attivaDisegno(!disegno.attivo));
+
+// un punto dello schermo come luogo [lng, lat] (null fuori dal globo)
+const luogoDi = p => { const l = map.unproject(p); return Number.isFinite(l.lng) && Number.isFinite(l.lat) ? [l.lng, l.lat] : null; };
+// un segno come elemento della carta. La freccia è un tratto dritto con la punta disegnata quando la si finisce, lunga
+// 18 px sullo schermo, che poi cresce e cala con lo zoom come il resto del segno.
+function elementoDiSegno({ strumento, colore, luoghi }) {
+  let linee;
+  if (strumento === "freccia") {
+    const [a, b] = [map.project(luoghi[0]), map.project(luoghi.at(-1))], l = Math.hypot(b.x - a.x, b.y - a.y) || 1;
+    const [dx, dy] = [(b.x - a.x) / l, (b.y - a.y) / l], punta = Math.min(18, l * .6);
+    const barba = s => { const c = Math.cos(s), n = Math.sin(s); return luogoDi([b.x - punta * (dx * c - dy * n), b.y - punta * (dx * n + dy * c)]); };
+    linee = [luoghi, [barba(.5), luoghi.at(-1), barba(-.5)].filter(Boolean)];
+  } else {
+    linee = [luoghi.length > 1 ? luoghi : [luoghi[0], luoghi[0]]]; // un tocco solo lascia un punto
+  }
+  return { type: "Feature", properties: { strumento, colore }, geometry: { type: "MultiLineString", coordinates: linee } };
+}
+let disegnoChiesto = false;
+function ridisegna() {
+  if (disegnoChiesto) return;
+  disegnoChiesto = true;
+  requestAnimationFrame(() => {
+    disegnoChiesto = false;
+    const corrente = disegno.corrente ? [elementoDiSegno(disegno.corrente)] : [];
+    map.getSource("disegni").setData(fc([...disegno.tratti, ...corrente]));
+  });
+}
+function aggiornaPulsantiDisegno() {
+  $("disegno-annulla").disabled = !disegno.storia.length;
+  $("disegno-cancella").disabled = !disegno.tratti.length;
+}
+function cambiaTratti(nuovi) {
+  disegno.storia.push(disegno.tratti);
+  disegno.tratti = nuovi;
+  aggiornaPulsantiDisegno();
+  ridisegna();
+}
+function annullaUltimo() {
+  if (!disegno.storia.length) return;
+  disegno.tratti = disegno.storia.pop();
+  aggiornaPulsantiDisegno();
+  ridisegna();
+}
+function annullaCorrente() { if (disegno.corrente) { disegno.corrente = null; ridisegna(); } }
+$("disegno-annulla").addEventListener("click", annullaUltimo);
+$("disegno-cancella").addEventListener("click", () => { if (disegno.tratti.length) cambiaTratti([]); });
+
+// il disegno con il mouse, la penna della LIM o un dito; un secondo dito vuol dire che si ingrandisce: il segno si lascia
+const lavagna = map.getCanvasContainer();
+const puntoSullaCarta = e => { const r = lavagna.getBoundingClientRect(); return [e.clientX - r.left, e.clientY - r.top]; };
+lavagna.addEventListener("pointerdown", e => {
+  if (!disegno.attivo) return;
+  if (!e.isPrimary || disegno.corrente) { annullaCorrente(); return; }
+  if (e.button > 0) return;
+  const p = puntoSullaCarta(e), luogo = luogoDi(p);
+  if (!luogo) return; // fuori dal globo
+  e.preventDefault();
+  disegno.corrente = { strumento: disegno.strumento, colore: disegno.colore, luoghi: [luogo], ultimo: p, inizio: p, puntatore: e.pointerId };
+  lavagna.setPointerCapture?.(e.pointerId);
+  ridisegna();
+});
+lavagna.addEventListener("pointermove", e => {
+  const c = disegno.corrente;
+  if (!c || e.pointerId !== c.puntatore) return;
+  const p = puntoSullaCarta(e);
+  if (Math.hypot(p[0] - c.ultimo[0], p[1] - c.ultimo[1]) < 2) return;
+  const luogo = luogoDi(p);
+  if (!luogo) return;
+  c.ultimo = p;
+  if (c.strumento === "freccia") c.luoghi = [c.luoghi[0], luogo];
+  else c.luoghi.push(luogo);
+  ridisegna();
+});
+function fineSegno(e) {
+  const c = disegno.corrente;
+  if (!c || e.pointerId !== c.puntatore) return;
+  disegno.corrente = null;
+  // una freccia senza lunghezza (un tocco) non è una freccia
+  if (c.strumento === "freccia" && Math.hypot(c.ultimo[0] - c.inizio[0], c.ultimo[1] - c.inizio[1]) < 8) { ridisegna(); return; }
+  cambiaTratti([...disegno.tratti, elementoDiSegno(c)]);
+}
+lavagna.addEventListener("pointerup", fineSegno);
+lavagna.addEventListener("pointercancel", e => { if (disegno.corrente?.puntatore === e.pointerId) annullaCorrente(); });
+document.addEventListener("keydown", e => {
+  if (!disegno.attivo || e.defaultPrevented || document.querySelector("dialog[open]")) return;
+  if (e.key === "Escape") { e.preventDefault(); attivaDisegno(false); pulsanteDisegna.focus(); }
+  else if ((e.ctrlKey || e.metaKey) && !e.shiftKey && e.key.toLowerCase() === "z") { e.preventDefault(); annullaUltimo(); }
 });
 
 /* ---------- Zoom e rotazione iniziale ---------- */

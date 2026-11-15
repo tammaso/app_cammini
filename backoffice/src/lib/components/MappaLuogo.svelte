@@ -13,8 +13,12 @@
     spilli: SpilloDelLuogo[];
     /** chiamata quando si sposta la posizione sulla mappa */
     sposta: (lat: number, lng: number) => void;
+    /** solo la posizione, senza l'elenco degli spilli (per la pagina della tappa) */
+    soloPosizione?: boolean;
+    /** il testo sotto la mappa, al posto di quello della scheda del luogo */
+    aiuto?: string;
   }
-  let { lat, lng, spilli, sposta }: Props = $props();
+  let { lat, lng, spilli, sposta, soloPosizione = false, aiuto }: Props = $props();
 
   const COLORE = { proposto: '#ffd166', confermato: '#5cc98a', manuale: '#6cc4ff' } as const;
   const vuota = { type: 'FeatureCollection' as const, features: [] };
@@ -60,6 +64,13 @@
   });
 
   const arrotonda = (v: number) => Math.round(v * 1e5) / 1e5;
+
+  // scelto un altro luogo (non trascinato qui): la mappa ci va, se non si vede
+  $effect(() => {
+    if (!pronta || !mappa || !valida) return;
+    const centro: [number, number] = [lng!, lat!];
+    if (!mappa.getBounds().contains(centro)) mappa.easeTo({ center: centro, zoom: Math.max(mappa.getZoom(), 6), duration: 600 });
+  });
 
   function inquadra() {
     if (!mappa || !maplibre) return;
@@ -123,10 +134,13 @@
   <div class="carta" bind:this={contenitore}></div>
   <div class="sotto">
     <p class="aiuto">
-      <span class="segno posizione"></span> Posizione nell'anagrafe: trascinala, o clicca sulla mappa, per cambiare le coordinate
-      (poi «Salva»). Sposta le tappe che usano il luogo e le città delle cartine.
+      <span class="segno posizione"></span>
+      {#if aiuto}{aiuto}{:else}Posizione nell'anagrafe: trascinala, o clicca sulla mappa, per cambiare le coordinate
+        (poi «Salva»). Sposta le tappe che usano il luogo e le città delle cartine.{/if}
     </p>
-    {#if spilli.length}
+    {#if soloPosizione}
+      <!-- nella tappa: niente spilli delle cartine -->
+    {:else if spilli.length}
       <p class="aiuto">Spilli delle cartine legati al luogo (si spostano nella pagina Allinea):</p>
       <ol class="spilli">
         {#each spilli as s, i (i)}

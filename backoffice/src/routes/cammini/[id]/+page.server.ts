@@ -4,7 +4,8 @@ import {
   aggiornaCammino, creaCammino, elencaTappe, eliminaCammino, etichetteInTesto, impostaRitorno, leggiCammino, spostaTappa, validaCammino,
 } from '#lib/server/cammini.ts';
 import { elencaCartine } from '#lib/server/cartine.ts';
-import { componiCammino } from '#lib/server/pubblicazione.ts';
+import { passiDelCammino } from '#lib/server/passi.ts';
+import { componiCammino, statoNelPortale } from '#lib/server/pubblicazione.ts';
 import type { Actions, PageServerLoad } from './$types';
 
 // '/cammini/nuovo' crea, '/cammini/3' modifica.
@@ -15,17 +16,20 @@ function idDaParametro(parametro: string): number | null {
   return id;
 }
 
-export const load: PageServerLoad = ({ params }) => {
+export const load: PageServerLoad = async ({ params }) => {
   const id = idDaParametro(params.id);
-  if (id === null) return { cammino: null, etichette: '', tappe: [], cartine: [], avvisi: [] };
+  if (id === null) return { cammino: null, etichette: '', tappe: [], cartine: [], avvisi: [], passi: [] };
   const cammino = leggiCammino(db, id)!;
+  // ciò che la pubblicazione segnalerebbe: tracciati che non partono dalla tappa precedente, testi mancanti
+  const avvisi = componiCammino(db, id).avvisi;
   return {
     cammino,
     etichette: etichetteInTesto(cammino.etichette),
     tappe: elencaTappe(db, id),
     cartine: elencaCartine(db, id),
-    // ciò che la pubblicazione segnalerebbe: tracciati che non partono dalla tappa precedente, testi mancanti
-    avvisi: componiCammino(db, id).avvisi,
+    avvisi,
+    // il percorso guidato: testi, tappe, immagini, cartina, pubblica
+    passi: passiDelCammino(db, id, { avvisi, portale: await statoNelPortale(db, id) }),
   };
 };
 
@@ -41,7 +45,11 @@ export const actions = {
       if (!creato.ok) return fail(400, { errori: creato.errori, valori });
       redirect(303, `/cammini/${creato.id}`);
     }
-    aggiornaCammino(db, id, esito.dati);
+    const aggiornato = aggiornaCammino(db, id, esito.dati, String(modulo.get('conferma') ?? ''));
+    if (!aggiornato.ok) {
+      const valori = Object.fromEntries([...modulo.entries()].map(([k, v]) => [k, String(v)]));
+      return fail(400, { errori: aggiornato.errori, valori });
+    }
     return { salvato: true };
   },
 
@@ -63,7 +71,8 @@ export const actions = {
   elimina: async ({ params }) => {
     const id = idDaParametro(params.id);
     if (id === null) error(404, 'Cammino non trovato');
-    eliminaCammino(db, id);
+    const esito = eliminaCammino(db, id);
+    if (!esito.ok) return fail(409, { messaggio: esito.messaggio });
     redirect(303, '/cammini');
   },
 } satisfies Actions;

@@ -1,12 +1,13 @@
 <script lang="ts">
   // Allineamento della cartina sul globo: gli spilli agganciano un punto del disegno a un punto della carta,
   // il disegno si deforma dal vivo mentre si trascinano (thin plate spline, src/lib/georeferenziazione.ts).
-  // Dalla prova prototipo/allinea.html; qui gli spilli stanno nel database (punti di controllo).
+  // Dalla prima prova, allinea.html (ora in superati/prototipo/); qui gli spilli stanno nel database (punti di controllo).
   import { onMount, untrack } from 'svelte';
   import { enhance } from '$app/forms';
   import 'maplibre-gl/dist/maplibre-gl.css';
   import type { GeoJSONSource, Map as Mappa, Marker } from 'maplibre-gl';
   import { eSimbolo, normale, type Punto } from '#lib/disegno.ts';
+  import { proponiSpilli } from '#lib/spilli.ts';
   import { adatta, inversa, mercY, ritagliaLinea, ritagliaPoligono, scarti, trasforma, type Certezza, type Modello } from '#lib/georeferenziazione.ts';
   import type { PageProps } from './$types';
 
@@ -33,42 +34,8 @@
   const medio = $derived.by(() => { const s = scarto.filter((v): v is number => v != null); return s.length ? s.reduce((a, b) => a + b, 0) / s.length : null; });
   const datiDaSalvare = $derived(JSON.stringify(punti.map(({ nome, luogoId, sx, sy, lng, lat, certezza, stato }) => ({ nome, luogoId, sx, sy, lng, lat, certezza, stato }))));
 
-  // --- Proposte: ogni nome della cartina che è nell'anagrafe va al simbolo più vicino, valutando tutti
-  // gli abbinamenti insieme (dove i nomi sono fitti il simbolo più vicino può essere del nome accanto)
-  function proponiPunti(): Spillo[] {
-    if (!disegno) return [];
-    const centro = (b: number[]): Punto => [(b[0] + b[2]) / 2, (b[1] + b[3]) / 2];
-    // i simboli, escluse le punte di freccia che stanno sulla loro linea dello stesso colore
-    const sullaSuaLinea = (f: (typeof disegno.forme)[number]) => disegno.forme.some((l) => l.tratto && l.tratto === f.riempimento
-      && l.parti.some((p) => p.some((q) => Math.hypot(q[0] - centro(f.box)[0], q[1] - centro(f.box)[1]) < 4)));
-    const simboli = disegno.forme.filter((f) => eSimbolo(f) && !sullaSuaLinea(f)).map((f) => centro(f.box));
-    const nomi = disegno.testi.map((t) => ({ t, luogo: data.luoghi.find((l) => l.chiavi.includes(normale(t.testo))) })).filter((x) => x.luogo);
-    // il riquadro di un testo comprende lo spazio di ascendenti e discendenti: si stringe in altezza
-    const costo = (b: number[], s: Punto) => {
-      const h = b[3] - b[1], y0 = b[1] + h * 0.25, y1 = b[3] - h * 0.2;
-      return Math.hypot(Math.max(b[0] - s[0], 0, s[0] - b[2]), Math.max(y0 - s[1], 0, s[1] - y1));
-    };
-    const coppie: [number, number, number][] = [];
-    nomi.forEach((x, i) => simboli.forEach((s, j) => coppie.push([costo(x.t.box, s), i, j])));
-    coppie.sort((a, b) => a[0] - b[0]);
-    const scelta = new Map<number, number>(), presi = new Set<number>();
-    for (const [c, i, j] of coppie) if (c < 15 && !scelta.has(i) && !presi.has(j)) { scelta.set(i, j); presi.add(j); }
-    for (let migliorato = true; migliorato;) {
-      migliorato = false;
-      const indici = [...scelta.keys()];
-      for (const i of indici) for (const k of indici) {
-        if (i >= k) continue;
-        const a = scelta.get(i)!, b = scelta.get(k)!;
-        if (costo(nomi[i].t.box, simboli[b]) + costo(nomi[k].t.box, simboli[a]) < costo(nomi[i].t.box, simboli[a]) + costo(nomi[k].t.box, simboli[b]) - 1e-6) {
-          scelta.set(i, b); scelta.set(k, a); migliorato = true;
-        }
-      }
-    }
-    return [...scelta].map(([i, j]) => {
-      const l = nomi[i].luogo!;
-      return { nome: l.nome, luogoId: l.id, luogo: l.nome, sx: simboli[j][0], sy: simboli[j][1], lng: l.lng, lat: l.lat, certezza: l.certezza, stato: 'proposto' as Stato };
-    }).sort((a, b) => b.lat - a.lat);
-  }
+  // --- Proposte: ogni nome della cartina che è nell'anagrafe va al simbolo più vicino (src/lib/spilli.ts)
+  const proponiPunti = (): Spillo[] => (disegno ? proponiSpilli(disegno.forme, disegno.testi, data.luoghi) : []);
 
   // --- Carta e disegno deformato
   let mappa: Mappa;
@@ -316,7 +283,7 @@
         <p class="stato" role="status">
           {#if form?.errore}<span class="errore">{form.errore}</span>
           {:else if form?.generata}Cartina generata: {form.generata.elementi} elementi, {form.generata.nomi} nomi, {form.generata.tracciati} tracciati.
-            <a href="/pubblicazione">Aggiorna il portale</a>{#each form.generata.avvisi as a (a)}<br />{a}{/each}
+            <a href="/pubblicazione">Prepara l'anteprima</a>{#each form.generata.avvisi as a (a)}<br />{a}{/each}
           {:else if modificati}Ci sono modifiche non salvate.
           {:else if form?.salvati}Spilli salvati.{/if}
         </p>

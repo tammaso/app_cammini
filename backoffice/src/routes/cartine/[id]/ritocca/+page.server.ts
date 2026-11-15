@@ -3,7 +3,7 @@ import { error, fail } from '@sveltejs/kit';
 import { db } from '#lib/server/db.ts';
 import { leggiCartina } from '#lib/server/cartine.ts';
 import { generaCartina } from '#lib/server/importazione-svg.ts';
-import { componiCartina, pubblicaPortale } from '#lib/server/pubblicazione.ts';
+import { INDIRIZZO_ANTEPRIMA, componiCartina, preparaAnteprima } from '#lib/server/pubblicazione.ts';
 import { registraErrore } from '#lib/server/registro.ts';
 import {
   eliminaNome, leggiNomi, leggiTappe, luogoDalNome, modificaNome, ripristinaNome, spostaNome, spostaTappa, validaNome,
@@ -20,9 +20,12 @@ export const load: PageServerLoad = ({ params }) => {
   const id = idValido(params.id);
   const k = leggiCartina(db, id)!;
   const pubblicata = componiCartina(db, id);
-  const cammino = db.prepare('SELECT frecce FROM cammini WHERE id = ?').get(k.camminoId)!;
+  const cammino = db.prepare('SELECT frecce, slug FROM cammini WHERE id = ?').get(k.camminoId)!;
   return {
-    cartina: { id, camminoId: k.camminoId, cammino: k.cammino, pulsante: k.pulsante, generata: k.importataIl, spilli: k.punti.length },
+    cartina: {
+      id, camminoId: k.camminoId, camminoSlug: String(cammino.slug), cammino: k.cammino, pulsante: k.pulsante, generata: k.importataIl,
+      spilli: k.punti.length,
+    },
     stili: pubblicata.stili,
     elementi: pubblicata.elementi,
     nomi: leggiNomi(db, id),
@@ -75,10 +78,11 @@ export const actions = {
     // senza spilli la cartina non si può rigenerare: il luogo si sposta comunque, i tratti alla prossima generazione
     return ritocco(id, () => { spostaTappa(db, k.camminoId, numero(m, 'tappa'), numero(m, 'lng'), numero(m, 'lat')); }, k.punti.length >= 3);
   },
-  pubblica: async () => {
+  // i ritocchi si guardano nell'anteprima del portale; si pubblicano dalla pagina «Pubblicazione»
+  anteprima: async () => {
     try {
-      const esito = await pubblicaPortale(db);
-      return { pubblicato: true, avvisi: esito.cammini.flatMap((c) => c.avvisi) };
+      const esito = await preparaAnteprima(db);
+      return { anteprima: INDIRIZZO_ANTEPRIMA, avvisi: esito.cammini.flatMap((c) => c.avvisi) };
     } catch (errore) {
       return fail(500, { errore: errore instanceof Error ? errore.message : String(errore) });
     }

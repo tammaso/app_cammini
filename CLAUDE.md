@@ -28,6 +28,15 @@ Lingua di lavoro: italiano, anche per testi dell'interfaccia, commenti nel codic
   nomi sulla carta, pin e fumetto della tappa (dal 2026-11-08 anche la dimensione: i caratteri della
   carta moltiplicano le misure per `--scala`, e a caratteri grandi compaiono meno nomi insieme finché
   non ci si avvicina). Le scelte restano nel browser di chi guarda.
+- **Disegna sulla carta** (2026-11-14, per la lezione alla LIM): nella fascia in fondo, dopo «Aiuto», il pulsante
+  «Disegna» (giallo quando è acceso) fa della carta una lavagna; nella stessa fascia, a destra, penna, evidenziatore,
+  freccia (tratto dritto con la punta), quattro colori (magenta, giallo, azzurro, bianco), «Annulla» (anche Ctrl+Z) e
+  «Cancella tutto» (che si può annullare). I nomi degli strumenti si leggono da 1560 px di larghezza (le LIM sono di
+  solito 1920), sotto solo le icone; sul telefono gli strumenti stanno in una riga sotto i comandi. I segni stanno sui
+  luoghi (sorgente `disegni`, livelli `disegni-*` sopra tutta la carta, sotto nomi e segnaposto): restano spostando la
+  carta, cambiando tappa o epoca. Mentre si disegna la carta non si trascina (rotellina e due dita la ingrandiscono
+  ancora; un secondo dito lascia il segno a metà) e segnaposto, nomi e fumetto non prendono il tocco; Esc o di nuovo
+  «Disegna» tornano alla carta di sempre. I segni non si salvano. Spiegato nella guida «Aiuto» («Disegna sulla carta»).
 - Niente «Stai guardando: …» sulla legenda e niente note in fondo al pannello (tolte il 2026-11-06):
   le fonti restano nel riquadro delle attribuzioni in basso a destra della mappa. La nota «tracciato
   indicativo» e quella sul satellite di oggi andranno ripensate (per esempio in una pagina «Fonti»).
@@ -60,7 +69,8 @@ Lingua di lavoro: italiano, anche per testi dell'interfaccia, commenti nel codic
   maniglia (Maiuscolo: passi lunghi). Spostata a mano non cambia più angolo da sola e le inquadrature delle tappe
   le girano intorno (sotto, accanto, sopra o a sinistra della legenda); doppio clic sulla maniglia, Invio o Esc la
   rimettono nel suo angolo. La posizione vale finché si resta sulla pagina (non si salva).
-  **Fumetto della tappa** (2026-11-13, struttura fissa): il nome della tappa e sotto «Oggi» con il luogo attuale
+  **Fumetto della tappa** (2026-11-13, struttura fissa; dal 2026-11-14 indica il segnaposto dov'è disegnato, anche in
+  colonna, non il luogo vero): il nome della tappa e sotto «Oggi» con il luogo attuale
   (`luogoAttuale`, «Dove si trova oggi» nel backoffice: nome attuale e Stato, «Tell el-Muqayyar, Iraq
   meridionale» → «Oggi Tell el-Muqayyar, Iraq meridionale»); senza luogo attuale, solo il nome (`apriFumetto`).
   Abramo nel formato dal 2026-11-13: Sichem «Tell Balata (Nablus), Cisgiordania», Egitto «Mit Rahina (Menfi),
@@ -78,26 +88,73 @@ Lingua di lavoro: italiano, anche per testi dell'interfaccia, commenti nel codic
 - **Backoffice** (prima versione costruita il 2026-11-08): `backoffice/`, workspace npm di questo
   repository, "gemello" di quello dell'Atlante d'arte (`C:\Users\Dringoli\ProgettiReda\atlante_arte`):
   SvelteKit 3 + Svelte 5, SQLite con `node:sqlite` (`backoffice/dati/cammini.db`, non versionato),
-  migrazioni SQL numerate. Il nucleo (connessione e migrazioni, registro delle modifiche e degli errori,
+  migrazioni SQL numerate. **Ridotto all'essenziale per il redattore** (2026-11-15, una cosa alla volta: indirizzo
+  protetto, strumenti superati in `superati/`, pubblicazione con anteprima, backup di serie e Cronologia, percorso
+  guidato, luogo dalla tappa, cartina con le proposte accettate). **Percorso guidato** nella pagina del cammino: in
+  testa cinque passi (Testi, Tappe, Immagini, Cartina storica, Pubblica), ciascuno con lo stato (fatto, da fare, da
+  controllare, facoltativo), una riga e il collegamento a dove si fa (`passiDelCammino` in `src/lib/server/passi.ts`,
+  calcolato dai dati e dallo stato nel portale, `statoNelPortale`; prova in `db.test.ts`). Poi gli avvisi piegati con il
+  conteggio, i testi, le tappe, le cartine; «Nomi scritti a mano» e «Ordine nel portale» piegati in «Avanzate», come
+  nella tappa la casella delle tappe secondarie (nessuna la usa). Il nucleo (connessione e migrazioni, registro delle modifiche e degli errori,
   backup, archivio immagini con sharp e relative pagine, selettore di immagini, stile) è copiato
   dall'Atlante e adattato: i due progetti restano separati. Attenzione: i due backoffice usano spesso la stessa porta
   (5173) e gli stessi indirizzi; le anteprime delle immagini restano un anno nella cache del browser, quindi dal
   2026-11-13 il loro indirizzo porta l'impronta del file (`/api/immagini/<id>/<larghezza>?v=<sha256>`, `urlAnteprima`):
   prima, al posto delle immagini 1 e 2 dei cammini comparivano quelle dell'Atlante. Pagine: Cammini (testi, tappe con ordine
-  ↑↓, cartine), tappa (luogo dall'anagrafe, testi, «Nome breve in Oggi», galleria di immagini dall'archivio
-  con ordine ← → o trascinamento, al massimo 12, tracciato), Luoghi
+  ↑↓, cartine), tappa (luogo, testi, «Nome breve in Oggi», galleria di immagini dall'archivio
+  con ordine ← → o trascinamento, al massimo 12, tracciato). **Il luogo si sceglie dalla tappa** (2026-11-15,
+  `salvaTappaDalModulo` in `cammini.ts`, prova in `db.test.ts`): si cerca nell'anagrafe per nome, nome antico, nome
+  attuale o altre forme («harr» trova Carran), oppure «+ Nuovo luogo» e un clic sulla mappa (entra nell'anagrafe come città
+  «probabile», con il «Dove si trova oggi» della tappa come nome attuale); la mappa sul satellite (MappaLuogo con
+  `soloPosizione`) mostra il luogo, che si trascina o si sposta con un clic. Spostandolo la pagina dice di quanto e che
+  cos'altro lo usa (la tappa Egitto e la città Menfi della cartina), con «Rimetti com'era»; salvando, il luogo si sposta
+  nell'anagrafe e le cartine del cammino che hanno SVG e almeno 3 spilli si rigenerano (i tratti si riagganciano; nelle
+  altre, oltre 5 km, diventano linee dritte, e la pagina lo dice). Luogo nuovo e tappa sono una sola transazione: se la
+  tappa non è valida il luogo non resta. **Luoghi esce dal menu principale** (gruppo «Altro»: «Luoghi (anagrafe)»).
+  **Satellite delle mappe del backoffice**: `src/routes/api/satellite.pmtiles/+server.ts` (richieste Range su
+  `bmng/bmng.pmtiles`) mancava su questa postazione perché la regola `*.pmtiles` del `.gitignore` escludeva anche la
+  cartella della pagina: ricreata il 2026-11-15, con l'eccezione `!backoffice/src/routes/api/satellite.pmtiles/` (da
+  portare anche sull'altra postazione prima del prossimo push). Luoghi
   (anagrafe con ricerca e «dove è usato»; dal 2026-11-12 la scheda ha una mappa sul satellite con la posizione
   dell'anagrafe, che si trascina o si sceglie con un clic, e gli spilli delle cartine legati al luogo, con la
   distanza e il collegamento ad Allinea: `src/lib/components/MappaLuogo.svelte`), cartina (pulsante e anno, stili modificabili: colori,
   contorno, opacità e spessore a zoom 3 / 7, tratteggio, voce di legenda; conteggi; punti di
-  controllo), Immagini, Pubblicazione («Aggiorna il portale»: scrive `prototipo/cammini/`, anche i
-  cammini in bozza, segnati nell'indice; un tracciato che non parte dalla tappa precedente, per
-  esempio dopo aver spostato le tappe, diventa una linea dritta e la pagina lo segnala; «Prepara la
-  demo»: aggiorna il portale e copia in `pubblicazione/` il sito pronto da caricare con FileZilla su
+  controllo), Immagini, Pubblicazione (**dal 2026-11-15 in due passi, anteprima e poi pubblica**:
+  «Prepara l'anteprima» scrive il portale com'è nel database in `anteprima/` (accanto a `prototipo/`, non versionata):
+  la pagina del portale con la fascetta gialla «Anteprima: non ancora pubblicata» e `noindex`, i dati comuni,
+  `cammini/`; si apre da http://localhost:8000/anteprima/cammino.html (`py strumenti\server.py`). La pagina dice che
+  cosa cambierebbe nel portale (`confrontaCammini`: cammini nuovi o che escono, campi del cammino e di ogni tappa,
+  parti della cartina, immagini nuove o tolte) e avvisa se dopo l'anteprima qualche cammino è cambiato. «Pubblica
+  l'anteprima» (con conferma, che avvisa se un cammino esce dal portale) copia proprio quella cartella al posto di
+  `prototipo/cammini/` (accanto e poi scambio: il portale non resta mai a metà): nel portale va quello che si è visto.
+  `preparaAnteprima`, `pubblicaAnteprima`, `statoAnteprima` in `pubblicazione.ts`, prova in `db.test.ts`. Anche
+  «Ritocca» ora prepara l'anteprima invece di aggiornare il portale. Ci vanno anche i cammini in bozza, segnati
+  nell'indice; un tracciato che non parte dalla tappa precedente, per esempio dopo aver spostato le tappe, diventa
+  una linea dritta e la pagina lo segnala; la cartella di un cammino eliminato se ne va. «Prepara la demo» copia in
+  `pubblicazione/` il portale com'è pubblicato (non ripubblica più), pronto da caricare con FileZilla su
   qualunque server web: `index.html` (la pagina, con il satellite accanto in `bmng/` e `noindex`),
-  `dati/` con i soli file comuni usati, `cammini/`, `robots.txt`, `LEGGIMI.txt`; «Apri la cartella»), Backup,
-  Registro. Abramo è stato caricato dal prototipo (`npm run carica-prototipo`) ed è in bozza; dal
+  `dati/` con i soli file comuni usati, `cammini/`, `robots.txt`, `LEGGIMI.txt`; «Apri la cartella»), **Cronologia**
+  (2026-11-15: le pagine Backup e Registro unite in `/cronologia`; `/backup` e `/registro` portano lì; le vecchie pagine
+  in `superati/backoffice-pagine/`): «Copie di sicurezza» (stato, «Fai una copia adesso», «Tornare a una copia»),
+  «Modifiche» (le ultime 30, «Mostra tutte»), e piegati «Impostazioni del backup» (cartella, acceso/spento), «Errori»
+  e il ripristino a mano. **Il backup automatico è acceso di serie** (`leggiImpostazioniBackup`: spento solo se
+  qualcuno lo spegne): finché non si sceglie una cartella salva in `Documenti\Backup cammini` (`CARTELLA_PREDEFINITA`,
+  o la variabile `CAMMINI_BACKUP`), creata al primo backup; la pagina avverte che è sullo stesso disco e consiglia
+  Google Drive o OneDrive. Prova in `backup.test.ts`. Abramo è stato caricato dal prototipo (`npm run carica-prototipo`) ed è in bozza (fino al
+  2026-11-15 il caricamento, `importaCartina` in `cartine.ts`, perdeva colore, corpo, «sempre visibile» e «solo allora» dei
+  nomi della cartina: ora li tiene, prova in `db.test.ts`; nel database della postazione di prova, caricato così il
+  2026-11-14, sono stati rimessi dal file pubblicato, e l'anteprima ora dà la cartina identica al portale); dal
   2026-11-12 ha la carta nuova (vedi «Nuova carta di Abramo»). Il backup salva anche i file SVG delle cartine.
+  **Ripristino dalla pagina Backup** (ora «Cronologia»; 2026-11-14, `ripristinaCopia` in `backup.ts`, prove in `backup.test.ts`; prima si
+  spostavano i file a mano a backoffice chiuso e le istruzioni dimenticavano gli SVG delle cartine): si sceglie una copia
+  della cartella del backup (anche fatta su un altro computer) e «Ripristina questa copia», con conferma. La copia si
+  controlla (integrità, è un database dei cammini, non viene da un backoffice più recente) e si porta allo schema attuale
+  in una cartella locale; poi lo stato di adesso si salva tra le copie (per annullare si ripristina quella) e i dati si
+  sostituiscono in una sola transazione sulla stessa connessione, senza riavviare. Restano di questo PC le impostazioni
+  del backup; i registri uniscono quelli della copia e le righe di qui che la copia non ha, in ordine di tempo, più una
+  riga «Ripristino Database» (migrazione 008). Tornano le immagini originali e gli SVG mancanti; la pagina avvisa se
+  qualche file non c'è nemmeno nel backup. Il portale non cambia finché non si aggiorna. Le istruzioni a mano restano,
+  piegate, per quando il backoffice non si avvia.
   Dal 2026-11-12: nella pagina del cammino «Dopo l'ultima tappa: il cammino finisce / torna alla tappa N»
   (`cammini.ritorno_tappa_id`, tracciato in `ritorno_tracciato` dalla generazione; nel portale il ritorno
   compare percorso all'ultima tappa); nella classificazione, per regioni, mari e vette, la casella «anche in
@@ -107,7 +164,7 @@ Lingua di lavoro: italiano, anche per testi dell'interfaccia, commenti nel codic
   le tappe si trascinano. Clic su un nome: scheda sopra la carta (testo, sottotitolo, corpo, inclinazione, zoom di
   comparsa con «Da qui», colore, sempre visibile; «Com'è nel disegno» per i ritoccati, «Elimina» per gli aggiunti,
   «Sposta qui il luogo dell'anagrafe» per città e vette); i nomi più chiari a quello zoom nel portale non compaiono
-  ancora; «Aggiorna il portale». Le aree non cambiano: dipendono solo dagli spilli. Un nome importato spostato o
+  ancora; «Prepara l'anteprima» (si pubblica dalla pagina Pubblicazione). Le aree non cambiano: dipendono solo dagli spilli. Un nome importato spostato o
   modificato diventa «modificato» e la generazione non lo ricrea: lo riconosce dalla scritta del disegno
   (`nomi.chiave`, migrazione 005, es. «MARI@592,312») o da categoria e testo; dalla chiave ricostruisce anche
   l'ordine dei nomi (la priorità quando si contendono lo spazio). «Com'è nel disegno» rimette il nome «importato» e
@@ -139,7 +196,17 @@ Lingua di lavoro: italiano, anche per testi dell'interfaccia, commenti nel codic
   **La cartina si consegna solo in SVG** (deciso: nessun formato proprietario, niente .ai/PDF), con i
   testi come testi. Il disegno di aree e tracciati nel backoffice si farà in una seconda fase.
   **Importazione dell'SVG nel backoffice** (costruita il 2026-11-08; Cammini → «Nuova cartina» o la
-  cartina → «Importa e classifica» e «Allinea»):
+  cartina → «Carica il file SVG e genera»). **Dal 2026-11-15 in una procedura sola**: si carica il file e si preme
+  «Accetta le proposte e genera» (`genera` in `cartine/[id]/importa`): salva la classificazione com'è proposta e, se la
+  cartina non ha ancora 3 spilli, mette quelli proposti dai nomi del disegno che sono nell'anagrafe (`proponiSpilli` in
+  `src/lib/spilli.ts`, lo stesso calcolo della pagina Allinea, che ora lo usa da lì; `proponiSpilliDellaCartina` in
+  `cartine.ts`; prova in `db.test.ts`); con meno di 3 luoghi riconosciuti chiede di metterli a mano. Classificazione e
+  spilli restano da controllare, piegati sotto «Controlla le proposte» e in «Allinea (avanzato)»; nella pagina della
+  cartina il pulsante principale è «Ritocca». Limite trovato provando con `Abramo_antica_livelli_09b.svg` su un cammino
+  di prova: **alla prima importazione di una cartina i colori delle aree non si possono proporre** (il backoffice
+  riconosce il percorso, cioè le linee con le frecce, i nomi e gli spilli, ma non sa quali colori sono la Mezzaluna o
+  Canaan: tutto il resto è proposto «niente», e la cartina esce senza aree); la pagina lo dice e apre «Colori». Dalla
+  seconda versione dello stesso file i colori si riconoscono dagli stili. Il vecchio percorso a passi resta:
   1. *File*: il browser estrae il disegno (`src/lib/estrazione.ts`: forme campionate, colori, opacità
      compresa quella dei gruppi, testi con inizio e fine della riga; salta gli effetti ritagliati da un
      ritaglio non rettangolare, trova cornice e legenda) e lo manda al server con il file
@@ -241,9 +308,9 @@ Lingua di lavoro: italiano, anche per testi dell'interfaccia, commenti nel codic
   «spilli» sul globo vedendo il disegno trasparente sopra il satellite, con la deformazione
   ricalcolata dal vivo. Punti di controllo anche sulla geografia fisica (capi, foci, confluenze),
   più affidabili delle città antiche; ogni punto ha un peso secondo la certezza del luogo.
-  **Prima prova: `prototipo/allinea.html`** (2026-11-08), **superata dal backoffice**: il suo pulsante
-  non aggiorna più il portale (`strumenti/server.py` risponde 410 e rimanda al backoffice), perché il
-  vecchio giro con l'importatore Python sovrascriverebbe spilli e cartina del database. Leggeva l'SVG nel browser (trasformazioni,
+  **Prima prova: `prototipo/allinea.html`** (2026-11-08), **superata dal backoffice** e dal 2026-11-15 in
+  `superati/` con l'importatore Python (il vecchio giro sovrascriverebbe spilli e cartina del database;
+  `strumenti/server.py` non riceve più niente). Leggeva l'SVG nel browser (trasformazioni,
   classi e forme le risolve il browser), salta gli effetti grafici (elementi ritagliati da un ritaglio
   non rettangolare, come le copie schiarite dentro l'arco), trova la cornice (il fondo più grande) e la
   legenda (rettangolo bianco piccolo). Abbina i nomi ai luoghi di `dati/luoghi.js` (nome e altri nomi)
@@ -266,6 +333,16 @@ Lingua di lavoro: italiano, anche per testi dell'interfaccia, commenti nel codic
   spostamento dei singoli nomi.
 
 ## Decisioni già prese
+
+- **Un indirizzo per cammino, legato a un QR stampato sul libro** (2026-11-15): una volta stampato, l'indirizzo non
+  deve più cambiare. Più avanti ci sarà una pagina madre (per esempio «I grandi cammini biblici») che rimanda ai singoli
+  cammini; per ora `cammino.html` senza parametro apre il primo dell'indice. Oggi l'indirizzo è
+  `cammino.html?cammino=<slug>`; lo slug (campo «Indirizzo») si sceglie creando il cammino e poi non si cambia più (non
+  si è mai potuto: era scritto male qui). **Indirizzo protetto** (2026-11-15, `aggiornaCammino` ed `eliminaCammino` in
+  `cammini.ts`, prova in `db.test.ts`): un cammino pubblicato non si elimina e torna in bozza (che lo toglierebbe dalla
+  pubblicazione vera, rompendo il QR) solo riscrivendo l'indirizzo per conferma; la pagina del cammino lo dice e ha
+  «Copia» per `cammino.html?cammino=<slug>`. Prima della stampa resta da decidere la forma definitiva dell'indirizzo
+  (dominio). Il QR lo genera la casa editrice: il portale e il backoffice non lo producono.
 
 - **Tecnologia mappa: MapLibre GL JS** (open source, BSD), non Google Earth. Google Earth resta
   utile solo come strumento di lavoro interno o attività per gli studenti.
@@ -356,61 +433,59 @@ Lingua di lavoro: italiano, anche per testi dell'interfaccia, commenti nel codic
 app_cammini/
 ├── package.json              workspace npm (backoffice) e comandi
 ├── pubblicazione/            demo pronta per FileZilla (npm run prepara-demo; non versionata, ~120 MB)
+├── anteprima/                anteprima del portale preparata dal backoffice prima di pubblicare (non versionata)
 ├── condiviso/cammino.ts      contratto dei file pubblicati: Indice, Cammino, Cartina (backoffice → portale)
+├── playwright.config.ts      configurazione delle prove del portale
+├── prove-portale/            prove del portale in Chrome (npm run prova-portale): portale.ts (strumenti comuni) e
+│                             apertura, racconto, epoche, scheda, legenda, accessibilita, disegno, animazioni,
+│                             telefono, dati
 ├── backoffice/               SvelteKit 3 + Svelte 5 + node:sqlite (vedi «Backoffice» sopra)
 │   ├── db/                   connessione, migrazioni (migrazioni/001_schema_iniziale.sql), comandi
 │   │                         carica-prototipo e pubblica; prove in db.test.ts e src/lib/server/importazione.test.ts
 │   ├── src/lib/              disegno.ts (disegno estratto, classificazione, gruppi di testo), estrazione.ts
-│   │                         (lettura dell'SVG nel browser), georeferenziazione.ts (thin plate spline)
+│   │                         (lettura dell'SVG nel browser), georeferenziazione.ts (thin plate spline), spilli.ts
+│   │                         (proposte degli spilli, per Allinea e per «Accetta le proposte e genera»)
 │   ├── src/lib/server/       cammini, luoghi, cartine, importazione-svg (classificazione e generazione),
-│   │                         geometria (jsts, terre emerse), percorso, pubblicazione, immagini, registro, backup
+│   │                         geometria (jsts, terre emerse), percorso, pubblicazione (anteprima, confronto, pubblica),
+│   │                         passi (percorso guidato del cammino), immagini, registro, backup
 │   ├── src/routes/           cammini, cammini/[id]/tappe/[tappa], cammini/[id]/cartine/nuova, luoghi,
-│   │                         cartine/[id] (+ importa, allinea, ritocca), immagini, pubblicazione, backup, registro,
+│   │                         cartine/[id] (+ importa, allinea, ritocca), immagini, pubblicazione, cronologia,
 │   │                         api (immagini, satellite.pmtiles, fiumi.geojson, cartine/[id]/svg)
 │   └── dati/                 cammini.db, archivio immagini, cartine/ (i file SVG) (locale, non versionato)
 ├── prototipo/
 │   ├── cammino.html          il portale: una pagina per tutti i cammini (sorgente leggibile, librerie da CDN)
 │   ├── cammini/              SCRITTO DAL BACKOFFICE: indice.json e una cartella per cammino
 │   │   └── abramo/           cammino.json, 1800ac.json (la cartina), immagini/ (WebP grandi e miniature -mini)
-│   ├── allinea.html          prima prova della georeferenziazione assistita (superata dal backoffice)
-│   ├── cartine/mezzaluna_1700ac.svg  la cartina del volume in SVG (da cartina_in_svg.py, per le prove)
-│   ├── cartine/mezzaluna_1700ac.punti.json  gli spilli con cui è generata la cartina del portale (da allinea.html)
 │   └── dati/                 dati comuni a tutti i cammini («Oggi»)
-│       ├── base.js           GEO: vecchie aree tematiche (non più caricato dalla pagina)
 │       ├── confini.geojson   confini mondiali, punto di vista italiano (c: 0 normale, 1 conteso)
 │       ├── stati.geojson     Stati come aree (n: nome come sulla carta, k: colore 1-7), semplificati a 0,02°
 │       ├── fiumi.geojson     fiumi mondiali (s: importanza, da: zoom di comparsa)
-│       ├── luoghi.js         LUOGHI: anagrafe di prova (nome, altri nomi, coordinate, certezza, nota),
-│       │                     in JSON dopo «const LUOGHI =», così la legge anche Python
-│       ├── mondo.js          MONDO: ~900 nomi italiani (Stati, capitali, grandi città, oceani, mari,
-│       │                     continenti, grandi rilievi e deserti, vette note), con zoom di comparsa
-│       └── regni_1700ac.geojson  vecchi regni estratti da Mezzal.psd (non più usati)
+│       ├── luoghi.js         LUOGHI: anagrafe di prova (nome, altri nomi, coordinate, certezza, nota), in JSON
+│       │                     dopo «const LUOGHI =»: la legge solo npm run carica-prototipo
+│       └── mondo.js          MONDO: ~900 nomi italiani (Stati, capitali, grandi città, oceani, mari,
+│                             continenti, grandi rilievi e deserti, vette note), con zoom di comparsa
 ├── bmng/
 │   ├── genera_tile_bmng.py   GeoTIFF/JPEG NASA → tile WebP → bmng.pmtiles
 │   ├── bmng.pmtiles          (locale, non versionato)
-│   ├── anteprima.html, server_anteprima.py, LEGGIMI.md
-│   └── cammino.html          vecchia copia autonoma (librerie incorporate), sostituita da prototipo/
+│   └── anteprima.html, server_anteprima.py, LEGGIMI.md  (controllo del satellite generato)
 ├── strumenti/
 │   ├── server.py             server locale con richieste Range (necessario per .pmtiles); chiede al
 │   │                         browser di ricontrollare pagina e dati a ogni caricamento (no-cache);
-│   │                         lascia leggere i file al backoffice; non riceve più gli spilli di allinea.html
+│   │                         lascia leggere i file al backoffice; non riceve niente (niente POST)
 │   ├── prepara_confini_fiumi.py  rigenera confini.geojson, stati.geojson e fiumi.geojson (per i soli confini:
 │   │                         py -c "import sys; sys.path.insert(0,'strumenti'); import prepara_confini_fiumi as p; p.confini()")
 │   ├── natural_earth/        copie dei file di Natural Earth usati dagli script (non versionate)
-│   ├── prepara_etichette_mondo.py rigenera mondo.js e capitali_da_validare.csv (scelte e correzioni nel codice)
-│   ├── capitali_da_validare.csv  capitali per la redazione, con esito e nota (Excel, separatore ;)
-│   ├── cartina_in_svg.py     .ai → SVG, solo per le prove (il cartografo consegnerà l'SVG)
-│   ├── importa_cartina_ai.py SUPERATO dal backoffice: cartina vettoriale .ai → importazioni/abramo_1700ac.json
-│   │                         (georeferenziazione con gli spilli di allinea.html, ritaglio sulle terre emerse,
-│   │                         stili, elementi, nomi, alone, tracciati delle tappe, frecce)
-│   ├── importazioni/         risultato del vecchio importatore, non più letto (non versionato)
-│   ├── estrai_regni_da_cartina.py  cartina raster (PSD) → poligoni dai colori (superato)
-│   └── mezzal_punti_controllo.json  punti di controllo usati per Mezzal.psd
+│   ├── prepara_etichette_mondo.py rigenera mondo.js e capitali_da_validare.csv (scelte e correzioni nel codice,
+│   │                         anche le posizioni dei nomi degli Stati sistemate a mano: POSIZIONI_A_MANO)
+│   └── capitali_da_validare.csv  capitali per la redazione, con esito e nota (Excel, separatore ;)
 ├── Abramo_antica_livelli_09 (1).svg  la carta nuova di Abramo (2026-11-12), come consegnata
 ├── Abramo_antica_livelli_09b.svg     la stessa con Canaan e gli ovali pieni (livello 03b): è quella nel backoffice
-├── Mezzal.psd                cartina del volume (Mezzaluna fertile, 1700 a.C.), raster (superata)
-├── Mezzal-e-perc-Abramo_mod.ai  la stessa cartina in vettoriale (Illustrator CS5.1, PDF compatibile):
-│                             aree, percorso, arco della Mezzaluna, pallini e testi come oggetti
+├── superati/                 (2026-11-15, non versionata: su GitHub restano nella storia) ciò che nessuno usa più,
+│                             spostato e non cancellato, con LEGGIMI.txt: prototipo/allinea.html (prima prova di
+│                             Allinea), la cartina vecchia (prototipo/cartine/mezzaluna_1700ac.svg e .punti.json,
+│                             Mezzal.psd, Mezzal-e-perc-Abramo_mod.ai), prototipo/dati/base.js e regni_1700ac.geojson,
+│                             strumenti/importa_cartina_ai.py, cartina_in_svg.py, estrai_regni_da_cartina.py,
+│                             mezzal_punti_controllo.json, bmng/cammino.html e bmng/dati/ (vecchia copia del portale)
 └── quadranti mondo NASA Blue Marble Next Generation/   8 GeoTIFF (locale, non versionato)
 ```
 
@@ -424,11 +499,32 @@ py strumenti\prepara_etichette_mondo.py # rigenera i nomi di tutto il mondo e l'
 npm install                             # una volta: librerie del backoffice (serve Node 24)
 npm run backoffice                      # backoffice su http://localhost:5175
 npm run carica-prototipo                # una volta sola, a database vuoto: carica Abramo, luoghi e spilli
-npm run pubblica                        # aggiorna prototipo/cammini/ (come il pulsante «Aggiorna il portale»)
-npm run prepara-demo                    # demo da caricare con FileZilla in pubblicazione/ (come «Prepara la demo»)
+npm run pubblica                        # aggiorna prototipo/cammini/ direttamente dal database, senza anteprima
+npm run prepara-demo                    # copia il portale pubblicato in pubblicazione/, per FileZilla (come «Prepara la demo»)
 npm test                                # prove del database e della pubblicazione
 npm run check                           # controllo dei tipi
+npm run prova-portale                   # prove del portale in un vero browser (Chrome installato, serve Internet)
+npm run rapporto-prove                  # rapporto dell'ultima esecuzione, con schermate e tracce degli errori
 ```
+
+**Prove del portale** (2026-11-14, Playwright, `prove-portale/`, configurazione in `playwright.config.ts`): il Chrome
+del computer segue la pagina come un visitatore, su un server suo (`strumenti/server.py 8020`), un browser alla volta,
+senza animazioni (tranne `animazioni.spec.ts`), circa 7 minuti. Non toccano `cammino.html`: la carta di MapLibre si
+raggiunge agganciandosi alla libreria mentre si carica (`agganciaLaCarta` in `portale.ts`), e le attese si ricavano dai
+file pubblicati, quindi valgono per ogni cammino (poche prove sono scritte su Abramo e lo dicono). Coprono apertura e
+satellite, racconto (panoramica, tappe, frecce, tastiera, epoca che non cambia da sola), epoche (livelli, legenda, nomi
+moderni o antichi, Stati gialli, «Cartina muta», mari con il nome antico), scheda e galleria (anche di più immagini,
+dando a una tappa tre immagini nei dati che arrivano alla pagina), legenda (non copre le tappe, si trascina),
+accessibilità e aiuto, disegno sulla carta, telefono (390 × 844) e i file pubblicati (`dati.spec.ts`: contratto, tracciati, immagini; testi
+alternativi e crediti mancanti sono avvisi nel rapporto, non errori). Ogni prova fallisce anche per errori nella pagina
+o file del progetto mancanti. Un difetto trovato e non ancora corretto si segna con `test.fail` (la prova avvisa quando
+sparisce). Corretti il 2026-11-14, dopo averli trovati con le prove: (1) le frecce ← → cambiavano tappa anche spostando
+la legenda dalla maniglia o la carta selezionata con la tastiera (ora il racconto ignora i tasti già usati, quelli sulla
+carta e quelli con Alt, Ctrl o Cmd); (2) sul telefono le inquadrature lasciavano in basso 30 px, meno delle attribuzioni
+aperte (`margineSotto`), la colonna dei segnaposto di Canaan si centrava anche sulle tappe fuori dallo schermo e usciva
+dalla carta (ora resta dentro, sopra le attribuzioni, se qualcuna delle sue tappe si vede) e il fumetto, che indicava il
+luogo vero, copriva il segnaposto in colonna di Mamre (ora indica il segnaposto dov'è disegnato: `spostaFumetto`).
+Il fumetto può ancora coprire gli altri segnaposto della colonna (tappe 7, 8 e 9): si chiude con la ×.
 
 Aprendo `cammino.html` con doppio clic il satellite non si carica (il browser non legge .pmtiles
 da file://): usare sempre il server.
@@ -496,7 +592,7 @@ da file://): usare sempre il server.
   scrive fuori, prima sul mare, legato da un filetto prugna a un punto ben dentro lo Stato libero da segnaposto e nomi
   (`disponiFiletti`, dopo tutti gli altri nomi; ancore in `aggiornaPostiStati`); se neanche il filetto trova posto, il
   nome torna nel suo punto. Nella panoramica di Abramo: Israele, Palestina, Libano (e Cipro su schermi piccoli). Il
-  punto di KUWAIT è a 47,52° E 29,18° N (in `base.js` e `mondo.js`): da zoom 5,6 il nome ci sta tutto, più da lontano
+  punto di KUWAIT è a 47,52° E 29,18° N (in `POSIZIONI_A_MANO` di `prepara_etichette_mondo.py` e in `mondo.js`): da zoom 5,6 il nome ci sta tutto, più da lontano
   va sul Golfo con il filetto. Il nome di uno Stato può accostarsi al quadratino di una capitale; se il suo punto non si vede (fuori dalla
   carta, sotto il pannello) o non ha posto, da zoom 3 il nome si avvicina alla parte visibile restando dentro lo
   Stato (`aggiornaPostiStati`, ricalcolato quando la carta si ferma: nella panoramica del cammino si legge anche

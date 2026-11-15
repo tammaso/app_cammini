@@ -6,15 +6,14 @@ Serve l'intera cartella del progetto e supporta le richieste "Range", necessarie
 per leggere bmng/bmng.pmtiles. Il server standard "python -m http.server" non le
 supporta e la mappa resterebbe senza satellite.
 
-Il backoffice (un'altra porta dello stesso PC) può leggere i file del progetto. Gli spilli della
-vecchia prova prototipo/allinea.html non si ricevono più: l'allineamento si fa nel backoffice.
+Il backoffice (un'altra porta dello stesso PC) può leggere i file del progetto. Il server non riceve
+niente (niente POST): l'allineamento delle cartine si fa nel backoffice.
 
 Uso, dalla cartella app_cammini:
     py strumenti\\server.py          -> http://localhost:8000/prototipo/cammino.html
     py strumenti\\server.py 8080     -> porta diversa
 """
 import http.server
-import json
 import os
 import re
 import sys
@@ -67,21 +66,6 @@ class GestoreConRange(http.server.SimpleHTTPRequestHandler):
         # il backoffice (un'altra porta dello stesso PC) può leggere i file del progetto
         self.send_header("Access-Control-Allow-Origin", "*")
         super().end_headers()
-
-    def rispondi(self, codice, dati):
-        corpo = json.dumps(dati, ensure_ascii=False).encode("utf-8")
-        self.send_response(codice)
-        self.send_header("Content-Type", "application/json; charset=utf-8")
-        self.send_header("Content-Length", str(len(corpo)))
-        self.end_headers()
-        self.wfile.write(corpo)
-
-    def do_POST(self):
-        """La vecchia prova prototipo/allinea.html salvava qui gli spilli e rigenerava la cartina con
-        l'importatore Python: ora allineamento e generazione si fanno nel backoffice, con gli spilli nel
-        database. Il vecchio giro sovrascriverebbe quel lavoro, quindi non si fa più."""
-        self.rispondi(410, {"errore": "l'allineamento ora si fa nel backoffice (npm run backoffice, poi "
-                                      "Cammini → la cartina → Allinea): lì gli spilli stanno nel database"})
 
     def log_message(self, *args):
         pass  # niente righe di log per ogni tile

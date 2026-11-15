@@ -1,6 +1,7 @@
 // Primo caricamento del database dai dati del prototipo: l'anagrafe di prova (prototipo/dati/luoghi.js),
-// i cammini già pubblicati (prototipo/cammini/), gli spilli delle cartine (prototipo/cartine/*.punti.json)
-// e le immagini delle schede. Si usa una volta sola, con il database ancora vuoto: da lì in poi i dati
+// i cammini già pubblicati (prototipo/cammini/) e le immagini delle schede. Non ci sono il file SVG delle cartine
+// né gli spilli (punti di controllo): stanno solo nel database e nei suoi backup (gli spilli della cartina vecchia
+// di Abramo, 1700 a.C., sono in superati/prototipo/cartine/). Si usa una volta sola, con il database ancora vuoto: da lì in poi i dati
 // si modificano nel backoffice e il portale si aggiorna con la pubblicazione.
 // Uso: npm run carica-prototipo
 import { readFile } from 'node:fs/promises';
@@ -9,13 +10,10 @@ import { fileURLToPath } from 'node:url';
 import type { Cammino, Cartina, Indice } from '../../condiviso/cammino.ts';
 import { apriDatabase, inTransazione } from './connessione.ts';
 import { applicaMigrazioni } from './migra.ts';
-import { importaCartina, type PuntoImportato } from '../src/lib/server/cartine.ts';
+import { importaCartina } from '../src/lib/server/cartine.ts';
 import { aggiornaMetadati, caricaImmagine, CARTELLA_IMMAGINI } from '../src/lib/server/immagini.ts';
 
 const PROTOTIPO = fileURLToPath(new URL('../../prototipo/', import.meta.url));
-// Gli spilli di allinea.html di ogni cartina: <cammino>/<epoca> -> file
-const SPILLI: Record<string, string> = { 'abramo/1700ac': 'cartine/mezzaluna_1700ac.punti.json' };
-
 const leggiJSON = async <T>(percorso: string): Promise<T> => JSON.parse(await readFile(percorso, 'utf8')) as T;
 
 const db = apriDatabase();
@@ -70,10 +68,8 @@ for (const [ordine, voce] of indice.cammini.entries()) {
   console.log(`«${c.titolo}»: ${c.tappe.length} tappe`);
   for (const e of c.epoche) {
     const cartina = await leggiJSON<Cartina>(join(cartella, e.cartina));
-    const spilli = SPILLI[`${c.id}/${e.id}`];
-    const punti = spilli ? (await leggiJSON<{ punti: PuntoImportato[] }>(join(PROTOTIPO, spilli))).punti : undefined;
-    const esito = importaCartina(db, { camminoId, epoca: e.id, pulsante: e.pulsante, anno: e.anno, fonte: cartina.fonte, cartina, punti });
-    console.log(`  cartina ${e.pulsante}: ${esito.elementi} elementi, ${esito.nomi} nomi, ${punti?.length ?? 0} punti di controllo`);
+    const esito = importaCartina(db, { camminoId, epoca: e.id, pulsante: e.pulsante, anno: e.anno, fonte: cartina.fonte, cartina });
+    console.log(`  cartina ${e.pulsante}: ${esito.elementi} elementi, ${esito.nomi} nomi (senza file SVG né spilli)`);
     esito.avvisi.forEach((a) => console.log(`    attenzione: ${a}`));
   }
 }

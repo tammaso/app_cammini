@@ -1,22 +1,27 @@
 // Prove del database e della pubblicazione, su un database in memoria.
 // Uso: npm test
 import assert from 'node:assert/strict';
-import { copyFileSync, mkdtempSync, readdirSync, rmSync } from 'node:fs';
+import { copyFileSync, existsSync, mkdtempSync, readFileSync, readdirSync, rmSync } from 'node:fs';
 import { tmpdir } from 'node:os';
 import { join } from 'node:path';
 import { test } from 'node:test';
 import { fileURLToPath } from 'node:url';
 import { apriDatabase } from './connessione.ts';
 import { applicaMigrazioni } from './migra.ts';
-import { aggiornaTappa, creaCammino, creaTappa, eliminaTappa, elencaTappe, leggiTappa, spostaTappa } from '../src/lib/server/cammini.ts';
+import {
+  aggiornaCammino, aggiornaTappa, creaCammino, creaTappa, eliminaCammino, eliminaTappa, elencaTappe, leggiCammino, leggiTappa, salvaTappaDalModulo,
+  spostaTappa,
+} from '../src/lib/server/cammini.ts';
 
 const CARTELLA_MIGRAZIONI = fileURLToPath(new URL('migrazioni', import.meta.url));
-import { importaCartina } from '../src/lib/server/cartine.ts';
+import { importaCartina, proponiSpilliDellaCartina, salvaPunti } from '../src/lib/server/cartine.ts';
 import { creaLuogo, eliminaLuogo } from '../src/lib/server/luoghi.ts';
-import { componiCammino } from '../src/lib/server/pubblicazione.ts';
-import { generaCartina } from '../src/lib/server/importazione-svg.ts';
+import { componiCammino, preparaAnteprima, pubblicaAnteprima, statoAnteprima } from '../src/lib/server/pubblicazione.ts';
+import { creaCartina, generaCartina } from '../src/lib/server/importazione-svg.ts';
+import { passiDelCammino } from '../src/lib/server/passi.ts';
 import { eliminaNome, leggiNomi, modificaNome, ripristinaNome, spostaNome } from '../src/lib/server/ritocchi.ts';
 import { gruppiDiTesto, type Disegno, type Testo } from '../src/lib/disegno.ts';
+import type { Cartina } from '../../condiviso/cammino.ts';
 
 function databaseDiProva() {
   const db = apriDatabase(':memory:');
@@ -124,6 +129,111 @@ test("eliminando una tappa le successive scalano, e un luogo usato non si elimin
   assert.equal(eliminaLuogo(db, luoghi.b).ok, true);
 });
 
+test("si pubblica dall'anteprima: prima non tocca il portale, poi il portale diventa proprio l'anteprima", async () => {
+  const { db, tappe, luoghi } = databaseDiProva();
+  const radice = mkdtempSync(join(tmpdir(), 'anteprima-'));
+  const cartelle = { cartella: join(radice, 'anteprima'), portale: join(radice, 'portale') };
+  try {
+    const prima = await preparaAnteprima(db, cartelle);
+    assert.deepEqual(prima.differenze.map((d) => [d.slug, d.esito]), [['prova', 'nuovo']]);
+    assert.match(readFileSync(join(cartelle.cartella, 'cammino.html'), 'utf8'), /Anteprima: non ancora pubblicata/);
+    assert.ok(existsSync(join(cartelle.cartella, 'dati', 'mondo.js')));
+    assert.ok(!existsSync(cartelle.portale), "l'anteprima non tocca il portale");
+
+    await pubblicaAnteprima(db, cartelle);
+    assert.ok(existsSync(join(cartelle.portale, 'prova', 'cammino.json')));
+    assert.deepEqual((await statoAnteprima(db, cartelle))!.differenze.map((d) => d.esito), ['uguale']);
+
+    // una tappa cambiata: l'anteprima lo dice, il portale resta com'era finché non si pubblica
+    aggiornaTappa(db, tappe[1], {
+      nome: 'Beta', breve: 'Beta', breveOggi: null, luogoId: luoghi.b, luogoAttuale: null, riferimento: null, testo: 'Testo nuovo',
+      approfondimento: null, immagini: [], secondaria: false,
+    });
+    const dopo = await preparaAnteprima(db, cartelle);
+    assert.deepEqual(dopo.differenze[0].dettagli, ['Tappa 2 «Beta»: testo del pannello']);
+    const portale = () => JSON.parse(readFileSync(join(cartelle.portale, 'prova', 'cammino.json'), 'utf8'));
+    assert.equal(portale().tappe[1].testo, 'Testo di Beta');
+    await pubblicaAnteprima(db, cartelle);
+    assert.equal(portale().tappe[1].testo, 'Testo nuovo');
+    assert.ok(!existsSync(`${cartelle.portale}.vecchia`) && !existsSync(`${cartelle.portale}.nuova`));
+  } finally {
+    rmSync(radice, { recursive: true, force: true });
+  }
+});
+
+test('il luogo della tappa si sceglie dalla tappa: nuovo (annullato se la tappa non è valida) o spostato sulla mappa', () => {
+  const { db, camminoId, tappe, luoghi } = databaseDiProva();
+  const modulo = (campi: Record<string, string>) => {
+    const m = new FormData();
+    for (const [k, v] of Object.entries({ nome: 'Delta', breve: 'Delta', testo: 'Testo di Delta', ...campi })) m.set(k, v);
+    return m;
+  };
+  const quantiLuoghi = () => Number(db.prepare('SELECT count(*) AS n FROM luoghi').get()!.n);
+
+  // un luogo nuovo senza il punto sulla mappa, o con la tappa non valida: non resta niente
+  assert.equal(salvaTappaDalModulo(db, camminoId, null, modulo({ luogoNuovo: 'Delta' })).ok, false);
+  const nonValida = salvaTappaDalModulo(db, camminoId, null, modulo({ luogoNuovo: 'Delta', luogoLat: '43', luogoLng: '13', testo: '' }));
+  assert.equal(nonValida.ok, false);
+  assert.equal(quantiLuoghi(), 3);
+
+  // con il punto: il luogo entra nell'anagrafe e la tappa lo usa
+  const creata = salvaTappaDalModulo(db, camminoId, null, modulo({ luogoNuovo: 'Delta', luogoLat: '43', luogoLng: '13', luogoAttuale: 'Oggi qui' }));
+  assert.ok(creata.ok);
+  const delta = leggiTappa(db, creata.id)!;
+  assert.deepEqual({ ...db.prepare('SELECT lat, lng, nome_attuale FROM luoghi WHERE id = ?').get(delta.luogoId) }, { lat: 43, lng: 13, nome_attuale: 'Oggi qui' });
+
+  // un luogo esistente spostato sulla mappa: si sposta nell'anagrafe (e per chi lo usa)
+  const spostata = salvaTappaDalModulo(db, camminoId, tappe[1], modulo({ nome: 'Beta', breve: 'Beta', testo: 'Testo di Beta', luogoId: String(luoghi.b), luogoLat: '41.5', luogoLng: '11' }));
+  assert.ok(spostata.ok && spostata.spostato);
+  assert.deepEqual(componiCammino(db, camminoId).cammino.tappe[1].coordinate, [11, 41.5]);
+  // senza spostamento non cambia niente
+  const ferma = salvaTappaDalModulo(db, camminoId, tappe[1], modulo({ nome: 'Beta', breve: 'Beta', testo: 'Testo di Beta', luogoId: String(luoghi.b), luogoLat: '41.5', luogoLng: '11' }));
+  assert.ok(ferma.ok && !ferma.spostato);
+});
+
+test('il percorso guidato dice a che punto è ogni passo del cammino', () => {
+  const { db, camminoId, tappe } = databaseDiProva();
+  const stati = (portale: 'assente' | 'da-aggiornare' | 'aggiornato' = 'assente') =>
+    passiDelCammino(db, camminoId, { avvisi: componiCammino(db, camminoId).avvisi, portale }).map((p) => [p.chiave, p.stato]);
+  assert.deepEqual(stati(), [['testi', 'fatto'], ['tappe', 'fatto'], ['immagini', 'facoltativo'], ['cartina', 'facoltativo'], ['pubblica', 'da-fare']]);
+  assert.equal(stati('aggiornato')[4][1], 'fatto');
+
+  // un'immagine senza crediti, un testo mancante, una cartina non generata, un tracciato che non parte più dalla tappa prima
+  const immagine = Number(db.prepare(`INSERT INTO immagini (file, sha256, larghezza, altezza, alt) VALUES ('originali/x.jpg', ?, 800, 600, 'Scavi')`)
+    .run('c'.repeat(64)).lastInsertRowid);
+  db.prepare('INSERT INTO tappe_immagini (tappa_id, posizione, immagine_id) VALUES (?, 0, ?)').run(tappe[1], immagine);
+  db.prepare("UPDATE cammini SET panoramica_testo = '' WHERE id = ?").run(camminoId);
+  creaCartina(db, camminoId, { epoca: '1000ac', pulsante: '1000 a.C.', anno: -1000 });
+  spostaTappa(db, tappe[2], -1);
+  const passi = passiDelCammino(db, camminoId, { avvisi: componiCammino(db, camminoId).avvisi, portale: 'da-aggiornare' });
+  assert.deepEqual(passi.map((p) => p.stato), ['da-fare', 'da-controllare', 'da-controllare', 'da-fare', 'da-fare']);
+  assert.match(passi[0].testo, /la panoramica/);
+  assert.equal(passi[2].href, `/cammini/${camminoId}/tappe/${tappe[1]}`);
+});
+
+test("un cammino pubblicato (l'indirizzo è nel QR del libro) non si elimina e torna in bozza solo riscrivendo l'indirizzo", () => {
+  const { db, camminoId } = databaseDiProva();
+  const { id: _id, frecce: _f, ritornoTappaId: _r, modificatoIl: _m, ...dati } = leggiCammino(db, camminoId)!;
+  assert.deepEqual(aggiornaCammino(db, camminoId, { ...dati, stato: 'pubblicato' }), { ok: true });
+  // l'indirizzo non cambia nemmeno se il modulo ne manda un altro
+  assert.deepEqual(aggiornaCammino(db, camminoId, { ...dati, slug: 'altro', stato: 'pubblicato', titolo: 'Nuovo titolo' }), { ok: true });
+  assert.equal(leggiCammino(db, camminoId)!.slug, 'prova');
+
+  const eliminazione = eliminaCammino(db, camminoId);
+  assert.equal(eliminazione.ok, false);
+  assert.ok(leggiCammino(db, camminoId));
+
+  const senzaConferma = aggiornaCammino(db, camminoId, { ...dati, stato: 'bozza' }, 'prov');
+  assert.equal(senzaConferma.ok, false);
+  assert.match(senzaConferma.ok ? '' : senzaConferma.errori.conferma ?? '', /«prova»/);
+  assert.equal(leggiCammino(db, camminoId)!.stato, 'pubblicato');
+
+  assert.deepEqual(aggiornaCammino(db, camminoId, { ...dati, stato: 'bozza' }, ' prova '), { ok: true });
+  assert.equal(leggiCammino(db, camminoId)!.stato, 'bozza');
+  assert.deepEqual(eliminaCammino(db, camminoId), { ok: true });
+  assert.equal(leggiCammino(db, camminoId), undefined);
+});
+
 test("una nuova importazione sostituisce solo ciò che era importato e lascia gli stili del redattore", () => {
   const { db, camminoId } = databaseDiProva();
   const cartina = (colore: string) => ({
@@ -144,6 +254,48 @@ test("una nuova importazione sostituisce solo ciò che era importato e lascia gl
   const { cammino, cartine } = componiCammino(db, camminoId);
   assert.deepEqual(cammino.epoche, [{ id: '1000ac', pulsante: '1000 a.C.', anno: -1000, cartina: '1000ac.json' }]);
   assert.equal(cartine[0].dati.stili[0].tipo === 'area' && cartine[0].dati.stili[0].riempimento, '#00aa00');
+});
+
+test("importando una cartina pubblicata i nomi tengono tutto: inclinazione, sottotitolo, «solo allora», colore, corpo e «sempre visibile»", () => {
+  const { db, camminoId } = databaseDiProva();
+  type Nome = Cartina['nomi'][number];
+  const nomi: Nome[] = [
+    ['regione-antica', 'Mezzaluna fertile', 43, 35.3, 3.4, { angolo: 26.4, colore: '#075a07', corpo: 21, sempre: true }],
+    ['mare', 'Mare Salato', 35.49, 31.5, 4.4, { oggi: false, colore: '#0b2ee6' }],
+    ['regno', 'Regno di\nMari', 40.3, 34, 2.5, { sotto: 'vassallo' }],
+    ['regione', 'Sinai', 33.4, 29.6, 3.8],
+  ];
+  importaCartina(db, {
+    camminoId, epoca: '1800ac', pulsante: '1800 a.C.', anno: -1800, fonte: 'prova.svg',
+    cartina: { stili: [], elementi: { type: 'FeatureCollection', features: [] }, nomi, alone: { type: 'FeatureCollection', features: [] } },
+  });
+  // il file che il backoffice ripubblica è quello di partenza
+  assert.deepEqual(componiCammino(db, camminoId).cartine[0].dati.nomi, nomi);
+});
+
+test('una cartina senza spilli si genera con quelli proposti: i nomi del disegno che sono nell\'anagrafe, sul loro pallino', async () => {
+  const { db, camminoId } = databaseDiProva();
+  const id = creaCartina(db, camminoId, { epoca: '1000ac', pulsante: '1000 a.C.', anno: -1000 });
+  const scritta = (testo: string, x: number, y: number): Testo => ({
+    testo, box: [x, y - 3, x + testo.length * 2, y + 3], inizio: [x, y], fine: [x + testo.length * 2, y], angolo: 0, colore: '#231f20', dimensione: 6,
+  });
+  // tre pallini con il nome accanto (Alfa, Beta e Gamma sono nell'anagrafe), un nome senza luogo e una punta di freccia
+  const pallino = (x: number, y: number) => ({
+    parti: [[[x - 1, y - 1], [x + 1, y - 1], [x + 1, y + 1], [x - 1, y + 1]] as [number, number][]], riempimento: '#000000', opacita: 1, tratto: null,
+    spessore: 0, tratteggiato: false, box: [x - 1, y - 1, x + 1, y + 1] as [number, number, number, number],
+  });
+  const disegno = {
+    cornice: [0, 0, 100, 100], forme: [pallino(20, 80), pallino(50, 50), pallino(80, 20)],
+    testi: [scritta('ALFA', 23, 80), scritta('Beta', 53, 50), scritta('Gamma', 83, 20), scritta('Nessuno', 10, 10)],
+  } as unknown as Disegno;
+  db.prepare('UPDATE cartine SET disegno = ?, classificazione = ? WHERE id = ?').run(JSON.stringify(disegno), JSON.stringify({ colori: {}, testi: {} }), id);
+
+  const proposte = proponiSpilliDellaCartina(db, id);
+  assert.deepEqual(proposte.map((p) => [p.nome, p.sx, p.sy, p.stato]), [['Gamma', 80, 20, 'proposto'], ['Beta', 50, 50, 'proposto'], ['Alfa', 20, 80, 'proposto']]);
+  salvaPunti(db, id, proposte);
+  const esito = await generaCartina(db, id);
+  assert.equal(typeof esito.secondi, 'number');
+  assert.equal(Number(db.prepare('SELECT count(*) AS n FROM punti_controllo WHERE cartina_id = ?').get(id)!.n), 3);
 });
 
 test('i nomi ritoccati a mano restano come li ha lasciati il redattore anche rigenerando la cartina', async () => {

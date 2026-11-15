@@ -8,12 +8,13 @@
 
   const sezioni = [
     { href: '/cammini', nome: 'Cammini', anche: '/cartine' },
-    { href: '/luoghi', nome: 'Luoghi' },
     { href: '/immagini', nome: 'Immagini' },
     { href: '/pubblicazione', nome: 'Pubblicazione' },
-    { href: '/backup', nome: 'Backup' },
-    { href: '/registro', nome: 'Registro' },
+    { href: '/cronologia', nome: 'Cronologia' },
   ];
+
+  // pagine di consultazione: il luogo di una tappa si sceglie dalla tappa, l'anagrafe serve di rado
+  const secondarie = [{ href: '/luoghi', nome: 'Luoghi (anagrafe)' }];
 
   const dentro = (href: string) => page.url.pathname === href || page.url.pathname.startsWith(`${href}/`);
   // Le cartine stanno sotto «Cammini».
@@ -35,6 +36,12 @@
         <li>
           <a href={sezione.href} aria-current={attiva(sezione) ? 'page' : undefined}>{sezione.nome}</a>
         </li>
+      {/each}
+    </ul>
+    <p class="gruppo">Altro</p>
+    <ul class="secondarie">
+      {#each secondarie as sezione (sezione.href)}
+        <li><a href={sezione.href} aria-current={attiva(sezione) ? 'page' : undefined}>{sezione.nome}</a></li>
       {/each}
     </ul>
     <p class="portale"><a href="http://localhost:8000/prototipo/cammino.html" target="_blank" rel="noopener">Apri il portale ↗</a></p>
@@ -59,6 +66,8 @@
   li a { display: block; padding: .5rem .75rem; border-radius: var(--radius-sm); text-decoration: none; color: var(--ink); }
   li a:hover { background: var(--surface-alt); }
   li a[aria-current='page'] { background: var(--accent-tint); color: var(--accent-ink); font-weight: 600; }
+  .gruppo { margin: 1.25rem 0 .3rem; padding: 0 .75rem; font-size: .75rem; text-transform: uppercase; letter-spacing: .06em; color: var(--ink-soft); }
+  .secondarie li a { padding: .35rem .75rem; font-size: .9rem; color: var(--ink-soft); }
   .portale { margin: 1.5rem 0 0; padding: 0 .75rem; font-size: .9rem; }
   main { padding: 2rem 2.5rem; max-width: 72rem; width: 100%; }
 

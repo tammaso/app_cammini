@@ -23,9 +23,9 @@
     <p>Fonte: {k.fonte ?? '—'} · generata il {quando(k.importataIl)} · georeferenziazione con {k.metodo}</p>
   </div>
   <div class="azioni">
-    <a class="pulsante" href="/cartine/{k.id}/importa">Importa e classifica</a>
-    <a class="pulsante secondario" href="/cartine/{k.id}/allinea">Allinea</a>
-    <a class="pulsante secondario" href="/cartine/{k.id}/ritocca">Ritocca</a>
+    <a class="pulsante" href="/cartine/{k.id}/ritocca">Ritocca</a>
+    <a class="pulsante secondario" href="/cartine/{k.id}/importa">Carica il file SVG e genera</a>
+    <a class="avanzata" href="/cartine/{k.id}/allinea" title="Gli spilli che agganciano il disegno al globo: di solito bastano quelli proposti">Allinea (avanzato)</a>
   </div>
 </header>
 
@@ -120,6 +120,8 @@
 </div>
 
 <style>
+  .azioni { align-items: center; }
+  .avanzata { font-size: .9rem; color: var(--ink-soft); }
   .disposizione { display: grid; grid-template-columns: minmax(0, 1.5fr) minmax(18rem, 1fr); gap: 1.5rem; align-items: start; }
   .colonna { display: grid; gap: 1.25rem; }
   .modulo { max-width: none; }

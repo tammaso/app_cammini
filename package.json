@@ -15,6 +15,11 @@
     "carica-prototipo": "npm run carica-prototipo -w backoffice --",
     "pubblica": "npm run pubblica -w backoffice",
     "prepara-demo": "npm run prepara-demo -w backoffice",
-    "test": "npm test -w backoffice"
+    "test": "npm test -w backoffice",
+    "prova-portale": "playwright test",
+    "rapporto-prove": "playwright show-report prove-portale/rapporto"
+  },
+  "devDependencies": {
+    "@playwright/test": "1.55.0"
   }
 }

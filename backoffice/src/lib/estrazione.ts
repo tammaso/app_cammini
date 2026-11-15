@@ -1,6 +1,6 @@
 // Estrazione del disegno da una cartina SVG, nel browser (serve il DOM): l'SVG si inserisce nascosto
 // nella pagina, così il browser risolve da solo trasformazioni, classi CSS e forme (percorsi, rettangoli,
-// cerchi) e ne dà le coordinate sul foglio, nelle unità del viewBox. Dalla prova prototipo/allinea.html.
+// cerchi) e ne dà le coordinate sul foglio, nelle unità del viewBox. Dalla prima prova, allinea.html (ora in superati/prototipo/).
 import { sogliaSimboli, type Disegno, type Forma, type Punto, type Riquadro, type Testo } from './disegno.ts';
 
 const PASSO = 1; // ogni quanti punti del foglio si campionano le linee

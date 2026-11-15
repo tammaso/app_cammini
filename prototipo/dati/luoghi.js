@@ -1,6 +1,6 @@
-// Anagrafe dei luoghi, versione di prova per la georeferenziazione assistita (prototipo/allinea.html).
+// Anagrafe dei luoghi, versione di prova per la georeferenziazione assistita (la prima prova, allinea.html, ora in superati/prototipo/); oggi la usa solo npm run carica-prototipo.
 // Nel backoffice sarà una tabella; qui ci sono solo i luoghi scritti sulla cartina della Mezzaluna.
-// Il blocco dopo «const LUOGHI =» è JSON (chiavi tra virgolette): lo legge anche strumenti/importa_cartina_ai.py.
+// Il blocco dopo «const LUOGHI =» è JSON (chiavi tra virgolette): lo leggeva anche il vecchio importatore Python.
 // Ogni luogo: nome italiano, altri nomi (antichi, biblici, attuali, come possono comparire su una
 // cartina), coordinate, tipo, certezza dell'identificazione e una nota.
 // Certezza: "certa" (sito identificato, lo spillo tiene fermo il disegno), "probabile" (lo tira

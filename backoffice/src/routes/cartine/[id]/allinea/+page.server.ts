@@ -1,8 +1,8 @@
 import { error, fail } from '@sveltejs/kit';
 import { db } from '#lib/server/db.ts';
-import { leggiCartina, salvaPunti, type SpilloSalvato } from '#lib/server/cartine.ts';
+import { leggiCartina, luoghiPerSpilli, salvaPunti, type SpilloSalvato } from '#lib/server/cartine.ts';
 import { generaCartina } from '#lib/server/importazione-svg.ts';
-import { gruppiDiTesto, normale, type Disegno } from '#lib/disegno.ts';
+import { gruppiDiTesto, type Disegno } from '#lib/disegno.ts';
 import type { Actions, PageServerLoad } from './$types';
 
 function idValido(parametro: string): number {
@@ -22,12 +22,9 @@ export const load: PageServerLoad = ({ params }) => {
       sx: Number(p.sx), sy: Number(p.sy), lng: Number(p.lng), lat: Number(p.lat),
       certezza: String(p.certezza) as SpilloSalvato['certezza'], stato: String(p.stato) as SpilloSalvato['stato'],
     }));
-  // i luoghi dell'anagrafe, con tutte le forme del nome, per proporre gli spilli
-  const luoghi = db.prepare('SELECT id, nome, nome_antico, altri_nomi, lat, lng, certezza, nota FROM luoghi').all().map((l) => ({
-    id: Number(l.id), nome: String(l.nome), lat: Number(l.lat), lng: Number(l.lng), certezza: String(l.certezza) as SpilloSalvato['certezza'],
-    nota: l.nota == null ? null : String(l.nota),
-    chiavi: [l.nome, l.nome_antico, ...(JSON.parse(String(l.altri_nomi)) as string[])].filter(Boolean).map((n) => normale(String(n))),
-  }));
+  // i luoghi dell'anagrafe, con tutte le forme del nome, per proporre gli spilli (e la nota, per la pagina)
+  const note = new Map(db.prepare('SELECT id, nota FROM luoghi').all().map((l) => [Number(l.id), l.nota == null ? null : String(l.nota)]));
+  const luoghi = luoghiPerSpilli(db).map((l) => ({ ...l, nota: note.get(l.id) ?? null }));
   return {
     cartina: { id, camminoId: cartina.camminoId, cammino: cartina.cammino, pulsante: cartina.pulsante, fonte: cartina.fonte },
     disegno: disegno && {

@@ -11,7 +11,7 @@ nomi più importanti ed evita le sovrapposizioni.
 Stati
 - Sorgente: ne_10m_admin_0_countries_ita (punto di vista ufficiale italiano), nome italiano NAME_IT.
 - Posizione dell'etichetta: LABEL_X/LABEL_Y di Natural Earth, oppure quella già sistemata a mano
-  in prototipo/dati/base.js per gli Stati della regione del cammino.
+  (POSIZIONI_A_MANO, qui sotto) per gli Stati della regione del cammino.
 - Si escludono basi militari, scogli e territori minuscoli che su un atlante scolastico non compaiono.
 
 Capitali
@@ -145,15 +145,17 @@ def punto_interno(geometria):
     return round(p.x, 3), round(p.y, 3)
 
 
-def posizioni_a_mano():
-    """Posizioni delle etichette già sistemate a mano in base.js, per nome italiano."""
-    testo = (RADICE / "prototipo" / "dati" / "base.js").read_text(encoding="utf-8")
-    geo = json.loads(testo[testo.index("{"):testo.rindex("}") + 1])
-    return {c["name"]: c["at"] for c in geo.get("countries", [])}
+# Posizioni dei nomi degli Stati della regione del cammino sistemate a mano (longitudine, latitudine), per nome
+# italiano. Prima stavano in prototipo/dati/base.js (ora in superati/): copiate qui identiche il 2026-11-15.
+POSIZIONI_A_MANO = {
+    "Cipro": [33.1, 35.1], "Israele": [34.72, 30.55], "Palestina": [35.55, 32.42], "Libano": [35.9, 34.05],
+    "Siria": [38.6, 35.2], "Turchia": [35.5, 39.0], "Iraq": [42.6, 33.4], "Iran": [52.0, 32.5],
+    "Arabia Saudita": [44.0, 24.5], "Kuwait": [47.52, 29.18], "Giordania": [36.9, 31.0], "Egitto": [29.0, 26.5],
+}
 
 
 def stati():
-    a_mano = posizioni_a_mano()
+    a_mano = POSIZIONI_A_MANO
     elenco = []
     for f in scarica("ne_10m_admin_0_countries_ita"):
         p = f["properties"]

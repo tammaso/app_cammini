@@ -5,6 +5,8 @@ import type { DatabaseSync } from 'node:sqlite';
 import type { Cartina as CartinaPubblicata, Coordinate, Freccia } from '../../../../condiviso/cammino.ts';
 import { inTransazione } from '../../../db/connessione.ts';
 import type { Cartina, CartinaInElenco, Certezza, Errori, PuntoControllo, Stile } from '../cammini.ts';
+import { gruppiDiTesto, normale, type Disegno } from '../disegno.ts';
+import { proponiSpilli, type LuogoPerSpilli } from '../spilli.ts';
 import type { EsitoModulo } from './cammini.ts';
 import { adesso, facoltativo, intero, valoriDi } from './moduli.ts';
 import { registraModifica } from './registro.ts';
@@ -123,7 +125,7 @@ export function aggiornaStile(db: DatabaseSync, id: number, d: DatiStile): void 
 
 // --- Importazione -------------------------------------------------------------------------------------
 
-// Un punto di controllo come lo salva allinea.html (prototipo/cartine/<cartina>.punti.json)
+// Un punto di controllo come lo salvava la prima prova, allinea.html (i file <cartina>.punti.json, ora in superati/)
 export interface PuntoImportato {
   nome: string;
   luogo: string | null;
@@ -202,12 +204,16 @@ export function importaCartina(db: DatabaseSync, imp: Importazione): EsitoImport
       nuovoElemento.run(cartinaId, stile, f.properties.nome, JSON.stringify(f.geometry));
     }
     db.prepare("DELETE FROM nomi WHERE cartina_id = ? AND origine = 'importato'").run(cartinaId);
-    const nuovoNome = db.prepare(`INSERT INTO nomi (cartina_id, posizione, categoria, testo, sotto, lng, lat, zoom, angolo, luogo_id, origine)
-      VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, 'importato')`);
+    // tutto quello che il file dice del nome, come nella generazione dall'SVG: anche «solo allora» (oggi: false),
+    // colore, corpo e «sempre visibile» (prima si perdevano: il database caricato dal portale il 2026-11-14 non li aveva)
+    const nuovoNome = db.prepare(`INSERT INTO nomi (cartina_id, posizione, categoria, testo, sotto, lng, lat, zoom, angolo, luogo_id,
+        anche_oggi, colore, corpo, sempre, origine)
+      VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, 'importato')`);
     imp.cartina.nomi.forEach(([categoria, nome, lng, lat, zoom, extra], posizione) => {
       const luogo = /^(capitale-antica|citta-antica|vetta)$/.test(categoria) ? trovaLuogo(db, nome) : null;
       if (/^(capitale-antica|citta-antica|vetta)$/.test(categoria) && luogo === null) avvisi.push(`«${nome}» non è nell'anagrafe dei luoghi.`);
-      nuovoNome.run(cartinaId, posizione, categoria, nome, extra?.sotto ?? null, lng, lat, zoom, extra?.angolo ?? null, luogo);
+      nuovoNome.run(cartinaId, posizione, categoria, nome, extra?.sotto ?? null, lng, lat, zoom, extra?.angolo ?? null, luogo,
+        extra?.oggi === false ? 0 : null, extra?.colore ?? null, extra?.corpo ?? null, extra?.sempre ? 1 : 0);
     });
 
     // tracciati delle tappe e frecce del cammino, se l'importazione li porta
@@ -255,6 +261,23 @@ export interface SpilloSalvato {
   lat: number;
   certezza: Certezza;
   stato: PuntoControllo['stato'];
+}
+
+// I luoghi dell'anagrafe con tutte le forme del nome (normalizzate), per abbinarli ai nomi scritti sulla cartina
+export function luoghiPerSpilli(db: DatabaseSync): LuogoPerSpilli[] {
+  return db.prepare('SELECT id, nome, nome_antico, altri_nomi, lat, lng, certezza FROM luoghi').all().map((l) => ({
+    id: Number(l.id), nome: String(l.nome), lat: Number(l.lat), lng: Number(l.lng), certezza: String(l.certezza) as Certezza,
+    chiavi: [l.nome, l.nome_antico, ...(JSON.parse(String(l.altri_nomi)) as string[])].filter(Boolean).map((n) => normale(String(n))),
+  }));
+}
+
+// Gli spilli che il backoffice propone per una cartina con il disegno caricato: gli stessi della pagina Allinea.
+export function proponiSpilliDellaCartina(db: DatabaseSync, cartinaId: number): SpilloSalvato[] {
+  const r = db.prepare('SELECT disegno FROM cartine WHERE id = ?').get(cartinaId);
+  if (r?.disegno == null) return [];
+  const disegno = JSON.parse(String(r.disegno)) as Disegno;
+  const testi = gruppiDiTesto(disegno).map((g) => ({ testo: g.testo, box: g.box }));
+  return proponiSpilli(disegno.forme, testi, luoghiPerSpilli(db)).map(({ luogo: _luogo, ...spillo }) => spillo);
 }
 
 export function salvaPunti(db: DatabaseSync, cartinaId: number, punti: SpilloSalvato[]): void {

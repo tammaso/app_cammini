@@ -47,6 +47,8 @@
     testi = Object.fromEntries(data.testi.map((t) => [t.chiave, t.uso.uso === 'ignora' ? t.testo : t.uso.testo]));
   });
   const proposti = $derived(data.colori.filter((c) => c.proposto).length + data.testi.filter((t) => t.proposto).length);
+  // alla prima importazione la cartina non ha stili d'area: i colori delle aree li deve scegliere il redattore
+  const primaVolta = $derived(!data.stili.some((s) => s.tipo === 'area'));
   let generazione = $state(false);
 </script>
 
@@ -56,15 +58,16 @@
   <div>
     <p><a href="/cartine/{k.id}">← Cartina {k.pulsante}</a> · {k.cammino}</p>
     <h1>Importa la cartina {k.pulsante}</h1>
-    <p>Dal file SVG del cartografo alla cartina del portale: carica il file, allinealo sul globo, classifica colori e testi, genera.</p>
+    <p>Dal file SVG del cartografo alla cartina del portale: carica il file e genera. Come leggere colori e testi e dove agganciare il
+      disegno al globo (gli spilli) lo propone il backoffice; le proposte si controllano qui sotto e in «Allinea» solo se serve,
+      e dopo si ritocca la carta.</p>
   </div>
 </header>
 
 <ol class="passi">
-  <li class:fatto={data.haSvg}>1. File SVG</li>
-  <li class:fatto={k.punti >= 3}><a href="/cartine/{k.id}/allinea">2. Allinea ({k.punti} spilli)</a></li>
-  <li class:fatto={data.haSvg && proposti === 0}>3. Classifica</li>
-  <li class:fatto={!!data.generataIl}>4. Genera</li>
+  <li class:fatto={data.haSvg}>1. Carica il file SVG</li>
+  <li class:fatto={!!data.generataIl}>2. Genera con le proposte</li>
+  <li><a href="/cartine/{k.id}/ritocca">3. Ritocca, se serve</a></li>
 </ol>
 
 <section class="riquadro sezione">
@@ -80,21 +83,40 @@
     {#if estrazione.inCorso}<span>Lettura del disegno…</span>{/if}
   </form>
   {#if estrazione.errore}<p class="avviso">Non riesco a leggere il disegno: {estrazione.errore}</p>{/if}
-  {#if form?.svgCaricato}<p class="conferma">File caricato. Controlla la classificazione qui sotto e, se il disegno è cambiato, gli spilli.</p>{/if}
+  {#if form?.svgCaricato}<p class="conferma">File caricato.</p>{/if}
+  {#if data.haSvg}
+    {#if primaVolta}
+      <p class="attenzione-colori"><strong>Prima importazione di questa cartina:</strong> il backoffice riconosce da solo il percorso del
+        cammino (le linee con le frecce), i nomi e gli spilli, ma non può sapere quali colori sono aree da mostrare (per esempio la
+        Mezzaluna fertile o Canaan). Nella sezione «Colori», qui sotto, scegli «nuovo stile» per ciascuno; dalla prossima versione del
+        file si riconoscono da soli.</p>
+    {/if}
+    <div class="genera">
+      <button class="pulsante" type="submit" form="classificazione" formaction="?/genera" name="salvaPrima" value="1" disabled={generazione}>
+        {generazione ? 'Generazione…' : 'Accetta le proposte e genera'}</button>
+      <p class="aiuto">{proposti ? `${proposti} ${proposti === 1 ? 'proposta' : 'proposte'} per colori e testi, ` : 'Colori e testi come qui sotto, '}
+        {k.punti >= 3 ? `${k.punti} spilli (pagina «Allinea»)` : 'spilli proposti dai nomi della cartina che sono nell\'anagrafe'}.
+        Rigenerando, i nomi ritoccati a mano restano come sono.</p>
+    </div>
+  {/if}
 </section>
 
 {#if form?.errore}<p class="avviso" role="alert">{form.errore}</p>{/if}
 {#if form?.generata}
   <div class="conferma" role="status">
     <p>Cartina generata in {form.generata.secondi} s: {form.generata.elementi} elementi, {form.generata.nomi} nomi,
-      {form.generata.tracciati} tracciati, {form.generata.frecce} frecce. <a href="/pubblicazione">Aggiorna il portale</a> per vederla.</p>
+      {form.generata.tracciati} tracciati, {form.generata.frecce} frecce{#if form.spilliProposti}, con {form.spilliProposti} spilli proposti
+      (si controllano in <a href="/cartine/{k.id}/allinea">«Allinea»</a>){/if}. Guardala in <a href="/cartine/{k.id}/ritocca">«Ritocca»</a>
+      e per vederla nel portale <a href="/pubblicazione">prepara l'anteprima</a>.</p>
     {#if form.generata.avvisi.length}<ul>{#each form.generata.avvisi as a (a)}<li>{a}</li>{/each}</ul>{/if}
   </div>
 {/if}
 {#if form?.classificata}<p class="conferma" role="status">Classificazione salvata{form.stiliNuovi?.length ? `; stili nuovi: ${form.stiliNuovi.join(', ')}` : ''}.</p>{/if}
 
 {#if data.haSvg}
-  <form method="POST" action="?/classifica" class="classificazione" use:enhance={() => {
+  <details class="controlla" open={primaVolta || (proposti > 0 && !!data.generataIl)}>
+  <summary>Controlla le proposte: colori e testi{proposti ? ` (${proposti} da confermare)` : ''} · <a href="/cartine/{k.id}/allinea">spilli in «Allinea»</a></summary>
+  <form id="classificazione" method="POST" action="?/classifica" class="classificazione" use:enhance={() => {
     generazione = true;
     return async ({ update }) => { await update({ reset: false }); generazione = false; };
   }}>
@@ -193,12 +215,12 @@
 
     <div class="barra riquadro">
       <button class="pulsante secondario" type="submit">Salva la classificazione</button>
-      <button class="pulsante" type="submit" formaction="?/genera" name="salvaPrima" value="1" disabled={generazione || k.punti < 3}
-        title={k.punti < 3 ? 'Prima allinea la cartina: servono almeno 3 spilli' : undefined}>
-        {generazione ? 'Generazione…' : '4. Salva e genera la cartina'}</button>
+      <button class="pulsante" type="submit" formaction="?/genera" name="salvaPrima" value="1" disabled={generazione}>
+        {generazione ? 'Generazione…' : 'Salva e genera la cartina'}</button>
       {#if data.generataIl}<span class="nota">Ultima generazione: {quando(data.generataIl)}</span>{/if}
     </div>
   </form>
+  </details>
 {/if}
 
 <style>
@@ -206,6 +228,11 @@
   .passi li { padding: .35rem .8rem; border-radius: 999px; background: var(--surface-alt); color: var(--ink-soft); font-size: .9rem; }
   .passi li.fatto { background: var(--accent-tint); color: var(--accent-ink); }
   .sezione { padding: 1rem 1.25rem; margin-bottom: 1.25rem; }
+  .genera { display: grid; gap: .4rem; justify-items: start; margin-top: .8rem; padding-top: .8rem; border-top: 1px solid var(--line); }
+  .genera .aiuto { margin: 0; color: var(--ink-soft); font-size: .88rem; }
+  .controlla { margin-bottom: 1.25rem; }
+  .attenzione-colori { margin: .8rem 0 0; padding: .6rem .9rem; border-radius: var(--radius-sm); background: var(--brand-tint); color: var(--brand); font-size: .92rem; }
+  .controlla > summary { cursor: pointer; font-weight: 600; padding: .6rem 0; }
   .sezione p { margin: .3rem 0 .6rem; }
   h2 { font-size: 1.05rem; }
   .aiuto { color: var(--ink-soft); font-size: .88rem; }

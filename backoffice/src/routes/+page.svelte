@@ -36,7 +36,7 @@
     <p>Il portale non è ancora stato aggiornato dal backoffice.</p>
   {/if}
   {#if data.pubblicazione.modificatiDopo.length}
-    <p>Modificati dopo: {data.pubblicazione.modificatiDopo.join(', ')}. <a href="/pubblicazione">Aggiorna il portale</a></p>
+    <p>Modificati dopo: {data.pubblicazione.modificatiDopo.join(', ')}. <a href="/pubblicazione">Prepara l'anteprima e pubblica</a></p>
   {/if}
 </section>
 

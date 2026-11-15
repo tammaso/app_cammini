@@ -1,5 +1,5 @@
-// Prepara la demo del portale da caricare su un server (per esempio con FileZilla): aggiorna il portale di
-// prova e copia in pubblicazione/ la pagina (index.html), i dati, i cammini e il satellite.
+// Prepara la demo del portale da caricare su un server (per esempio con FileZilla): copia in pubblicazione/
+// la pagina (index.html), i dati, i cammini com'è pubblicato il portale (prototipo/cammini/) e il satellite.
 // Come il pulsante «Prepara la demo» della pagina «Pubblicazione». Uso: npm run prepara-demo
 import { apriDatabase } from './connessione.ts';
 import { applicaMigrazioni } from './migra.ts';
